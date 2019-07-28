@@ -1,5 +1,6 @@
 import { Artifact } from './artifact'
 import { Required } from './required'
+import { Type } from './type'
 
 export interface Module {
 
@@ -27,7 +28,7 @@ export interface Module {
     /**
      * The type of the module.
      */
-    type: string
+    type: Type
 
     /**
      * Defines whether or not the module is required. If omitted, then the module will be required.
