@@ -14,6 +14,14 @@ function rootOption(yargs: yargs.Argv) {
     })
 }
 
+function namePositional(yargs: yargs.Argv) {
+    return yargs.option('name', {
+        describe: 'Distribution index file name.',
+        type: 'string',
+        default: 'distribution'
+    })
+}
+
 // -------------
 // Init Commands
 
@@ -80,15 +88,16 @@ const generateServerCommand: yargs.CommandModule = {
 }
 
 const generateDistroCommand: yargs.CommandModule = {
-    command: 'distro',
+    command: 'distro [name]',
     describe: 'Generate a distribution index from the root file structure.',
     builder: (yargs) => {
         yargs = rootOption(yargs)
+        yargs = namePositional(yargs)
         return yargs
     },
     handler: (argv) => {
         console.log(`Root set to ${argv.root}`)
-        console.log('Invoked generate distro.')
+        console.log(`Invoked generate distro name ${argv.name}.json.`)
     }
 }
 
@@ -106,6 +115,17 @@ const generateCommand: yargs.CommandModule = {
     }
 }
 
+const validateCommand: yargs.CommandModule = {
+    command: 'validate [name]',
+    describe: 'Validate a distribution.json against the spec.',
+    builder: (yargs) => {
+        return namePositional(yargs)
+    },
+    handler: (argv) => {
+        console.log(`Invoked validate with name ${argv.name}.json`)
+    }
+}
+
 // Registering yargs configuration.
 // tslint:disable-next-line:no-unused-expression
 yargs
@@ -113,6 +133,7 @@ yargs
 .scriptName('')
 .command(initCommand)
 .command(generateCommand)
+.command(validateCommand)
 .demandCommand()
 .help()
 .argv

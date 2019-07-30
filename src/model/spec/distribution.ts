@@ -7,7 +7,7 @@ export interface Distribution {
     /**
      * Global settings for Discord Rich Presence.
      */
-    discord: {
+    discord?: {
         /**
          * Client ID for the Application registered with Discord.
          */

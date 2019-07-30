@@ -41,7 +41,7 @@ export interface Server {
     /**
      * Server specific settings used for Discord Rich Presence.
      */
-    discord: {
+    discord?: {
         /**
          * Short ID for the server. Displayed on the second status line as Server: shortId.
          */
