@@ -2,6 +2,13 @@
 import { resolve } from 'path'
 import yargs from 'yargs'
 
+function positionalRoot(yargs: yargs.Argv) {
+    return yargs.positional('root', {
+        describe: 'File structure root',
+        type: 'string'
+    })
+}
+
 // Registering yargs configuration.
 // tslint:disable-next-line:no-unused-expression
 yargs
@@ -10,14 +17,11 @@ yargs
     root: resolve
 })
 .command({
-    command: 'generate <root>',
+    command: 'generate server <root>',
     aliases: ['g'],
     describe: 'Generate a distribution.json',
     builder: (yargs) => {
-        return yargs.positional('root', {
-            describe: 'File structure root',
-            type: 'string'
-        })
+        return positionalRoot(yargs)
     },
     handler: (argv) => {
         console.log(`got generate with root=${argv.root}`)

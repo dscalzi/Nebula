@@ -4,6 +4,9 @@ export const Types: {[property: string]: Type} = {
         id: 'Library',
         defaultExtension: 'jar'
     },
+    /**
+     * @deprecated Will be replaced by Types.Forge.
+     */
     ForgeHosted: {
         id: 'ForgeHosted',
         defaultExtension: 'jar'
