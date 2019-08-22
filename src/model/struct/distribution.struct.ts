@@ -19,14 +19,12 @@ export class DistributionStructure implements ModelStructure<Distribution> {
         await this.serverStruct.init()
     }
 
-    public async getSpecModel() {
-        return new Promise(async (resolve) => {
-            resolve({
-                version: '1.0.0',
-                rss: '<FILL IN MANUALLY>',
-                servers: await this.serverStruct.getSpecModel()
-            })
-        }) as Promise<Distribution>
+    public async getSpecModel(): Promise<Distribution> {
+        return {
+            version: '1.0.0',
+            rss: '<FILL IN MANUALLY>',
+            servers: await this.serverStruct.getSpecModel()
+        }
     }
 
 }
