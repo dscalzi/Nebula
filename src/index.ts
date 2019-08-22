@@ -1,6 +1,8 @@
 /* tslint:disable:no-shadowed-variable */
-import { resolve } from 'path'
+import { writeFile } from 'fs-extra'
+import { resolve as resolvePath } from 'path'
 import yargs from 'yargs'
+import { DistributionStructure } from './model/struct/distribution.struct'
 
 function rootOption(yargs: yargs.Argv) {
     return yargs.option('root', {
@@ -10,7 +12,29 @@ function rootOption(yargs: yargs.Argv) {
         global: true
     })
     .coerce({
-        root: resolve
+        root: resolvePath
+    })
+}
+
+function baseUrlOption(yargs: yargs.Argv) {
+    return yargs.option('baseUrl', {
+        describe: 'Base url of your file host.',
+        type: 'string',
+        demandOption: true,
+        global: true
+    })
+    .coerce({
+        baseUrl: (arg: string) => {
+            // Users must provide protocol in all other instances.
+            if (arg.indexOf('//') === -1) {
+                if (arg.toLowerCase().startsWith('localhost')) {
+                    arg = 'http://' + arg
+                } else {
+                    throw new TypeError('Please provide a URL protocol (ex. http:// or https://)')
+                }
+            }
+            return (new URL(arg)).toString()
+        }
     })
 }
 
@@ -32,9 +56,15 @@ const initRootCommand: yargs.CommandModule = {
         yargs = rootOption(yargs)
         return yargs
     },
-    handler: (argv) => {
-        console.log(`Root set to ${argv.root}`)
-        console.log('Invoked init root.')
+    handler: async (argv) => {
+        console.debug(`Root set to ${argv.root}`)
+        console.debug('Invoked init root.')
+        try {
+            await new DistributionStructure(argv.root as string, '').init()
+            console.log(`Successfully created new root at ${argv.root}`)
+        } catch (error) {
+            console.error(`Failed to init new root at ${argv.root}`, error)
+        }
     }
 }
 
@@ -80,8 +110,8 @@ const generateServerCommand: yargs.CommandModule = {
         })
     },
     handler: (argv) => {
-        console.log(`Root set to ${argv.root}`)
-        console.log(`Generating server ${argv.id} for Minecraft ${argv.version}.`,
+        console.debug(`Root set to ${argv.root}`)
+        console.debug(`Generating server ${argv.id} for Minecraft ${argv.version}.`,
         `\n\t├ Include forge: ${argv.forge}`,
         `\n\t└ Include liteloader: ${argv.liteloader}`)
     }
@@ -92,12 +122,22 @@ const generateDistroCommand: yargs.CommandModule = {
     describe: 'Generate a distribution index from the root file structure.',
     builder: (yargs) => {
         yargs = rootOption(yargs)
+        yargs = baseUrlOption(yargs)
         yargs = namePositional(yargs)
         return yargs
     },
-    handler: (argv) => {
-        console.log(`Root set to ${argv.root}`)
-        console.log(`Invoked generate distro name ${argv.name}.json.`)
+    handler: async (argv) => {
+        console.debug(`Root set to ${argv.root}`)
+        console.debug(`Base Url set to ${argv.baseUrl}`)
+        console.debug(`Invoked generate distro name ${argv.name}.json.`)
+        try {
+            const distributionStruct = new DistributionStructure(argv.root as string, argv.baseUrl as string)
+            const distro = await distributionStruct.getSpecModel()
+            writeFile(resolvePath(argv.root as string, `${argv.name}.json`), JSON.stringify(distro, null, 2))
+            console.log(distro)
+        } catch (error) {
+            console.error(`Failed to generate distribution with root ${argv.root}.`, error)
+        }
     }
 }
 
@@ -122,7 +162,7 @@ const validateCommand: yargs.CommandModule = {
         return namePositional(yargs)
     },
     handler: (argv) => {
-        console.log(`Invoked validate with name ${argv.name}.json`)
+        console.debug(`Invoked validate with name ${argv.name}.json`)
     }
 }
 

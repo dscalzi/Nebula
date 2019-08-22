@@ -1,45 +1,58 @@
-export const Types: {[property: string]: Type} = {
+export enum Type {
+
+    Library = 'Library',
+    ForgeHosted = 'ForgeHosted',
+    Forge = 'Forge',
+    LiteLoader = 'LiteLoader',
+    ForgeMod = 'ForgeMod',
+    LiteMod = 'LiteMod',
+    File = 'File',
+    VersionManifest = 'VersionManifest'
+
+}
+
+export interface TypeMetadata {
+
+    id: string
+    defaultExtension?: string
+
+}
+
+export const TypeMetadata: {[property: string]: TypeMetadata} = {
 
     Library: {
-        id: 'Library',
+        id: Type.Library,
         defaultExtension: 'jar'
     },
     /**
      * @deprecated Will be replaced by Types.Forge.
      */
     ForgeHosted: {
-        id: 'ForgeHosted',
+        id: Type.ForgeHosted,
         defaultExtension: 'jar'
     },
     Forge: {
-        id: 'Forge',
+        id: Type.Forge,
         defaultExtension: 'jar'
     },
     LiteLoader: {
-        id: 'LiteLoader',
+        id: Type.LiteLoader,
         defaultExtension: 'jar'
     },
     ForgeMod: {
-        id: 'ForgeMod',
+        id: Type.ForgeMod,
         defaultExtension: 'jar'
     },
     LiteMod: {
-        id: 'LiteMod',
+        id: Type.LiteMod,
         defaultExtension: 'litemod'
     },
     File: {
-        id: 'File'
+        id: Type.File
     },
     VersionManifest: {
-        id: 'VersionManifest',
+        id: Type.VersionManifest,
         defaultExtension: 'json'
     }
-
-}
-
-export interface Type {
-
-    id: string
-    defaultExtension?: string
 
 }

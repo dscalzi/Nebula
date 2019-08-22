@@ -1,5 +1,7 @@
 export interface ModelStructure<T> {
 
-    getSpecModel(): T
+    init(): void
+
+    getSpecModel(): Promise<T>
 
 }
