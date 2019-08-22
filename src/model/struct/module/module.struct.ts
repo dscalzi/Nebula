@@ -2,7 +2,7 @@ import { createHash } from 'crypto'
 import { lstat, pathExists, readdir, readFile, Stats } from 'fs-extra'
 import { resolve } from 'path'
 import { Module } from '../../spec/module'
-import { Type } from '../../spec/type'
+import { Type, TypeMetadata } from '../../spec/type'
 import { BaseModelStructure } from '../basemodel.struct'
 
 export abstract class ModuleStructure extends BaseModelStructure<Module> {
@@ -25,10 +25,14 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         return this.resolvedModels
     }
 
+    protected generateMavenIdentifier(name: string, version: string) {
+        return `generated.${this.type.toLowerCase()}:${name}-${version}@${TypeMetadata[this.type].defaultExtension}`
+    }
+
     protected async abstract getModuleId(name: string, path: string, stats: Stats, buf: Buffer): Promise<string>
     protected async abstract getModuleName(name: string, path: string, stats: Stats, buf: Buffer): Promise<string>
-    protected async abstract getModuleUrl(name: string, path: string, stats: Stats, buf: Buffer): Promise<string>
-    protected async abstract getModulePath(name: string, path: string, stats: Stats, buf: Buffer): Promise<string>
+    protected async abstract getModuleUrl(name: string, path: string, stats: Stats): Promise<string>
+    protected async abstract getModulePath(name: string, path: string, stats: Stats): Promise<string | null>
 
     private async _doModuleRetrieval(): Promise<Module[]> {
 
@@ -41,7 +45,7 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
                 const stats = await lstat(filePath)
                 const buf = await readFile(filePath)
                 if (stats.isFile()) {
-                    accumulator.push({
+                    const mdl: Module = {
                         id: await this.getModuleId(file, filePath, stats, buf),
                         name: await this.getModuleName(file, filePath, stats, buf),
                         type: this.type,
@@ -52,10 +56,14 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
                         artifact: {
                             size: stats.size,
                             MD5: createHash('md5').update(buf).digest('hex'),
-                            url: await this.getModuleUrl(file, filePath, stats, buf),
-                            path: await this.getModulePath(file, filePath, stats, buf)
+                            url: await this.getModuleUrl(file, filePath, stats)
                         }
-                    })
+                    }
+                    const pth = await this.getModulePath(file, filePath, stats)
+                    if (pth) {
+                        mdl.artifact.path = pth
+                    }
+                    accumulator.push(mdl)
                 }
             }
         }

@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/dscalzi/Nebula#readme",
   "devDependencies": {
+    "@types/adm-zip": "^0.4.32",
     "@types/fs-extra": "^8.0.0",
     "@types/node": "^12.7.2",
     "@types/yargs": "^13.0.2",
