@@ -1,9 +1,9 @@
 import { lstat, readdir } from 'fs-extra'
 import { join, resolve as resolvePath } from 'path'
 import { resolve as resolveUrl } from 'url'
-import { Server } from '../spec/server'
+import { Server } from '../../spec/server'
 import { BaseModelStructure } from './basemodel.struct'
-import { FileStructure } from './module/file.struct'
+import { MiscFileStructure } from './module/file.struct'
 import { ForgeModStructure } from './module/forgemod.struct'
 import { LiteModStructure } from './module/litemod.struct'
 
@@ -63,7 +63,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 const liteModStruct = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
                 const liteModModules = await liteModStruct.getSpecModel()
 
-                const fileStruct = new FileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+                const fileStruct = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
                 const fileModules = await fileStruct.getSpecModel()
 
                 const modules = [

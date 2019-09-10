@@ -2,7 +2,7 @@
 import { writeFile } from 'fs-extra'
 import { resolve as resolvePath } from 'path'
 import yargs from 'yargs'
-import { DistributionStructure } from './model/struct/distribution.struct'
+import { DistributionStructure } from './model/struct/model/distribution.struct'
 
 function rootOption(yargs: yargs.Argv) {
     return yargs.option('root', {

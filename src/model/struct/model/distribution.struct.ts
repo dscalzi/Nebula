@@ -1,6 +1,6 @@
 import { mkdirs } from 'fs-extra'
-import { Distribution } from '../spec/distribution'
-import { ModelStructure } from './model.struct'
+import { Distribution } from '../../spec/distribution'
+import { ModelStructure } from './ModelStructure'
 import { ServerStructure } from './server.struct'
 
 export class DistributionStructure implements ModelStructure<Distribution> {

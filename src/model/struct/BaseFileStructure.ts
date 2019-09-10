@@ -1,17 +1,15 @@
 import { mkdirs } from 'fs-extra'
 import { join, resolve } from 'path'
-import { ModelStructure } from './model.struct'
+import { FileStructure } from './FileStructure'
 
-export abstract class BaseModelStructure<T> implements ModelStructure<T[]> {
+export abstract class BaseFileStructure implements FileStructure {
 
-    protected resolvedModels: T[] | undefined
     protected containerDirectory: string
 
     constructor(
         protected absoluteRoot: string,
         protected relativeRoot: string,
-        protected structRoot: string,
-        protected baseUrl: string
+        protected structRoot: string
     ) {
         this.relativeRoot = join(relativeRoot, structRoot)
         this.containerDirectory = resolve(absoluteRoot, structRoot)
@@ -20,7 +18,5 @@ export abstract class BaseModelStructure<T> implements ModelStructure<T[]> {
     public async init() {
         mkdirs(this.containerDirectory)
     }
-
-    public abstract async getSpecModel(): Promise<T[]>
 
 }

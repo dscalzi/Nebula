@@ -2,9 +2,9 @@ import AdmZip from 'adm-zip'
 import { Stats } from 'fs-extra'
 import { join } from 'path'
 import { resolve } from 'url'
-import { capitalize } from '../../../util/stringutils'
-import { LiteMod } from '../../liteloader/litemod'
-import { Type } from '../../spec/type'
+import { capitalize } from '../../../../util/stringutils'
+import { LiteMod } from '../../../liteloader/litemod'
+import { Type } from '../../../spec/type'
 import { ModuleStructure } from './module.struct'
 
 export class LiteModStructure extends ModuleStructure {

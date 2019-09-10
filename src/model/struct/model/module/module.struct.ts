@@ -1,8 +1,8 @@
 import { createHash } from 'crypto'
 import { lstat, pathExists, readdir, readFile, Stats } from 'fs-extra'
 import { resolve } from 'path'
-import { Module } from '../../spec/module'
-import { Type, TypeMetadata } from '../../spec/type'
+import { Module } from '../../../spec/module'
+import { Type, TypeMetadata } from '../../../spec/type'
 import { BaseModelStructure } from '../basemodel.struct'
 
 export abstract class ModuleStructure extends BaseModelStructure<Module> {

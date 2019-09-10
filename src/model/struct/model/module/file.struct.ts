@@ -1,10 +1,10 @@
 import { Stats } from 'fs'
 import { join } from 'path'
 import { resolve } from 'url'
-import { Type } from '../../spec/type'
+import { Type } from '../../../spec/type'
 import { ModuleStructure } from './module.struct'
 
-export class FileStructure extends ModuleStructure {
+export class MiscFileStructure extends ModuleStructure {
 
     constructor(
         absoluteRoot: string,
