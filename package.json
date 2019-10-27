@@ -27,16 +27,16 @@
   "homepage": "https://github.com/dscalzi/Nebula#readme",
   "devDependencies": {
     "@types/adm-zip": "^0.4.32",
-    "@types/fs-extra": "^8.0.0",
-    "@types/node": "^12.7.2",
-    "@types/yargs": "^13.0.2",
+    "@types/fs-extra": "^8.0.1",
+    "@types/node": "^12.11.7",
+    "@types/yargs": "^13.0.3",
     "rimraf": "^3.0.0",
-    "tslint": "^5.19.0",
-    "typescript": "^3.5.3"
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.4"
   },
   "dependencies": {
     "adm-zip": "^0.4.13",
     "fs-extra": "^8.1.0",
-    "yargs": "^14.0.0"
+    "yargs": "^14.2.0"
   }
 }
