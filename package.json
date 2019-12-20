@@ -28,15 +28,15 @@
   "devDependencies": {
     "@types/adm-zip": "^0.4.32",
     "@types/fs-extra": "^8.0.1",
-    "@types/node": "^12.11.7",
+    "@types/node": "^12.12.21",
     "@types/yargs": "^13.0.3",
     "rimraf": "^3.0.0",
-    "tslint": "^5.20.0",
-    "typescript": "^3.6.4"
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.3"
   },
   "dependencies": {
     "adm-zip": "^0.4.13",
     "fs-extra": "^8.1.0",
-    "yargs": "^14.2.0"
+    "yargs": "^15.0.2"
   }
 }
