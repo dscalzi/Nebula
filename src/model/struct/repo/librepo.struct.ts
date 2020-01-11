@@ -1,6 +1,6 @@
-import { BaseFileStructure } from '../BaseFileStructure'
+import { BaseMavenRepo } from './BaseMavenRepo'
 
-export class LibRepoStructure extends BaseFileStructure {
+export class LibRepoStructure extends BaseMavenRepo {
 
     constructor(
         absoluteRoot: string,

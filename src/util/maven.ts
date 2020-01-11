@@ -3,36 +3,42 @@ import { URL } from 'url'
 
 export class MavenUtil {
 
-    public static readonly ID_REGEX = /(.+):(.+):([^@]+)(?:@{1}(.+)$)?/
+    public static readonly ID_REGEX = /(.+):(.+):([^@-]+)(?:-{1}([^@]+))?(?:@{1}(.+)$)?/
 
     public static isMavenIdentifier(id: string) {
-        return this.ID_REGEX.test(id)
+        return MavenUtil.ID_REGEX.test(id)
     }
 
-    public static mavenToString(id: string, extension = 'jar') {
-        if (!this.isMavenIdentifier(id)) {
+    public static mavenIdentifierToString(id: string, extension = 'jar') {
+        if (!MavenUtil.isMavenIdentifier(id)) {
             return null
         }
 
-        const result = this.ID_REGEX.exec(id)
+        const result = MavenUtil.ID_REGEX.exec(id)
         if (result != null) {
             const group = result[1]
             const artifact = result[2]
             const version = result[3]
-            const ext = result[4] || extension
+            const classifier = result[4]
+            const ext = result[5] || extension
 
-            return `${group.replace(/\./g, '/')}/${artifact}/${version}/${artifact}-${version}.${ext}`
+            return MavenUtil.mavenComponentsToString(group, artifact, version, classifier, ext)
         }
         return null
     }
 
+    public static mavenComponentsToString(group: string, artifact: string,version: string,
+                                          classifier?: string, extension = 'jar') {
+        return `${group.replace(/\./g, '/')}/${artifact}/${version}/${artifact}-${version}${classifier != null ? `-${classifier}` : ''}.${extension}`
+    }
+
     public static mavenToUrl(id: string, extension = 'jar') {
-        const res = this.mavenToString(id, extension)
+        const res = MavenUtil.mavenIdentifierToString(id, extension)
         return res == null ? null : new URL(res)
     }
 
     public static mavenToPath(id: string, extension = 'jar') {
-        const res = this.mavenToString(id, extension)
+        const res = MavenUtil.mavenIdentifierToString(id, extension)
         return res == null ? null : normalize(res)
     }
 
