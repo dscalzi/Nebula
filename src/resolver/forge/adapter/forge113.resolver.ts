@@ -10,10 +10,11 @@ export class Forge113Adapter extends ForgeResolver {
     constructor(
         absoluteRoot: string,
         relativeRoot: string,
+        baseUrl: string,
         minecraftVersion: string,
         forgeVersion: string
     ) {
-        super(absoluteRoot, relativeRoot, minecraftVersion, forgeVersion)
+        super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, forgeVersion)
     }
 
     public async getModule(): Promise<Module> {

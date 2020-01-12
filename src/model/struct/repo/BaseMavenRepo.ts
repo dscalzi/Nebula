@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { createWriteStream, mkdirs, pathExists } from 'fs-extra'
-import { dirname, resolve } from 'path'
+import { dirname, join, resolve } from 'path'
 import { resolve as resolveURL } from 'url'
 import { MavenUtil } from '../../../util/maven'
 import { BaseFileStructure } from '../BaseFileStructure'
@@ -24,6 +24,12 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
                                    classifier?: string, extension = 'jar'): string {
         return resolve(this.containerDirectory,
             MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension))
+    }
+
+    public getArtifactUrlByComponents(baseURL: string, group: string, artifact: string, version: string,
+                                      classifier?: string, extension = 'jar'): string {
+        return resolveURL(baseURL, join(this.relativeRoot,
+            MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension)))
     }
 
     public async artifactExists(path: string) {

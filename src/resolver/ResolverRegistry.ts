@@ -12,10 +12,12 @@ export class ResolverRegistry {
     public static getForgeResolver(
         minecraftVersion: string,
         forgeVersion: string,
-        absoluteRoot: string, relativeRoot: string): ForgeResolver | undefined {
+        absoluteRoot: string,
+        relativeRoot: string,
+        baseURL: string): ForgeResolver | undefined {
         for (const impl of ResolverRegistry.FORGE_ADAPTER_IMPL) {
             if (impl.isForVersion(minecraftVersion)) {
-                return new impl(absoluteRoot, relativeRoot, minecraftVersion, forgeVersion)
+                return new impl(absoluteRoot, relativeRoot, baseURL, minecraftVersion, forgeVersion)
             }
         }
     }

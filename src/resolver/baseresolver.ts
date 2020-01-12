@@ -14,7 +14,8 @@ export abstract class BaseResolver implements Resolver {
 
     constructor(
         protected absoluteRoot: string,
-        protected relativeRoot: string
+        protected relativeRoot: string,
+        protected baseUrl: string
     ) {}
 
     public abstract getModule(): Promise<Module>

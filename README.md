@@ -17,11 +17,19 @@ Generate a distribution.json for Helios.
 Example
 ```properties
 JAVA_EXECUTABLE=C:\Program Files\AdoptOpenJDK\jdk-8.0.222.10-hotspot\bin\java.exe
+ROOT=D:\TestRoot2
+BASE_URL=http://localhost:8080/
 ```
 
 ## Usage
 
 Nebula is not complete. The following usage is tentative.
+
+#### Notes
+
+Rather than updating the entire usage with minor changes, please read these notes.
+
+* Root and BaseUrl options are currently disabled. This information is being pulled from the `.env` for now.
 
 ## Commands
 

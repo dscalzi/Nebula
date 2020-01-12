@@ -10,39 +10,56 @@ import { ResolverRegistry } from './resolver/ResolverRegistry'
 
 dotenv.config()
 
-function rootOption(yargs: yargs.Argv) {
-    return yargs.option('root', {
-        describe: 'File structure root.',
-        type: 'string',
-        demandOption: true,
-        global: true
-    })
-    .coerce({
-        root: resolvePath
-    })
+function getRoot() {
+    return resolvePath(process.env.ROOT as string)
 }
 
-function baseUrlOption(yargs: yargs.Argv) {
-    return yargs.option('baseUrl', {
-        describe: 'Base url of your file host.',
-        type: 'string',
-        demandOption: true,
-        global: true
-    })
-    .coerce({
-        baseUrl: (arg: string) => {
-            // Users must provide protocol in all other instances.
-            if (arg.indexOf('//') === -1) {
-                if (arg.toLowerCase().startsWith('localhost')) {
-                    arg = 'http://' + arg
-                } else {
-                    throw new TypeError('Please provide a URL protocol (ex. http:// or https://)')
-                }
-            }
-            return (new URL(arg)).toString()
+function getBaseURL() {
+    let baseUrl = process.env.BASE_URL as string
+    // Users must provide protocol in all other instances.
+    if (baseUrl.indexOf('//') === -1) {
+        if (baseUrl.toLowerCase().startsWith('localhost')) {
+            baseUrl = 'http://' + baseUrl
+        } else {
+            throw new TypeError('Please provide a URL protocol (ex. http:// or https://)')
         }
-    })
+    }
+    return (new URL(baseUrl)).toString()
 }
+
+// function rootOption(yargs: yargs.Argv) {
+//     return yargs.option('root', {
+//         describe: 'File structure root.',
+//         type: 'string',
+//         demandOption: true,
+//         global: true
+//     })
+//     .coerce({
+//         root: resolvePath
+//     })
+// }
+
+// function baseUrlOption(yargs: yargs.Argv) {
+//     return yargs.option('baseUrl', {
+//         describe: 'Base url of your file host.',
+//         type: 'string',
+//         demandOption: true,
+//         global: true
+//     })
+//     .coerce({
+//         baseUrl: (arg: string) => {
+//             // Users must provide protocol in all other instances.
+//             if (arg.indexOf('//') === -1) {
+//                 if (arg.toLowerCase().startsWith('localhost')) {
+//                     arg = 'http://' + arg
+//                 } else {
+//                     throw new TypeError('Please provide a URL protocol (ex. http:// or https://)')
+//                 }
+//             }
+//             return (new URL(arg)).toString()
+//         }
+//     })
+// }
 
 function namePositional(yargs: yargs.Argv) {
     return yargs.option('name', {
@@ -59,10 +76,12 @@ const initRootCommand: yargs.CommandModule = {
     command: 'root',
     describe: 'Generate an empty standard file structure.',
     builder: (yargs) => {
-        yargs = rootOption(yargs)
+        // yargs = rootOption(yargs)
         return yargs
     },
     handler: async (argv) => {
+        argv.root = getRoot()
+
         console.debug(`Root set to ${argv.root}`)
         console.debug('Invoked init root.')
         try {
@@ -94,7 +113,7 @@ const generateServerCommand: yargs.CommandModule = {
     command: 'server <id> <version>',
     describe: 'Generate a new server configuration.',
     builder: (yargs) => {
-        yargs = rootOption(yargs)
+        // yargs = rootOption(yargs)
         return yargs
         .positional('id', {
             describe: 'Server id.',
@@ -116,6 +135,8 @@ const generateServerCommand: yargs.CommandModule = {
         })
     },
     handler: (argv) => {
+        argv.root = getRoot()
+
         console.debug(`Root set to ${argv.root}`)
         console.debug(`Generating server ${argv.id} for Minecraft ${argv.version}.`,
         `\n\t├ Include forge: ${argv.forge}`,
@@ -127,12 +148,15 @@ const generateDistroCommand: yargs.CommandModule = {
     command: 'distro [name]',
     describe: 'Generate a distribution index from the root file structure.',
     builder: (yargs) => {
-        yargs = rootOption(yargs)
-        yargs = baseUrlOption(yargs)
+        // yargs = rootOption(yargs)
+        // yargs = baseUrlOption(yargs)
         yargs = namePositional(yargs)
         return yargs
     },
     handler: async (argv) => {
+        argv.root = getRoot()
+        argv.baseUrl = getBaseURL()
+
         console.debug(`Root set to ${argv.root}`)
         console.debug(`Base Url set to ${argv.baseUrl}`)
         console.debug(`Invoked generate distro name ${argv.name}.json.`)
@@ -181,7 +205,7 @@ const testCommand: yargs.CommandModule = {
     handler: async (argv) => {
         console.debug(`Invoked test with mcVer ${argv.mcVer} forgeVer ${argv.forgeVer}`)
         console.log(process.cwd())
-        const resolver = ResolverRegistry.getForgeResolver('1.12.2', '14.23.5.2847', 'D:/TestRoot2', 'D:/TestRoot2')
+        const resolver = ResolverRegistry.getForgeResolver('1.12.2', '14.23.5.2847', getRoot(), '', getBaseURL())
         if (resolver != null) {
             const mdl = await resolver.getModule()
             console.log(inspect(mdl, false, null, true))

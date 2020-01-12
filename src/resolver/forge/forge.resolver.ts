@@ -10,10 +10,11 @@ export abstract class ForgeResolver extends BaseResolver {
     constructor(
         absoluteRoot: string,
         relativeRoot: string,
+        baseUrl: string,
         protected minecraftVersion: string,
         protected forgeVersion: string
     ) {
-        super(absoluteRoot, relativeRoot)
+        super(absoluteRoot, relativeRoot, baseUrl)
         this.repoStructure = new RepoStructure(absoluteRoot, relativeRoot)
     }
 

@@ -20,10 +20,11 @@ export class Forge18Adapter extends ForgeResolver {
     constructor(
         absoluteRoot: string,
         relativeRoot: string,
+        baseUrl: string,
         minecraftVersion: string,
         forgeVersion: string
     ) {
-        super(absoluteRoot, relativeRoot, minecraftVersion, forgeVersion)
+        super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, forgeVersion)
     }
 
     public async getModule(): Promise<Module> {
@@ -78,7 +79,16 @@ export class Forge18Adapter extends ForgeResolver {
             ),
             name: 'Minecraft Forge',
             type: Type.ForgeHosted,
-            artifact: this.generateArtifact(forgeUniversalBuffer, await lstat(targetLocalPath)),
+            artifact: this.generateArtifact(
+                forgeUniversalBuffer,
+                await lstat(targetLocalPath),
+                forgeRepo.getArtifactUrlByComponents(
+                    this.baseUrl,
+                    ForgeRepoStructure.FORGE_GROUP,
+                    ForgeRepoStructure.FORGE_ARTIFACT,
+                    artifactVersion, 'universal'
+                )
+            ),
             subModules: []
         }
 
@@ -136,7 +146,15 @@ export class Forge18Adapter extends ForgeResolver {
                 id: properId,
                 name: `Minecraft Forge (${mavenComponents?.artifact})`,
                 type: Type.Library,
-                artifact: this.generateArtifact(libBuf as Buffer, stats)
+                artifact: this.generateArtifact(
+                    libBuf as Buffer,
+                    stats,
+                    libRepo.getArtifactUrlByComponents(
+                        this.baseUrl,
+                        mavenComponents.group, mavenComponents.artifact,
+                        mavenComponents.version, mavenComponents.classifier, extension
+                    )
+                )
             })
 
             if (postProcess) {
@@ -160,11 +178,11 @@ export class Forge18Adapter extends ForgeResolver {
         return forgeModule
     }
 
-    private generateArtifact(buf: Buffer, stats: Stats): Artifact {
+    private generateArtifact(buf: Buffer, stats: Stats, url: string): Artifact {
         return {
             size: stats.size,
             MD5: createHash('md5').update(buf).digest('hex'),
-            url: 'TODO'
+            url
         }
     }
 
@@ -194,7 +212,7 @@ export class Forge18Adapter extends ForgeResolver {
 
         console.debug('Spawning PackXZExtract.')
         await PackXZExtractWrapper.extractUnpack(files)
-        console.debug('All filex extracted, calculating hashes..')
+        console.debug('All files extracted, calculating hashes..')
 
         for (const entry of processingQueue) {
             const tmpFileName = basename(entry.localPath)
