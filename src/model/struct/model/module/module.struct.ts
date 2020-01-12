@@ -43,8 +43,8 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
             for (const file of files) {
                 const filePath = resolve(this.containerDirectory, file)
                 const stats = await lstat(filePath)
-                const buf = await readFile(filePath)
                 if (stats.isFile()) {
+                    const buf = await readFile(filePath)
                     const mdl: Module = {
                         id: await this.getModuleId(file, filePath, stats, buf),
                         name: await this.getModuleName(file, filePath, stats, buf),

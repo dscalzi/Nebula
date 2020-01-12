@@ -15,8 +15,8 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
         super(absoluteRoot, relativeRoot, structRoot)
     }
 
-    public getArtifactById(mavenIdentifier: string): string | null {
-        const resolved = MavenUtil.mavenIdentifierToString(mavenIdentifier)
+    public getArtifactById(mavenIdentifier: string, extension?: string): string | null {
+        const resolved = MavenUtil.mavenIdentifierToString(mavenIdentifier, extension)
         return resolved == null ? null : resolve(this.containerDirectory, resolved)
     }
 
@@ -30,9 +30,17 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
         return pathExists(path)
     }
 
-    public async downloadArtifact(url: string, group: string, artifact: string, version: string,
-                                  classifier?: string, extension?: string) {
-        const relative = MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension)
+    public async downloadArtifactById(url: string, mavenIdentifier: string, extension?: string) {
+        return this.downloadArtifactBase(url, MavenUtil.mavenIdentifierToString(mavenIdentifier, extension) as string)
+    }
+
+    public async downloadArtifactByComponents(url: string, group: string, artifact: string, version: string,
+                                              classifier?: string, extension?: string) {
+        return this.downloadArtifactBase(url,
+            MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension))
+    }
+
+    private async downloadArtifactBase(url: string, relative: string) {
         const resolvedURL = resolveURL(url, relative).toString()
         console.debug(`Downloading ${resolvedURL}..`)
         const response = await axios({

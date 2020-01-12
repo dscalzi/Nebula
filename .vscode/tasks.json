@@ -9,7 +9,10 @@
             "tsconfig": "tsconfig.json",
             "problemMatcher": [
                 "$tsc"
-            ]
+            ],
+            "presentation": {
+                "reveal": "silent"
+            }
         }
     ]
 }

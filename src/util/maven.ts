@@ -6,11 +6,16 @@ export class MavenUtil {
     public static readonly ID_REGEX = /(.+):(.+):([^@]+)()(?:@{1}(.+)$)?/
     public static readonly ID_REGEX_WITH_CLASSIFIER = /(.+):(.+):(?:([^@]+)(?:-([a-zA-Z]+)))(?:@{1}(.+)$)?/
 
-    public static isMavenIdentifier(id: string) {
+    public static mavenComponentsToIdentifier(group: string, artifact: string, version: string,
+                                              classifier?: string, extension?: string) {
+        return `${group}:${artifact}:${version}${classifier != null ? `-${classifier}` : ''}${extension != null ? `@${extension}` : ''}`
+    }
+
+    public static isMavenIdentifier(id: string): boolean {
         return MavenUtil.ID_REGEX.test(id) || MavenUtil.ID_REGEX_WITH_CLASSIFIER.test(id)
     }
 
-    public static mavenIdentifierToString(id: string, extension = 'jar') {
+    public static getMavenComponents(id: string, extension = 'jar') {
         if (!MavenUtil.isMavenIdentifier(id)) {
             return null
         }
@@ -24,15 +29,27 @@ export class MavenUtil {
         }
 
         if (result != null) {
-            const group = result[1]
-            const artifact = result[2]
-            const version = result[3]
-            const classifier = result[4] || undefined
-            const ext = result[5] || extension
-
-            return MavenUtil.mavenComponentsToString(group, artifact, version, classifier, ext)
+            return {
+                group: result[1],
+                artifact: result[2],
+                version: result[3],
+                classifier: result[4] || undefined,
+                extension: result[5] || extension
+            }
         }
+
         return null
+    }
+
+    public static mavenIdentifierToString(id: string, extension = 'jar') {
+        const tmp = MavenUtil.getMavenComponents(id, extension)
+
+        if (tmp != null) {
+            return MavenUtil.mavenComponentsToString(tmp.group, tmp.artifact, tmp.version,
+                                                     tmp.classifier, tmp.extension)
+        } else {
+            return null
+        }
     }
 
     public static mavenComponentsToString(group: string, artifact: string, version: string,
