@@ -1,4 +1,7 @@
-import { resolve } from 'path'
+import axios from 'axios'
+import { createWriteStream, mkdirs, pathExists } from 'fs-extra'
+import { dirname, resolve } from 'path'
+import { resolve as resolveURL } from 'url'
 import { MavenUtil } from '../../../util/maven'
 import { BaseFileStructure } from '../BaseFileStructure'
 
@@ -19,8 +22,36 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
 
     public getArtifactByComponents(group: string, artifact: string, version: string,
                                    classifier?: string, extension = 'jar'): string {
-        throw resolve(this.containerDirectory,
+        return resolve(this.containerDirectory,
             MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension))
+    }
+
+    public async artifactExists(path: string) {
+        return pathExists(path)
+    }
+
+    public async downloadArtifact(url: string, group: string, artifact: string, version: string,
+                                  classifier?: string, extension?: string) {
+        const relative = MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension)
+        const resolvedURL = resolveURL(url, relative).toString()
+        console.debug(`Downloading ${resolvedURL}..`)
+        const response = await axios({
+            method: 'get',
+            url: resolvedURL,
+            responseType: 'stream'
+        })
+        const localPath = resolve(this.containerDirectory, relative)
+        await mkdirs(dirname(localPath))
+        const writer = createWriteStream(localPath)
+        response.data.pipe(writer)
+        // tslint:disable-next-line: no-shadowed-variable
+        return new Promise((resolve, reject) => {
+            writer.on('finish', () => {
+                console.debug(`Completed download of ${resolvedURL}.`)
+                resolve()
+            })
+            writer.on('error', reject)
+        })
     }
 
 }

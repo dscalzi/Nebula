@@ -2,6 +2,9 @@ import { BaseMavenRepo } from './BaseMavenRepo'
 
 export class ForgeRepoStructure extends BaseMavenRepo {
 
+    public static readonly FORGE_GROUP = 'net.minecraftforge'
+    public static readonly FORGE_ARTIFACT = 'forge'
+
     constructor(
         absoluteRoot: string,
         relativeRoot: string
@@ -10,7 +13,10 @@ export class ForgeRepoStructure extends BaseMavenRepo {
     }
 
     public getLocalForge(version: string, classifier?: string) {
-        this.getArtifactByComponents('net.minecraftforge', 'forge', version, classifier, 'jar')
+        return this.getArtifactByComponents(
+            ForgeRepoStructure.FORGE_GROUP,
+            ForgeRepoStructure.FORGE_ARTIFACT,
+            version, classifier, 'jar')
     }
 
 }

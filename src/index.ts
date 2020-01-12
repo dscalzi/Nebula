@@ -1,8 +1,10 @@
 /* tslint:disable:no-shadowed-variable */
 import { writeFile } from 'fs-extra'
 import { resolve as resolvePath } from 'path'
+import { URL } from 'url'
 import yargs from 'yargs'
 import { DistributionStructure } from './model/struct/model/distribution.struct'
+import { ResolverRegistry } from './resolver/ResolverRegistry'
 
 function rootOption(yargs: yargs.Argv) {
     return yargs.option('root', {
@@ -166,6 +168,21 @@ const validateCommand: yargs.CommandModule = {
     }
 }
 
+const testCommand: yargs.CommandModule = {
+    command: 'test <mcVer> <forgeVer>',
+    describe: 'Validate a distribution.json against the spec.',
+    builder: (yargs) => {
+        return namePositional(yargs)
+    },
+    handler: async (argv) => {
+        console.debug(`Invoked test with mcVer ${argv.mcVer} forgeVer ${argv.forgeVer}`)
+        const resolver = ResolverRegistry.getForgeResolver('1.12.2', '14.23.5.2847', 'D:/TestRoot2', 'D:/TestRoot2')
+        if (resolver != null) {
+            await resolver.getModule()
+        }
+    }
+}
+
 // Registering yargs configuration.
 // tslint:disable-next-line:no-unused-expression
 yargs
@@ -174,6 +191,7 @@ yargs
 .command(initCommand)
 .command(generateCommand)
 .command(validateCommand)
+.command(testCommand)
 .demandCommand()
 .help()
 .argv
