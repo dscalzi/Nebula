@@ -2,6 +2,23 @@
 
 Generate a distribution.json for Helios.
 
+## Requirements
+
+* Node.js 12
+* Java 8+ (https://adoptopenjdk.net/)
+  * This is required to process [XZ](https://tukaani.org/xz/format.html) files.
+
+## Setup
+
+1. Clone the repository
+2. Install the dependencies (`npm i`)
+3. Create a `.env` file at the root directory and set the required values.
+
+Example
+```properties
+JAVA_EXECUTABLE=C:\Program Files\AdoptOpenJDK\jdk-8.0.222.10-hotspot\bin\java.exe
+```
+
 ## Usage
 
 Nebula is not complete. The following usage is tentative.

@@ -1,10 +1,14 @@
 /* tslint:disable:no-shadowed-variable */
+import dotenv from 'dotenv'
 import { writeFile } from 'fs-extra'
 import { resolve as resolvePath } from 'path'
 import { URL } from 'url'
+import { inspect } from 'util'
 import yargs from 'yargs'
 import { DistributionStructure } from './model/struct/model/distribution.struct'
 import { ResolverRegistry } from './resolver/ResolverRegistry'
+
+dotenv.config()
 
 function rootOption(yargs: yargs.Argv) {
     return yargs.option('root', {
@@ -176,10 +180,11 @@ const testCommand: yargs.CommandModule = {
     },
     handler: async (argv) => {
         console.debug(`Invoked test with mcVer ${argv.mcVer} forgeVer ${argv.forgeVer}`)
+        console.log(process.cwd())
         const resolver = ResolverRegistry.getForgeResolver('1.12.2', '14.23.5.2847', 'D:/TestRoot2', 'D:/TestRoot2')
         if (resolver != null) {
             const mdl = await resolver.getModule()
-            console.log(mdl)
+            console.log(inspect(mdl, false, null, true))
         }
     }
 }

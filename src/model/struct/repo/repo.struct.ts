@@ -1,3 +1,4 @@
+import { join } from 'path'
 import { BaseFileStructure } from '../BaseFileStructure'
 import { ForgeRepoStructure } from './forgerepo.struct'
 import { LibRepoStructure } from './librepo.struct'
@@ -36,6 +37,10 @@ export class RepoStructure extends BaseFileStructure {
 
     public getLibRepoStruct() {
         return this.libRepoStruct
+    }
+
+    public getTempDirectory() {
+        return join(this.absoluteRoot, 'temp')
     }
 
 }

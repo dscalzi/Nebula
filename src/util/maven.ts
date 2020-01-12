@@ -17,7 +17,7 @@ export class MavenUtil {
 
     public static getMavenComponents(id: string, extension = 'jar') {
         if (!MavenUtil.isMavenIdentifier(id)) {
-            return null
+            throw new Error('Id is not a maven identifier.')
         }
 
         let result
@@ -38,7 +38,7 @@ export class MavenUtil {
             }
         }
 
-        return null
+        throw new Error('Failed to process maven data.')
     }
 
     public static mavenIdentifierToString(id: string, extension = 'jar') {
