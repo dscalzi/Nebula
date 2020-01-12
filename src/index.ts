@@ -6,6 +6,7 @@ import { URL } from 'url'
 import { inspect } from 'util'
 import yargs from 'yargs'
 import { DistributionStructure } from './model/struct/model/distribution.struct'
+import { ServerStructure } from './model/struct/model/server.struct'
 import { ResolverRegistry } from './resolver/ResolverRegistry'
 
 dotenv.config()
@@ -124,14 +125,14 @@ const generateServerCommand: yargs.CommandModule = {
             type: 'string'
         })
         .option('forge', {
-            describe: 'Include Forge.',
-            type: 'boolean',
-            default: true
+            describe: 'Forge version.',
+            type: 'string',
+            default: null
         })
         .option('liteloader', {
-            describe: 'Include liteloader.',
-            type: 'boolean',
-            default: false
+            describe: 'LiteLoader version.',
+            type: 'string',
+            default: null
         })
     },
     handler: (argv) => {
@@ -139,8 +140,19 @@ const generateServerCommand: yargs.CommandModule = {
 
         console.debug(`Root set to ${argv.root}`)
         console.debug(`Generating server ${argv.id} for Minecraft ${argv.version}.`,
-        `\n\t├ Include forge: ${argv.forge}`,
-        `\n\t└ Include liteloader: ${argv.liteloader}`)
+        `\n\t├ Forge version: ${argv.forge}`,
+        `\n\t└ LiteLoader version: ${argv.liteloader}`)
+
+        const serverStruct = new ServerStructure(argv.root as string, getBaseURL())
+        serverStruct.createServer(
+            argv.id as string,
+            argv.version as string,
+            {
+                forgeVersion: argv.forge as string,
+                liteloaderVersion: argv.liteloader as string
+            }
+        )
+
     }
 }
 

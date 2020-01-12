@@ -1,6 +1,8 @@
-import { lstat, readdir } from 'fs-extra'
-import { join, resolve as resolvePath } from 'path'
+import { lstat, mkdirs, pathExists, readdir, readFile, writeFile } from 'fs-extra'
+import { dirname, join, resolve as resolvePath } from 'path'
 import { resolve as resolveUrl } from 'url'
+import { ResolverRegistry } from '../../../resolver/ResolverRegistry'
+import { ServerMeta } from '../../nebula/servermeta'
 import { Server } from '../../spec/server'
 import { BaseModelStructure } from './basemodel.struct'
 import { MiscFileStructure } from './module/file.struct'
@@ -23,6 +25,44 @@ export class ServerStructure extends BaseModelStructure<Server> {
             this.resolvedModels = await this._doSeverRetrieval()
         }
         return this.resolvedModels
+    }
+
+    public async createServer(
+        id: string,
+        minecraftVersion: string,
+        options: {
+            forgeVersion?: string
+            liteloaderVersion?: string
+        }
+    ) {
+        const effectiveId = `${id}-${minecraftVersion}`
+        const absoluteServerRoot = resolvePath(this.containerDirectory, effectiveId)
+        const relativeServerRoot = join(this.relativeRoot, effectiveId)
+
+        if (await pathExists(absoluteServerRoot)) {
+            console.error('Server already exists! Aborting.')
+            return
+        }
+
+        await mkdirs(absoluteServerRoot)
+
+        if (options.forgeVersion != null) {
+            const fms = new ForgeModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+            await fms.init()
+            const serverMeta: ServerMeta = {
+                forgeVersion: options.forgeVersion
+            }
+            await writeFile(resolvePath(absoluteServerRoot, 'servermeta.json'), JSON.stringify(serverMeta, null, 2))
+        }
+
+        if (options.liteloaderVersion != null) {
+            const lms = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+            await lms.init()
+        }
+
+        const mfs = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+        await mfs.init()
+
     }
 
     private async _doSeverRetrieval(): Promise<Server[]> {
@@ -57,6 +97,25 @@ export class ServerStructure extends BaseModelStructure<Server> {
                     iconUrl = '<FILL IN MANUALLY>'
                 }
 
+                // Read server meta
+                const serverMeta: ServerMeta = JSON.parse(await readFile(resolvePath(absoluteServerRoot, 'servermeta.json'), 'utf-8'))
+
+                const forgeResolver = ResolverRegistry.getForgeResolver(
+                    match[2],
+                    serverMeta.forgeVersion,
+                    dirname(this.absoluteRoot),
+                    '',
+                    this.baseUrl
+                )
+
+                if (forgeResolver == null) {
+                    console.error(`No forge resolver found for Minecraft ${match[2]}, aborting.`)
+                    throw new Error(`No forge resolver found for Minecraft ${match[2]}!`)
+                }
+
+                // Resolve forge
+                const forgeItselfModule = await forgeResolver.getModule()
+
                 const forgeModStruct = new ForgeModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
                 const forgeModModules = await forgeModStruct.getSpecModel()
 
@@ -67,6 +126,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 const fileModules = await fileStruct.getSpecModel()
 
                 const modules = [
+                    forgeItselfModule,
                     ...forgeModModules,
                     ...liteModModules,
                     ...fileModules
