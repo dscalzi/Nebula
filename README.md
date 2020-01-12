@@ -76,15 +76,17 @@ Generate an new server in the root directory. Options are provided to include fo
 Options:
 
 * `--root <string>` Specify the root directory.
-* `--forge <boolean>` Include forge
-  * OPTIONAL (default: true)
-* `--liteloader <boolean>`
-  * OPTIONAL (default: false)
+* `--forge <string>` Specify forge version. This is WITHOUT the minecraft version (ex. 14.23.5.2847)
+  * OPTIONAL (default: null)
+  * If not provided forge will not be enabled.
+* `--liteloader <string>` Specify liteloader version.
+  * OPTIONAL (default: null)
+  * If not provided liteloader will not be enabled.
 
 >
 > Example Usage
 >
-> `generate server Test1 1.12.2 --root C:/TestRoot --forge true`
+> `generate server Test1 1.12.2 --root C:/TestRoot --forge 14.23.5.2847`
 >
 
 ---
