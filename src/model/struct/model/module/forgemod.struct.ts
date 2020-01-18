@@ -73,16 +73,27 @@ export class ForgeModStructure extends ModuleStructure {
                 }
             }
 
+            let createDefault = false
+
             if (raw) {
                 // Assuming the main mod will be the first entry in this file.
-                const resolved = JSON.parse(raw) as object
-                if (resolved.hasOwnProperty('modListVersion')) {
-                    this.forgeModMetadata[name] = (resolved as McModInfoList).modList[0]
-                } else {
-                    this.forgeModMetadata[name] = (resolved as McModInfo[])[0]
+                try {
+                    const resolved = JSON.parse(raw) as object
+                    if (resolved.hasOwnProperty('modListVersion')) {
+                        this.forgeModMetadata[name] = (resolved as McModInfoList).modList[0]
+                    } else {
+                        this.forgeModMetadata[name] = (resolved as McModInfo[])[0]
+                    }
+                } catch (err) {
+                    console.error(`ForgeMod ${name} contains an invalid mcmod.info file.`)
+                    createDefault = true
                 }
             } else {
                 console.error(`ForgeMod ${name} does not contain mcmod.info file.`)
+                createDefault = true
+            }
+
+            if (createDefault) {
                 this.forgeModMetadata[name] = ({
                     modid: name.substring(0, name.lastIndexOf('.')).toLowerCase(),
                     name,
