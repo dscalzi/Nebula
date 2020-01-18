@@ -14,7 +14,8 @@ export interface VersionManifest {
         url?: string,
         checksums?: string[],
         serverreq?: boolean,
-        clientreq?: boolean
+        clientreq?: boolean,
+        comment?: string
     }>
 
 }

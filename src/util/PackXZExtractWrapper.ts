@@ -1,11 +1,8 @@
 import { spawn } from 'child_process'
 import { join } from 'path'
+import { JavaUtil } from './javautil'
 
 export class PackXZExtractWrapper {
-
-    public static getJavaExecutable() {
-        return process.env.JAVA_EXECUTABLE as string
-    }
 
     public static getPackXZExtract() {
         return join(process.cwd(), 'libraries', 'java', 'PackXZExtract.jar')
@@ -25,7 +22,7 @@ export class PackXZExtractWrapper {
 
     private static execute(command: string, paths: string[]) {
         return new Promise((resolve, reject) => {
-            const child = spawn(PackXZExtractWrapper.getJavaExecutable(), [
+            const child = spawn(JavaUtil.getJavaExecutable(), [
                 '-jar',
                 PackXZExtractWrapper.getPackXZExtract(),
                 command,

@@ -14,7 +14,7 @@ import { ForgeResolver } from '../forge.resolver'
 export class Forge18Adapter extends ForgeResolver {
 
     public static isForVersion(version: string) {
-        return Forge18Adapter.isVersionAcceptable(version, [8, 9, 10, 11, 12])
+        return Forge18Adapter.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
     }
 
     constructor(
@@ -37,8 +37,7 @@ export class Forge18Adapter extends ForgeResolver {
 
     public async getForgeByVersion() {
         const forgeRepo = this.repoStructure.getForgeRepoStruct()
-        const artifactVersion = `${this.minecraftVersion}-${this.forgeVersion}`
-        const targetLocalPath = forgeRepo.getLocalForge(artifactVersion, 'universal')
+        const targetLocalPath = forgeRepo.getLocalForge(this.artifactVersion, 'universal')
         console.debug(`Checking for forge version at ${targetLocalPath}..`)
         if (!await forgeRepo.artifactExists(targetLocalPath)) {
             console.debug(`Forge not found locally, initializing download..`)
@@ -46,7 +45,7 @@ export class Forge18Adapter extends ForgeResolver {
                 this.REMOTE_REPOSITORY,
                 ForgeRepoStructure.FORGE_GROUP,
                 ForgeRepoStructure.FORGE_ARTIFACT,
-                artifactVersion, 'universal', 'jar')
+                this.artifactVersion, 'universal', 'jar')
         } else {
             console.debug('Using locally discovered forge.')
         }
@@ -75,7 +74,7 @@ export class Forge18Adapter extends ForgeResolver {
             id: MavenUtil.mavenComponentsToIdentifier(
                 ForgeRepoStructure.FORGE_GROUP,
                 ForgeRepoStructure.FORGE_ARTIFACT,
-                artifactVersion, 'universal'
+                this.artifactVersion, 'universal'
             ),
             name: 'Minecraft Forge',
             type: Type.ForgeHosted,
@@ -86,7 +85,7 @@ export class Forge18Adapter extends ForgeResolver {
                     this.baseUrl,
                     ForgeRepoStructure.FORGE_GROUP,
                     ForgeRepoStructure.FORGE_ARTIFACT,
-                    artifactVersion, 'universal'
+                    this.artifactVersion, 'universal'
                 )
             ),
             subModules: []

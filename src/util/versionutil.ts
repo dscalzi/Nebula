@@ -17,7 +17,7 @@ export class VersionUtil {
                 }
             }
         }
-        return null
+        throw new Error(`${version} is not a valid minecraft version!`)
     }
 
 }

@@ -43,4 +43,8 @@ export class RepoStructure extends BaseFileStructure {
         return join(this.absoluteRoot, 'temp')
     }
 
+    public getWorkDirectory() {
+        return join(this.absoluteRoot, 'work')
+    }
+
 }

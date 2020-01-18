@@ -217,7 +217,8 @@ const testCommand: yargs.CommandModule = {
     handler: async (argv) => {
         console.debug(`Invoked test with mcVer ${argv.mcVer} forgeVer ${argv.forgeVer}`)
         console.log(process.cwd())
-        const resolver = ResolverRegistry.getForgeResolver('1.12.2', '14.23.5.2847', getRoot(), '', getBaseURL())
+        const resolver = ResolverRegistry.getForgeResolver(argv.mcVer as string,
+            argv.forgeVer as string, getRoot(), '', getBaseURL())
         if (resolver != null) {
             const mdl = await resolver.getModule()
             console.log(inspect(mdl, false, null, true))

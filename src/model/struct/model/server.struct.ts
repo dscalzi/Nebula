@@ -103,7 +103,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 const forgeResolver = ResolverRegistry.getForgeResolver(
                     match[2],
                     serverMeta.forgeVersion,
-                    dirname(this.absoluteRoot),
+                    dirname(this.containerDirectory),
                     '',
                     this.baseUrl
                 )

@@ -10,9 +10,8 @@
             "name": "Launch Program",
             "program": "${workspaceFolder}\\src\\index.ts",
             "args": [
-                "test",
-                "1.12.2",
-                "14.23.5.2847"
+                "g",
+                "distro"
             ],
             "preLaunchTask": "compile",
             "outFiles": [
