@@ -26,7 +26,7 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
     }
 
     protected generateMavenIdentifier(name: string, version: string) {
-        return `generated.${this.type.toLowerCase()}:${name}-${version}@${TypeMetadata[this.type].defaultExtension}`
+        return `generated.${this.type.toLowerCase()}:${name}:${version}@${TypeMetadata[this.type].defaultExtension}`
     }
 
     protected async abstract getModuleId(name: string, path: string, stats: Stats, buf: Buffer): Promise<string>

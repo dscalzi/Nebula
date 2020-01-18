@@ -16,7 +16,7 @@ Generate a distribution.json for Helios.
 
 Example
 ```properties
-JAVA_EXECUTABLE=C:\Program Files\AdoptOpenJDK\jdk-8.0.222.10-hotspot\bin\java.exe
+JAVA_EXECUTABLE=C:\Program Files\AdoptOpenJDK\jdk-8.0.232.09-hotspot\bin\java.exe
 ROOT=D:\TestRoot2
 BASE_URL=http://localhost:8080/
 ```
