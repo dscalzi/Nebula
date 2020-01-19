@@ -5,7 +5,7 @@ import { basename, join } from 'path'
 import { VersionManifest17 } from '../../../model/forge/versionmanifest17'
 import { Module } from '../../../model/spec/module'
 import { Type } from '../../../model/spec/type'
-import { ForgeRepoStructure } from '../../../model/struct/repo/forgerepo.struct'
+import { LibRepoStructure } from '../../../model/struct/repo/librepo.struct'
 import { MavenUtil } from '../../../util/maven'
 import { PackXZExtractWrapper } from '../../../util/PackXZExtractWrapper'
 import { VersionUtil } from '../../../util/versionutil'
@@ -36,15 +36,15 @@ export class Forge17Adapter extends ForgeResolver {
     }
 
     public async getForgeByVersion() {
-        const forgeRepo = this.repoStructure.getForgeRepoStruct()
-        const targetLocalPath = forgeRepo.getLocalForge(this.artifactVersion, 'universal')
+        const libRepo = this.repoStructure.getLibRepoStruct()
+        const targetLocalPath = libRepo.getLocalForge(this.artifactVersion, 'universal')
         console.debug(`Checking for forge version at ${targetLocalPath}..`)
-        if (!await forgeRepo.artifactExists(targetLocalPath)) {
+        if (!await libRepo.artifactExists(targetLocalPath)) {
             console.debug(`Forge not found locally, initializing download..`)
-            await forgeRepo.downloadArtifactByComponents(
+            await libRepo.downloadArtifactByComponents(
                 this.REMOTE_REPOSITORY,
-                ForgeRepoStructure.FORGE_GROUP,
-                ForgeRepoStructure.FORGE_ARTIFACT,
+                LibRepoStructure.FORGE_GROUP,
+                LibRepoStructure.FORGE_ARTIFACT,
                 this.artifactVersion, 'universal', 'jar')
         } else {
             console.debug('Using locally discovered forge.')
@@ -72,8 +72,8 @@ export class Forge17Adapter extends ForgeResolver {
 
         const forgeModule: Module = {
             id: MavenUtil.mavenComponentsToIdentifier(
-                ForgeRepoStructure.FORGE_GROUP,
-                ForgeRepoStructure.FORGE_ARTIFACT,
+                LibRepoStructure.FORGE_GROUP,
+                LibRepoStructure.FORGE_ARTIFACT,
                 this.artifactVersion, 'universal'
             ),
             name: 'Minecraft Forge',
@@ -81,10 +81,10 @@ export class Forge17Adapter extends ForgeResolver {
             artifact: this.generateArtifact(
                 forgeUniversalBuffer,
                 await lstat(targetLocalPath),
-                forgeRepo.getArtifactUrlByComponents(
+                libRepo.getArtifactUrlByComponents(
                     this.baseUrl,
-                    ForgeRepoStructure.FORGE_GROUP,
-                    ForgeRepoStructure.FORGE_ARTIFACT,
+                    LibRepoStructure.FORGE_GROUP,
+                    LibRepoStructure.FORGE_ARTIFACT,
                     this.artifactVersion, 'universal'
                 )
             ),
@@ -100,7 +100,6 @@ export class Forge17Adapter extends ForgeResolver {
             }
             console.debug(`Processing ${lib.name}..`)
 
-            const libRepo = this.repoStructure.getLibRepoStruct()
             const extension = this.determineExtension(lib.checksums)
             const localPath = libRepo.getArtifactById(lib.name, extension) as string
 

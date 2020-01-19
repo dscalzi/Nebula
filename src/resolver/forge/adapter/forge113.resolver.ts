@@ -4,7 +4,6 @@ import { basename, dirname, join } from 'path'
 import { VersionManifest113 } from '../../../model/forge/versionmanifest113'
 import { Module } from '../../../model/spec/module'
 import { Type } from '../../../model/spec/type'
-import { ForgeRepoStructure } from '../../../model/struct/repo/forgerepo.struct'
 import { LibRepoStructure } from '../../../model/struct/repo/librepo.struct'
 import { JavaUtil } from '../../../util/javautil'
 import { MavenUtil } from '../../../util/maven'
@@ -36,15 +35,15 @@ export class Forge113Adapter extends ForgeResolver {
     }
 
     private async process() {
-        const forgeRepo = this.repoStructure.getForgeRepoStruct()
-        const installerPath = forgeRepo.getLocalForge(this.artifactVersion, 'installer')
+        const libRepo = this.repoStructure.getLibRepoStruct()
+        const installerPath = libRepo.getLocalForge(this.artifactVersion, 'installer')
         console.debug(`Checking for forge installer at ${installerPath}..`)
-        if (!await forgeRepo.artifactExists(installerPath)) {
+        if (!await libRepo.artifactExists(installerPath)) {
             console.debug(`Forge installer not found locally, initializing download..`)
-            await forgeRepo.downloadArtifactByComponents(
+            await libRepo.downloadArtifactByComponents(
                 this.REMOTE_REPOSITORY,
-                ForgeRepoStructure.FORGE_GROUP,
-                ForgeRepoStructure.FORGE_ARTIFACT,
+                LibRepoStructure.FORGE_GROUP,
+                LibRepoStructure.FORGE_ARTIFACT,
                 this.artifactVersion, 'installer', 'jar'
             )
         } else {
@@ -158,22 +157,22 @@ export class Forge113Adapter extends ForgeResolver {
         const generatedFiles = [
             {
                 name: 'base jar',
-                group: ForgeRepoStructure.FORGE_GROUP,
-                artifact: ForgeRepoStructure.FORGE_ARTIFACT,
+                group: LibRepoStructure.FORGE_GROUP,
+                artifact: LibRepoStructure.FORGE_ARTIFACT,
                 version: this.artifactVersion,
                 classifier: undefined
             },
             {
                 name: 'universal jar',
-                group: ForgeRepoStructure.FORGE_GROUP,
-                artifact: ForgeRepoStructure.FORGE_ARTIFACT,
+                group: LibRepoStructure.FORGE_GROUP,
+                artifact: LibRepoStructure.FORGE_ARTIFACT,
                 version: this.artifactVersion,
                 classifier: 'universal'
             },
             {
                 name: 'client jar',
-                group: ForgeRepoStructure.FORGE_GROUP,
-                artifact: ForgeRepoStructure.FORGE_ARTIFACT,
+                group: LibRepoStructure.FORGE_GROUP,
+                artifact: LibRepoStructure.FORGE_ARTIFACT,
                 version: this.artifactVersion,
                 classifier: 'client'
             },
