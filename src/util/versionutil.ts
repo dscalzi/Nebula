@@ -1,4 +1,12 @@
+import Axios from 'axios'
+import { PromotionsSlim } from '../model/forge/promotionsslim'
+
 export class VersionUtil {
+
+    public static readonly PROMOTION_TYPE = [
+        'recommended',
+        'latest'
+    ]
 
     public static readonly MINECRAFT_VERSION_REGEX = /(\d+).(\d+).(\d+)/
 
@@ -26,6 +34,39 @@ export class VersionUtil {
             return acceptable.find((element) => versionComponents.minor === element) != null
         }
         return false
+    }
+
+    public static isPromotionVersion(version: string) {
+        return VersionUtil.PROMOTION_TYPE.indexOf(version.toLowerCase()) > -1
+    }
+
+    public static async getPromotionIndex() {
+        const response = await Axios({
+            method: 'get',
+            url: 'https://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json',
+            responseType: 'json'
+        })
+        return response.data as PromotionsSlim
+    }
+
+    public static getPromotedVersionStrict(index: PromotionsSlim, minecraftVersion: string, promotion: string) {
+        const workingPromotion = promotion.toLowerCase()
+        return index.promos[`${minecraftVersion}-${workingPromotion}`]
+    }
+
+    public static async getPromotedForgeVersion(minecraftVersion: string, promotion: string) {
+        const workingPromotion = promotion.toLowerCase()
+        const res = await VersionUtil.getPromotionIndex()
+        let version = res.promos[`${minecraftVersion}-${workingPromotion}`]
+        if (version == null) {
+            console.warn(`No ${workingPromotion} version found for Forge ${minecraftVersion}.`)
+            console.warn(`Attempting to pull latest version instead.`)
+            version = res.promos[`${minecraftVersion}-latest`]
+            if (version == null) {
+                throw new Error(`No latest version found for Forge ${minecraftVersion}.`)
+            }
+        }
+        return version
     }
 
 }

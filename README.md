@@ -79,6 +79,7 @@ Options:
 * `--forge <string>` Specify forge version. This is WITHOUT the minecraft version (ex. 14.23.5.2847)
   * OPTIONAL (default: null)
   * If not provided forge will not be enabled.
+  * You can provide either `latest` or `recommended` to use the latest/recommended version of forge.
 * `--liteloader <string>` Specify liteloader version.
   * OPTIONAL (default: null)
   * If not provided liteloader will not be enabled.
@@ -112,6 +113,23 @@ Options:
 > `generate distribution --root C:/TestRoot --baseUrl https://myhost.com`
 >
 
+---
+
+### Latest Forge
+
+Get the latest version of Forge.
+
+`latest-forge <version>`
+
+---
+
+### Recommended Forge
+
+Get the recommended version of Forge. If no recommended build is available, it will pull the latest version.
+
+`recommended-forge <version>`
+
+---
 
 ## File Structure Setup (Tentative)
 

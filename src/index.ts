@@ -8,6 +8,7 @@ import yargs from 'yargs'
 import { DistributionStructure } from './model/struct/model/distribution.struct'
 import { ServerStructure } from './model/struct/model/server.struct'
 import { VersionSegmentedRegistry } from './util/VersionSegmentedRegistry'
+import { VersionUtil } from './util/versionutil'
 
 dotenv.config()
 
@@ -135,13 +136,20 @@ const generateServerCommand: yargs.CommandModule = {
             default: null
         })
     },
-    handler: (argv) => {
+    handler: async (argv) => {
         argv.root = getRoot()
 
         console.debug(`Root set to ${argv.root}`)
         console.debug(`Generating server ${argv.id} for Minecraft ${argv.version}.`,
         `\n\t├ Forge version: ${argv.forge}`,
         `\n\t└ LiteLoader version: ${argv.liteloader}`)
+
+        if (VersionUtil.isPromotionVersion(argv.forge as string)) {
+            console.debug(`Resolving ${argv.forge} Forge Version..`)
+            const version = await VersionUtil.getPromotedForgeVersion(argv.version as string, argv.forge as string)
+            console.debug(`Forge version set to ${version}`)
+            argv.forge = version
+        }
 
         const serverStruct = new ServerStructure(argv.root as string, getBaseURL())
         serverStruct.createServer(
@@ -208,6 +216,42 @@ const validateCommand: yargs.CommandModule = {
     }
 }
 
+const latestForgeCommand: yargs.CommandModule = {
+    command: 'latest-forge <version>',
+    describe: 'Get the latest version of forge.',
+    handler: async (argv) => {
+        console.debug(`Invoked latest-forge with version ${argv.version}.`)
+
+        const forgeVer = await VersionUtil.getPromotedForgeVersion(argv.version as string, 'latest')
+        console.log(`Latest version: Forge ${forgeVer} (${argv.version})`)
+    }
+}
+
+const recommendedForgeCommand: yargs.CommandModule = {
+    command: 'recommended-forge <version>',
+    describe: 'Get the recommended version of forge. Returns latest if there is no recommended build.',
+    handler: async (argv) => {
+        console.debug(`Invoked recommended-forge with version ${argv.version}.`)
+
+        const index = await VersionUtil.getPromotionIndex()
+        const mcVer = argv.version as string
+
+        let forgeVer = VersionUtil.getPromotedVersionStrict(index, mcVer, 'recommended')
+        if (forgeVer != null) {
+            console.log(`Recommended version: Forge ${forgeVer} (${mcVer})`)
+        } else {
+            console.log(`No recommended build for ${mcVer}. Checking for latest version..`)
+            forgeVer = VersionUtil.getPromotedVersionStrict(index, mcVer, 'latest')
+            if (forgeVer != null) {
+                console.log(`Latest version: Forge ${forgeVer} (${mcVer})`)
+            } else {
+                console.log(`No build available for ${mcVer}.`)
+            }
+        }
+
+    }
+}
+
 const testCommand: yargs.CommandModule = {
     command: 'test <mcVer> <forgeVer>',
     describe: 'Validate a distribution.json against the spec.',
@@ -234,6 +278,8 @@ yargs
 .command(initCommand)
 .command(generateCommand)
 .command(validateCommand)
+.command(latestForgeCommand)
+.command(recommendedForgeCommand)
 .command(testCommand)
 .demandCommand()
 .help()
