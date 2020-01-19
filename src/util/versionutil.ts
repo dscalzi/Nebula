@@ -20,4 +20,12 @@ export class VersionUtil {
         throw new Error(`${version} is not a valid minecraft version!`)
     }
 
+    public static isVersionAcceptable(version: string, acceptable: number[]): boolean {
+        const versionComponents = VersionUtil.getMinecraftVersionComponents(version)
+        if (versionComponents != null && versionComponents.major === 1) {
+            return acceptable.find((element) => versionComponents.minor === element) != null
+        }
+        return false
+    }
+
 }

@@ -8,12 +8,13 @@ import { Type } from '../../../model/spec/type'
 import { ForgeRepoStructure } from '../../../model/struct/repo/forgerepo.struct'
 import { MavenUtil } from '../../../util/maven'
 import { PackXZExtractWrapper } from '../../../util/PackXZExtractWrapper'
+import { VersionUtil } from '../../../util/versionutil'
 import { ForgeResolver } from '../forge.resolver'
 
 export class Forge17Adapter extends ForgeResolver {
 
     public static isForVersion(version: string) {
-        return Forge17Adapter.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
+        return VersionUtil.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
     }
 
     constructor(

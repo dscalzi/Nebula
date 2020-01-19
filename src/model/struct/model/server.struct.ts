@@ -1,12 +1,11 @@
 import { lstat, mkdirs, pathExists, readdir, readFile, writeFile } from 'fs-extra'
 import { dirname, join, resolve as resolvePath } from 'path'
 import { resolve as resolveUrl } from 'url'
-import { ResolverRegistry } from '../../../resolver/ResolverRegistry'
+import { VersionSegmentedRegistry } from '../../../util/VersionSegmentedRegistry'
 import { ServerMeta } from '../../nebula/servermeta'
 import { Server } from '../../spec/server'
 import { BaseModelStructure } from './basemodel.struct'
 import { MiscFileStructure } from './module/file.struct'
-import { ForgeModStructure } from './module/forgemod.struct'
 import { LiteModStructure } from './module/litemod.struct'
 
 export class ServerStructure extends BaseModelStructure<Server> {
@@ -47,7 +46,12 @@ export class ServerStructure extends BaseModelStructure<Server> {
         await mkdirs(absoluteServerRoot)
 
         if (options.forgeVersion != null) {
-            const fms = new ForgeModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+            const fms = VersionSegmentedRegistry.getForgeModStruct(
+                minecraftVersion,
+                absoluteServerRoot,
+                relativeServerRoot,
+                this.baseUrl
+            )
             await fms.init()
             const serverMeta: ServerMeta = {
                 forgeVersion: options.forgeVersion
@@ -99,24 +103,25 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
                 // Read server meta
                 const serverMeta: ServerMeta = JSON.parse(await readFile(resolvePath(absoluteServerRoot, 'servermeta.json'), 'utf-8'))
+                const minecraftVersion = match[2]
 
-                const forgeResolver = ResolverRegistry.getForgeResolver(
-                    match[2],
+                const forgeResolver = VersionSegmentedRegistry.getForgeResolver(
+                    minecraftVersion,
                     serverMeta.forgeVersion,
                     dirname(this.containerDirectory),
                     '',
                     this.baseUrl
                 )
 
-                if (forgeResolver == null) {
-                    console.error(`No forge resolver found for Minecraft ${match[2]}, aborting.`)
-                    throw new Error(`No forge resolver found for Minecraft ${match[2]}!`)
-                }
-
                 // Resolve forge
                 const forgeItselfModule = await forgeResolver.getModule()
 
-                const forgeModStruct = new ForgeModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+                const forgeModStruct = VersionSegmentedRegistry.getForgeModStruct(
+                    minecraftVersion,
+                    absoluteServerRoot,
+                    relativeServerRoot,
+                    this.baseUrl
+                )
                 const forgeModModules = await forgeModStruct.getSpecModel()
 
                 const liteModStruct = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)

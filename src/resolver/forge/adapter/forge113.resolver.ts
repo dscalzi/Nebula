@@ -8,12 +8,13 @@ import { ForgeRepoStructure } from '../../../model/struct/repo/forgerepo.struct'
 import { LibRepoStructure } from '../../../model/struct/repo/librepo.struct'
 import { JavaUtil } from '../../../util/javautil'
 import { MavenUtil } from '../../../util/maven'
+import { VersionUtil } from '../../../util/versionutil'
 import { ForgeResolver } from '../forge.resolver'
 
 export class Forge113Adapter extends ForgeResolver {
 
     public static isForVersion(version: string) {
-        return Forge113Adapter.isVersionAcceptable(version, [13, 14, 15])
+        return VersionUtil.isVersionAcceptable(version, [13, 14, 15])
     }
 
     constructor(

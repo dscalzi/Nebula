@@ -7,7 +7,7 @@ import { inspect } from 'util'
 import yargs from 'yargs'
 import { DistributionStructure } from './model/struct/model/distribution.struct'
 import { ServerStructure } from './model/struct/model/server.struct'
-import { ResolverRegistry } from './resolver/ResolverRegistry'
+import { VersionSegmentedRegistry } from './util/VersionSegmentedRegistry'
 
 dotenv.config()
 
@@ -217,7 +217,7 @@ const testCommand: yargs.CommandModule = {
     handler: async (argv) => {
         console.debug(`Invoked test with mcVer ${argv.mcVer} forgeVer ${argv.forgeVer}`)
         console.log(process.cwd())
-        const resolver = ResolverRegistry.getForgeResolver(argv.mcVer as string,
+        const resolver = VersionSegmentedRegistry.getForgeResolver(argv.mcVer as string,
             argv.forgeVer as string, getRoot(), '', getBaseURL())
         if (resolver != null) {
             const mdl = await resolver.getModule()

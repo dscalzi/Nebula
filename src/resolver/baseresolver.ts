@@ -1,16 +1,8 @@
 import { Module } from '../model/spec/module'
-import { VersionUtil } from '../util/versionutil'
+import { VersionSegmented } from '../util/VersionSegmented'
 import { Resolver } from './resolver'
 
-export abstract class BaseResolver implements Resolver {
-
-    protected static isVersionAcceptable(version: string, acceptable: number[]): boolean {
-        const versionComponents = VersionUtil.getMinecraftVersionComponents(version)
-        if (versionComponents != null && versionComponents.major === 1) {
-            return acceptable.find((element) => versionComponents.minor === element) != null
-        }
-        return false
-    }
+export abstract class BaseResolver implements Resolver, VersionSegmented {
 
     constructor(
         protected absoluteRoot: string,
