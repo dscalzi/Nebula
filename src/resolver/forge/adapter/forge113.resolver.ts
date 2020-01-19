@@ -212,11 +212,15 @@ export class Forge113Adapter extends ForgeResolver {
             const exists = await pathExists(targetLocalPath)
             if (exists) {
 
+                // Always tag destination with artifact version.
+                // Allows different versions of forge to be installed at once.
+                // Ex. Recommended 1.15 on prod, latest 1.15 on test.
+
                 mdls.push({
                     id: MavenUtil.mavenComponentsToIdentifier(
                         entry.group,
                         entry.artifact,
-                        entry.version,
+                        this.artifactVersion,
                         entry.classifier
                     ),
                     name: `Minecraft Forge (${entry.name})`,
@@ -228,7 +232,7 @@ export class Forge113Adapter extends ForgeResolver {
                             this.baseUrl,
                             entry.group,
                             entry.artifact,
-                            entry.version,
+                            entry.version, // work dir version
                             entry.classifier
                         )
                     ),
@@ -238,7 +242,7 @@ export class Forge113Adapter extends ForgeResolver {
                 const destination = this.repoStructure.getLibRepoStruct().getArtifactByComponents(
                     entry.group,
                     entry.artifact,
-                    entry.version,
+                    this.artifactVersion,
                     entry.classifier
                 )
 

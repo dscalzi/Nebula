@@ -8,7 +8,7 @@ export class MavenUtil {
 
     public static mavenComponentsToIdentifier(group: string, artifact: string, version: string,
                                               classifier?: string, extension?: string) {
-        return `${group}:${artifact}:${version}${classifier != null ? `-${classifier}` : ''}${extension != null ? `@${extension}` : ''}`
+        return `${group}:${artifact}:${version}${classifier != null ? `:${classifier}` : ''}${extension != null ? `@${extension}` : ''}`
     }
 
     public static isMavenIdentifier(id: string): boolean {
