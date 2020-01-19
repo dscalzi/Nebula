@@ -153,6 +153,7 @@ export class Forge113Adapter extends ForgeResolver {
     private async processForgeModule(versionManifest: VersionManifest113) {
 
         const libDir = join(this.repoStructure.getWorkDirectory(), 'libraries')
+        const mcpVersion = this.getMCPVersion(versionManifest.arguments.game)
 
         const generatedFiles = [
             {
@@ -197,19 +198,15 @@ export class Forge113Adapter extends ForgeResolver {
                 artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
                 version: this.minecraftVersion,
                 classifier: 'extra'
-            }
-        ]
-
-        const mcpVersion = this.getMCPVersion(versionManifest.arguments.game)
-        if (mcpVersion != null) {
-            generatedFiles.push({
+            },
+            {
                 name: 'client srg',
                 group: LibRepoStructure.MINECRAFT_GROUP,
                 artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
                 version: `${this.minecraftVersion}-${mcpVersion}`,
                 classifier: 'srg'
-            })
-        }
+            }
+        ]
 
         const mdls: Module[] = []
 
