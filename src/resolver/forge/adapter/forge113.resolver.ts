@@ -81,7 +81,7 @@ export class Forge113Adapter extends ForgeResolver {
         const versionManifest = versionManifestTuple[0] as VersionManifest113
 
         console.debug('Processing generated forge files.')
-        const forgeModule = await this.processForgeModule()
+        const forgeModule = await this.processForgeModule(versionManifest)
 
         // Attach version.json module.
         forgeModule.subModules?.unshift(versionManifestTuple[1] as Module)
@@ -150,7 +150,7 @@ export class Forge113Adapter extends ForgeResolver {
 
     }
 
-    private async processForgeModule() {
+    private async processForgeModule(versionManifest: VersionManifest113) {
 
         const libDir = join(this.repoStructure.getWorkDirectory(), 'libraries')
 
@@ -200,6 +200,17 @@ export class Forge113Adapter extends ForgeResolver {
             }
         ]
 
+        const mcpVersion = this.getMCPVersion(versionManifest.arguments.game)
+        if (mcpVersion != null) {
+            generatedFiles.push({
+                name: 'client srg',
+                group: LibRepoStructure.MINECRAFT_GROUP,
+                artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
+                version: `${this.minecraftVersion}-${mcpVersion}`,
+                classifier: 'srg'
+            })
+        }
+
         const mdls: Module[] = []
 
         for (const entry of generatedFiles) {
@@ -212,15 +223,11 @@ export class Forge113Adapter extends ForgeResolver {
             const exists = await pathExists(targetLocalPath)
             if (exists) {
 
-                // Always tag destination with artifact version.
-                // Allows different versions of forge to be installed at once.
-                // Ex. Recommended 1.15 on prod, latest 1.15 on test.
-
                 mdls.push({
                     id: MavenUtil.mavenComponentsToIdentifier(
                         entry.group,
                         entry.artifact,
-                        this.artifactVersion,
+                        entry.version,
                         entry.classifier
                     ),
                     name: `Minecraft Forge (${entry.name})`,
@@ -232,7 +239,7 @@ export class Forge113Adapter extends ForgeResolver {
                             this.baseUrl,
                             entry.group,
                             entry.artifact,
-                            entry.version, // work dir version
+                            entry.version,
                             entry.classifier
                         )
                     ),
@@ -242,7 +249,7 @@ export class Forge113Adapter extends ForgeResolver {
                 const destination = this.repoStructure.getLibRepoStruct().getArtifactByComponents(
                     entry.group,
                     entry.artifact,
-                    this.artifactVersion,
+                    entry.version,
                     entry.classifier
                 )
 
@@ -308,6 +315,15 @@ export class Forge113Adapter extends ForgeResolver {
                 resolve()
             })
         })
+    }
+
+    private getMCPVersion(args: string[]) {
+        for (let i = 0; i < args.length; i++) {
+            if (args[i] === '--fml.mcpVersion') {
+                return args[i + 1]
+            }
+        }
+        return null
     }
 
 }
