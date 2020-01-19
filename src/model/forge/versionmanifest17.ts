@@ -1,4 +1,4 @@
-export interface VersionManifest {
+export interface VersionManifest17 {
 
     id: string
     time: string

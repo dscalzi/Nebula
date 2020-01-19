@@ -1,3 +1,6 @@
+import { createHash } from 'crypto'
+import { Stats } from 'fs-extra'
+import { Artifact } from '../../model/spec/artifact'
 import { RepoStructure } from '../../model/struct/repo/repo.struct'
 import { BaseResolver } from '../baseresolver'
 
@@ -66,6 +69,14 @@ export abstract class ForgeResolver extends BaseResolver {
 
         }
         return version
+    }
+
+    protected generateArtifact(buf: Buffer, stats: Stats, url: string): Artifact {
+        return {
+            size: stats.size,
+            MD5: createHash('md5').update(buf).digest('hex'),
+            url
+        }
     }
 
 }

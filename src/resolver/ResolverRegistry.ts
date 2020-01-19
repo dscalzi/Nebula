@@ -1,11 +1,11 @@
 import { Forge113Adapter } from './forge/adapter/forge113.resolver'
-import { Forge18Adapter } from './forge/adapter/forge18.resolver'
+import { Forge17Adapter } from './forge/adapter/forge17.resolver'
 import { ForgeResolver } from './forge/forge.resolver'
 
 export class ResolverRegistry {
 
     public static readonly FORGE_ADAPTER_IMPL = [
-        Forge18Adapter,
+        Forge17Adapter,
         Forge113Adapter
     ]
 

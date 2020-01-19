@@ -28,8 +28,8 @@ export class PackXZExtractWrapper {
                 command,
                 paths.join(',')
             ])
-            child.stdout.on('data', (data) => console.log('[PackXZExtract]', data.toString('utf8')))
-            child.stderr.on('data', (data) => console.error('[PackXZExtract]', data.toString('utf8')))
+            child.stdout.on('data', (data) => console.log('[PackXZExtract]', data.toString('utf8').trim()))
+            child.stderr.on('data', (data) => console.error('[PackXZExtract]', data.toString('utf8').trim()))
             child.on('close', (code, signal) => {
                 console.log('[PackXZExtract]', 'Exited with code', code)
                 resolve()

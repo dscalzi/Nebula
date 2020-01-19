@@ -1,9 +1,8 @@
 import AdmZip from 'adm-zip'
 import { createHash } from 'crypto'
-import { copy, lstat, mkdirs, pathExists, readFile, remove, Stats } from 'fs-extra'
+import { copy, lstat, mkdirs, pathExists, readFile, remove } from 'fs-extra'
 import { basename, join } from 'path'
-import { VersionManifest } from '../../../model/forge/versionmanifest'
-import { Artifact } from '../../../model/spec/artifact'
+import { VersionManifest17 } from '../../../model/forge/versionmanifest17'
 import { Module } from '../../../model/spec/module'
 import { Type } from '../../../model/spec/type'
 import { ForgeRepoStructure } from '../../../model/struct/repo/forgerepo.struct'
@@ -11,10 +10,10 @@ import { MavenUtil } from '../../../util/maven'
 import { PackXZExtractWrapper } from '../../../util/PackXZExtractWrapper'
 import { ForgeResolver } from '../forge.resolver'
 
-export class Forge18Adapter extends ForgeResolver {
+export class Forge17Adapter extends ForgeResolver {
 
     public static isForVersion(version: string) {
-        return Forge18Adapter.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
+        return Forge17Adapter.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
     }
 
     constructor(
@@ -32,7 +31,7 @@ export class Forge18Adapter extends ForgeResolver {
     }
 
     public isForVersion(version: string) {
-        return Forge18Adapter.isForVersion(version)
+        return Forge17Adapter.isForVersion(version)
     }
 
     public async getForgeByVersion() {
@@ -68,7 +67,7 @@ export class Forge18Adapter extends ForgeResolver {
             throw new Error('Failed to find version.json in forge universal jar.')
         }
 
-        versionManifest = JSON.parse(versionManifest) as VersionManifest
+        versionManifest = JSON.parse(versionManifest) as VersionManifest17
 
         const forgeModule: Module = {
             id: MavenUtil.mavenComponentsToIdentifier(
@@ -175,14 +174,6 @@ export class Forge18Adapter extends ForgeResolver {
         }
 
         return forgeModule
-    }
-
-    private generateArtifact(buf: Buffer, stats: Stats, url: string): Artifact {
-        return {
-            size: stats.size,
-            MD5: createHash('md5').update(buf).digest('hex'),
-            url
-        }
     }
 
     private determineExtension(checksums: string[] | undefined) {
