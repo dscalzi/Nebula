@@ -18,14 +18,14 @@ export class LibRepoStructure extends BaseMavenRepo {
         super(absoluteRoot, relativeRoot, 'lib')
     }
 
-    public getLocalForge(version: string, classifier?: string) {
+    public getLocalForge(version: string, classifier?: string): string {
         return this.getArtifactByComponents(
             LibRepoStructure.FORGE_GROUP,
             LibRepoStructure.FORGE_ARTIFACT,
             version, classifier, 'jar')
     }
 
-    public getLocalLiteLoader(version: string, classifier?: string) {
+    public getLocalLiteLoader(version: string, classifier?: string): string {
         return this.getArtifactByComponents(
             LibRepoStructure.LITELOADER_GROUP,
             LibRepoStructure.LITELOADER_ARTIFACT,

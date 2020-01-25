@@ -2,7 +2,7 @@
 
 export interface ModsToml {
 
-    modLoader: string,
+    modLoader: string
     loaderVersion: string
     issueTrackerURL?: string
 
@@ -19,9 +19,9 @@ export interface ModsToml {
     }>
 
     dependencies?: {[modId: string]: {
-        modId: string,
-        mandatory: boolean,
-        versionRange: string,
+        modId: string
+        mandatory: boolean
+        versionRange: string
         ordering?: 'NONE' | 'BEFORE' | 'AFTER'
         side: 'BOTH' | 'CLIENT' | 'SERVER'
     }}

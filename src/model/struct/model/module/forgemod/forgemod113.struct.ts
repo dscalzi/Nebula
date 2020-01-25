@@ -10,7 +10,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
 
     public static readonly IMPLEMENTATION_VERSION_REGEX = /^Implementation-Version: (.+)[\r\n]/
 
-    public static isForVersion(version: string) {
+    public static isForVersion(version: string): boolean {
         return VersionUtil.isVersionAcceptable(version, [13, 14, 15])
     }
 
@@ -37,8 +37,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
     }
 
     private getForgeModMetadata(buf: Buffer, name: string): ModsToml {
-
-        if (!this.forgeModMetadata.hasOwnProperty(name)) {
+        if (!Object.prototype.hasOwnProperty.call(this.forgeModMetadata, name)) {
             const zip = new AdmZip(buf)
             const zipEntries = zip.getEntries()
 

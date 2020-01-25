@@ -17,25 +17,25 @@ export class RepoStructure extends BaseFileStructure {
         this.versionRepoStruct = new VersionRepoStructure(this.containerDirectory, this.relativeRoot)
     }
 
-    public async init() {
+    public async init(): Promise<void> {
         super.init()
         await this.libRepoStruct.init()
         await this.versionRepoStruct.init()
     }
 
-    public getLibRepoStruct() {
+    public getLibRepoStruct(): LibRepoStructure {
         return this.libRepoStruct
     }
 
-    public getVersionRepoStruct() {
+    public getVersionRepoStruct(): VersionRepoStructure {
         return this.versionRepoStruct
     }
 
-    public getTempDirectory() {
+    public getTempDirectory(): string {
         return join(this.absoluteRoot, 'temp')
     }
 
-    public getWorkDirectory() {
+    public getWorkDirectory(): string {
         return join(this.absoluteRoot, 'work')
     }
 

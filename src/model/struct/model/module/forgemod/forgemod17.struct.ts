@@ -8,7 +8,7 @@ import { BaseForgeModStructure } from '../forgemod.struct'
 
 export class ForgeModStructure17 extends BaseForgeModStructure {
 
-    public static isForVersion(version: string) {
+    public static isForVersion(version: string): boolean {
         return VersionUtil.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
     }
 
@@ -35,7 +35,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
     }
 
     private getForgeModMetadata(buf: Buffer, name: string): McModInfo {
-        if (!this.forgeModMetadata.hasOwnProperty(name)) {
+        if (!Object.prototype.hasOwnProperty.call(this.forgeModMetadata, name)) {
             const zip = new AdmZip(buf)
             const zipEntries = zip.getEntries()
 
@@ -79,7 +79,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                 // Assuming the main mod will be the first entry in this file.
                 try {
                     const resolved = JSON.parse(raw) as object
-                    if (resolved.hasOwnProperty('modListVersion')) {
+                    if (Object.prototype.hasOwnProperty.call(resolved, 'modListVersion')) {
                         this.forgeModMetadata[name] = (resolved as McModInfoList).modList[0]
                     } else {
                         this.forgeModMetadata[name] = (resolved as McModInfo[])[0]

@@ -12,11 +12,11 @@ import { VersionUtil } from './util/versionutil'
 
 dotenv.config()
 
-function getRoot() {
+function getRoot(): string {
     return resolvePath(process.env.ROOT as string)
 }
 
-function getBaseURL() {
+function getBaseURL(): string {
     let baseUrl = process.env.BASE_URL as string
     // Users must provide protocol in all other instances.
     if (baseUrl.indexOf('//') === -1) {
@@ -63,6 +63,7 @@ function getBaseURL() {
 //     })
 // }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function namePositional(yargs: yargs.Argv) {
     return yargs.option('name', {
         describe: 'Distribution index file name.',
@@ -101,7 +102,7 @@ const initCommand: yargs.CommandModule = {
     describe: 'Base init command.',
     builder: (yargs) => {
         return yargs
-        .command(initRootCommand)
+            .command(initRootCommand)
     },
     handler: (argv) => {
         argv._handled = true
@@ -117,32 +118,32 @@ const generateServerCommand: yargs.CommandModule = {
     builder: (yargs) => {
         // yargs = rootOption(yargs)
         return yargs
-        .positional('id', {
-            describe: 'Server id.',
-            type: 'string'
-        })
-        .positional('version', {
-            describe: 'Minecraft version.',
-            type: 'string'
-        })
-        .option('forge', {
-            describe: 'Forge version.',
-            type: 'string',
-            default: null
-        })
-        .option('liteloader', {
-            describe: 'LiteLoader version.',
-            type: 'string',
-            default: null
-        })
+            .positional('id', {
+                describe: 'Server id.',
+                type: 'string'
+            })
+            .positional('version', {
+                describe: 'Minecraft version.',
+                type: 'string'
+            })
+            .option('forge', {
+                describe: 'Forge version.',
+                type: 'string',
+                default: null
+            })
+            .option('liteloader', {
+                describe: 'LiteLoader version.',
+                type: 'string',
+                default: null
+            })
     },
     handler: async (argv) => {
         argv.root = getRoot()
 
         console.debug(`Root set to ${argv.root}`)
         console.debug(`Generating server ${argv.id} for Minecraft ${argv.version}.`,
-        `\n\t├ Forge version: ${argv.forge}`,
-        `\n\t└ LiteLoader version: ${argv.liteloader}`)
+            `\n\t├ Forge version: ${argv.forge}`,
+            `\n\t└ LiteLoader version: ${argv.liteloader}`)
 
         if (VersionUtil.isPromotionVersion(argv.forge as string)) {
             console.debug(`Resolving ${argv.forge} Forge Version..`)
@@ -197,8 +198,8 @@ const generateCommand: yargs.CommandModule = {
     describe: 'Base generate command.',
     builder: (yargs) => {
         return yargs
-        .command(generateServerCommand)
-        .command(generateDistroCommand)
+            .command(generateServerCommand)
+            .command(generateDistroCommand)
     },
     handler: (argv) => {
         argv._handled = true
@@ -273,14 +274,14 @@ const testCommand: yargs.CommandModule = {
 // Registering yargs configuration.
 // tslint:disable-next-line:no-unused-expression
 yargs
-.version(false)
-.scriptName('')
-.command(initCommand)
-.command(generateCommand)
-.command(validateCommand)
-.command(latestForgeCommand)
-.command(recommendedForgeCommand)
-.command(testCommand)
-.demandCommand()
-.help()
-.argv
+    .version(false)
+    .scriptName('')
+    .command(initCommand)
+    .command(generateCommand)
+    .command(validateCommand)
+    .command(latestForgeCommand)
+    .command(recommendedForgeCommand)
+    .command(testCommand)
+    .demandCommand()
+    .help()
+    .argv

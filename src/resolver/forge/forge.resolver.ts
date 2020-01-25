@@ -1,6 +1,6 @@
 import { createHash } from 'crypto'
 import { Stats } from 'fs-extra'
-import { Artifact } from '../../model/spec/artifact'
+import { Artifact } from 'helios-distribution-types'
 import { RepoStructure } from '../../model/struct/repo/repo.struct'
 import { BaseResolver } from '../baseresolver'
 
@@ -25,7 +25,7 @@ export abstract class ForgeResolver extends BaseResolver {
 
     // Coverage is not 100% but that doesnt matter.
     // It's enough and you should always use the latest version anyway.
-    public inferArtifactVersion() {
+    public inferArtifactVersion(): string {
         const version = `${this.minecraftVersion}-${this.forgeVersion}`
 
         const ver = this.forgeVersion.split('.')

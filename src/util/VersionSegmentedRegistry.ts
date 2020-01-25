@@ -2,6 +2,8 @@ import { ForgeModStructure113 } from '../model/struct/model/module/forgemod/forg
 import { ForgeModStructure17 } from '../model/struct/model/module/forgemod/forgemod17.struct'
 import { Forge113Adapter } from '../resolver/forge/adapter/forge113.resolver'
 import { Forge17Adapter } from '../resolver/forge/adapter/forge17.resolver'
+import { ForgeResolver } from '../resolver/forge/forge.resolver'
+import { BaseForgeModStructure } from '../model/struct/model/module/forgemod.struct'
 
 export class VersionSegmentedRegistry {
 
@@ -20,7 +22,8 @@ export class VersionSegmentedRegistry {
         forgeVersion: string,
         absoluteRoot: string,
         relativeRoot: string,
-        baseURL: string) {
+        baseURL: string
+    ): ForgeResolver {
         for (const impl of VersionSegmentedRegistry.FORGE_ADAPTER_IMPL) {
             if (impl.isForVersion(minecraftVersion)) {
                 return new impl(absoluteRoot, relativeRoot, baseURL, minecraftVersion, forgeVersion)
@@ -34,7 +37,7 @@ export class VersionSegmentedRegistry {
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string
-    ) {
+    ): BaseForgeModStructure {
         for (const impl of VersionSegmentedRegistry.FORGEMOD_STRUCT_IML) {
             if (impl.isForVersion(minecraftVersion)) {
                 return new impl(absoluteRoot, relativeRoot, baseUrl)

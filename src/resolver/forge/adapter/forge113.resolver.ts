@@ -1,9 +1,8 @@
 import { spawn } from 'child_process'
 import { copy, lstat, mkdirs, move, pathExists, readFile, remove, writeFile } from 'fs-extra'
+import { Module, Type } from 'helios-distribution-types'
 import { basename, dirname, join } from 'path'
 import { VersionManifest113 } from '../../../model/forge/versionmanifest113'
-import { Module } from '../../../model/spec/module'
-import { Type } from '../../../model/spec/type'
 import { LibRepoStructure } from '../../../model/struct/repo/librepo.struct'
 import { JavaUtil } from '../../../util/javautil'
 import { MavenUtil } from '../../../util/maven'
@@ -12,7 +11,7 @@ import { ForgeResolver } from '../forge.resolver'
 
 export class Forge113Adapter extends ForgeResolver {
 
-    public static isForVersion(version: string) {
+    public static isForVersion(version: string): boolean {
         return VersionUtil.isVersionAcceptable(version, [13, 14, 15])
     }
 
@@ -34,12 +33,12 @@ export class Forge113Adapter extends ForgeResolver {
         return Forge113Adapter.isForVersion(version)
     }
 
-    private async process() {
+    private async process(): Promise<Module> {
         const libRepo = this.repoStructure.getLibRepoStruct()
         const installerPath = libRepo.getLocalForge(this.artifactVersion, 'installer')
         console.debug(`Checking for forge installer at ${installerPath}..`)
         if (!await libRepo.artifactExists(installerPath)) {
-            console.debug(`Forge installer not found locally, initializing download..`)
+            console.debug('Forge installer not found locally, initializing download..')
             await libRepo.downloadArtifactByComponents(
                 this.REMOTE_REPOSITORY,
                 LibRepoStructure.FORGE_GROUP,
@@ -65,7 +64,7 @@ export class Forge113Adapter extends ForgeResolver {
         // Required for the installer to function.
         await writeFile(join(workDir, 'launcher_profiles.json'), JSON.stringify({}))
 
-        console.debug(`Spawning forge installer`)
+        console.debug('Spawning forge installer')
 
         console.log('============== [ IMPORTANT ] ==============')
         console.log('When the installer opens please set the client installation directory to:')
@@ -96,7 +95,7 @@ export class Forge113Adapter extends ForgeResolver {
         return forgeModule
     }
 
-    private async processLibraries(manifest: VersionManifest113) {
+    private async processLibraries(manifest: VersionManifest113): Promise<Module[]> {
 
         const libDir = join(this.repoStructure.getWorkDirectory(), 'libraries')
         const libRepo = this.repoStructure.getLibRepoStruct()
@@ -150,7 +149,7 @@ export class Forge113Adapter extends ForgeResolver {
 
     }
 
-    private async processForgeModule(versionManifest: VersionManifest113) {
+    private async processForgeModule(versionManifest: VersionManifest113): Promise<Module> {
 
         const libDir = join(this.repoStructure.getWorkDirectory(), 'libraries')
         const mcpVersion = this.getMCPVersion(versionManifest.arguments.game)
@@ -267,7 +266,7 @@ export class Forge113Adapter extends ForgeResolver {
         return forgeModule
     }
 
-    private async processVersionManifest() {
+    private async processVersionManifest(): Promise<[VersionManifest113, Module]> {
         const workDir = this.repoStructure.getWorkDirectory()
         const versionRepo = this.repoStructure.getVersionRepoStruct()
         const versionName = versionRepo.getFileName(this.minecraftVersion, this.forgeVersion)
@@ -297,8 +296,8 @@ export class Forge113Adapter extends ForgeResolver {
         return [versionManifest, versionManifestModule]
     }
 
-    private executeInstaller(installerExec: string) {
-        return new Promise((resolve, reject) => {
+    private executeInstaller(installerExec: string): Promise<void> {
+        return new Promise(resolve => {
             const child = spawn(JavaUtil.getJavaExecutable(), [
                 '-jar',
                 installerExec
@@ -307,14 +306,14 @@ export class Forge113Adapter extends ForgeResolver {
             })
             child.stdout.on('data', (data) => console.log('[Forge Installer]', data.toString('utf8').trim()))
             child.stderr.on('data', (data) => console.error('[Forge Installer]', data.toString('utf8').trim()))
-            child.on('close', (code, signal) => {
+            child.on('close', code => {
                 console.log('[Forge Installer]', 'Exited with code', code)
                 resolve()
             })
         })
     }
 
-    private getMCPVersion(args: string[]) {
+    private getMCPVersion(args: string[]): string | null {
         for (let i = 0; i < args.length; i++) {
             if (args[i] === '--fml.mcpVersion') {
                 return args[i + 1]

@@ -1,10 +1,9 @@
 import AdmZip from 'adm-zip'
 import { createHash } from 'crypto'
 import { copy, lstat, mkdirs, pathExists, readFile, remove } from 'fs-extra'
+import { Module, Type } from 'helios-distribution-types'
 import { basename, join } from 'path'
 import { VersionManifest17 } from '../../../model/forge/versionmanifest17'
-import { Module } from '../../../model/spec/module'
-import { Type } from '../../../model/spec/type'
 import { LibRepoStructure } from '../../../model/struct/repo/librepo.struct'
 import { MavenUtil } from '../../../util/maven'
 import { PackXZExtractWrapper } from '../../../util/PackXZExtractWrapper'
@@ -13,7 +12,7 @@ import { ForgeResolver } from '../forge.resolver'
 
 export class Forge17Adapter extends ForgeResolver {
 
-    public static isForVersion(version: string) {
+    public static isForVersion(version: string): boolean {
         return VersionUtil.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
     }
 
@@ -31,16 +30,16 @@ export class Forge17Adapter extends ForgeResolver {
         return this.getForgeByVersion()
     }
 
-    public isForVersion(version: string) {
+    public isForVersion(version: string): boolean {
         return Forge17Adapter.isForVersion(version)
     }
 
-    public async getForgeByVersion() {
+    public async getForgeByVersion(): Promise<Module> {
         const libRepo = this.repoStructure.getLibRepoStruct()
         const targetLocalPath = libRepo.getLocalForge(this.artifactVersion, 'universal')
         console.debug(`Checking for forge version at ${targetLocalPath}..`)
         if (!await libRepo.artifactExists(targetLocalPath)) {
-            console.debug(`Forge not found locally, initializing download..`)
+            console.debug('Forge not found locally, initializing download..')
             await libRepo.downloadArtifactByComponents(
                 this.REMOTE_REPOSITORY,
                 LibRepoStructure.FORGE_GROUP,
@@ -121,7 +120,7 @@ export class Forge17Adapter extends ForgeResolver {
                     }
                 }
             } else {
-                console.debug(`Not found locally, downloading..`)
+                console.debug('Not found locally, downloading..')
                 queueDownload = true
             }
 
@@ -176,12 +175,13 @@ export class Forge17Adapter extends ForgeResolver {
         return forgeModule
     }
 
-    private determineExtension(checksums: string[] | undefined) {
+    private determineExtension(checksums: string[] | undefined): string {
         return checksums != null && checksums.length > 1 ? 'jar.pack.xz' : 'jar'
     }
 
     private async processPackXZFiles(
-        processingQueue: Array<{id: string, localPath: string}>): Promise<Array<{id: string, MD5: string}>> {
+        processingQueue: Array<{id: string, localPath: string}>
+    ): Promise<Array<{id: string, MD5: string}>> {
 
         const accumulator = []
 

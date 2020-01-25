@@ -15,7 +15,7 @@ export abstract class BaseFileStructure implements FileStructure {
         this.containerDirectory = resolve(absoluteRoot, structRoot)
     }
 
-    public async init() {
+    public async init(): Promise<void> {
         mkdirs(this.containerDirectory)
     }
 

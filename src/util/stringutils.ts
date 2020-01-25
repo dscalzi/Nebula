@@ -1,4 +1,4 @@
-export function capitalize(str: string) {
+export function capitalize(str: string): string {
     if (!str) {
         return str
     }

@@ -15,38 +15,40 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
         super(absoluteRoot, relativeRoot, structRoot)
     }
 
-    public getArtifactById(mavenIdentifier: string, extension?: string): string | null {
-        const resolved = MavenUtil.mavenIdentifierToString(mavenIdentifier, extension)
-        return resolved == null ? null : resolve(this.containerDirectory, resolved)
+    public getArtifactById(mavenIdentifier: string, extension?: string): string {
+        return resolve(this.containerDirectory, MavenUtil.mavenIdentifierToString(mavenIdentifier, extension))
     }
 
-    public getArtifactByComponents(group: string, artifact: string, version: string,
-                                   classifier?: string, extension = 'jar'): string {
+    public getArtifactByComponents(
+        group: string, artifact: string, version: string, classifier?: string, extension = 'jar'
+    ): string {
         return resolve(this.containerDirectory,
             MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension))
     }
 
-    public getArtifactUrlByComponents(baseURL: string, group: string, artifact: string, version: string,
-                                      classifier?: string, extension = 'jar'): string {
+    public getArtifactUrlByComponents(
+        baseURL: string, group: string, artifact: string, version: string, classifier?: string, extension = 'jar'
+    ): string {
         return resolveURL(baseURL, join(this.relativeRoot,
             MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension)))
     }
 
-    public async artifactExists(path: string) {
+    public async artifactExists(path: string): Promise<boolean> {
         return pathExists(path)
     }
 
-    public async downloadArtifactById(url: string, mavenIdentifier: string, extension?: string) {
+    public async downloadArtifactById(url: string, mavenIdentifier: string, extension?: string): Promise<void> {
         return this.downloadArtifactBase(url, MavenUtil.mavenIdentifierToString(mavenIdentifier, extension) as string)
     }
 
-    public async downloadArtifactByComponents(url: string, group: string, artifact: string, version: string,
-                                              classifier?: string, extension?: string) {
+    public async downloadArtifactByComponents(
+        url: string, group: string, artifact: string, version: string, classifier?: string, extension?: string
+    ): Promise<void> {
         return this.downloadArtifactBase(url,
             MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension))
     }
 
-    private async downloadArtifactBase(url: string, relative: string) {
+    private async downloadArtifactBase(url: string, relative: string): Promise<void> {
         const resolvedURL = resolveURL(url, relative).toString()
         console.debug(`Downloading ${resolvedURL}..`)
         const response = await axios({

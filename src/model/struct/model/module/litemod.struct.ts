@@ -1,10 +1,10 @@
 import AdmZip from 'adm-zip'
 import { Stats } from 'fs-extra'
+import { Type } from 'helios-distribution-types'
 import { join } from 'path'
 import { resolve } from 'url'
 import { capitalize } from '../../../../util/stringutils'
 import { LiteMod } from '../../../liteloader/litemod'
-import { Type } from '../../../spec/type'
 import { ModuleStructure } from './module.struct'
 
 export class LiteModStructure extends ModuleStructure {
@@ -26,15 +26,17 @@ export class LiteModStructure extends ModuleStructure {
     protected async getModuleName(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {
         return capitalize(this.getLiteModMetadata(buf, name).name)
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {
         return resolve(this.baseUrl, join(this.relativeRoot, name))
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModulePath(name: string, path: string, stats: Stats): Promise<string | null> {
         return null
     }
 
     private getLiteModMetadata(buf: Buffer, name: string): LiteMod {
-        if (!this.liteModMetadata.hasOwnProperty(name)) {
+        if (!Object.prototype.hasOwnProperty.call(this.liteModMetadata, name)) {
             const zip = new AdmZip(buf)
             const zipEntries = zip.getEntries()
 

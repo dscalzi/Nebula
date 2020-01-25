@@ -1,9 +1,9 @@
 import { lstat, mkdirs, pathExists, readdir, readFile, writeFile } from 'fs-extra'
+import { Server } from 'helios-distribution-types'
 import { dirname, join, resolve as resolvePath } from 'path'
 import { resolve as resolveUrl } from 'url'
 import { VersionSegmentedRegistry } from '../../../util/VersionSegmentedRegistry'
 import { ServerMeta } from '../../nebula/servermeta'
-import { Server } from '../../spec/server'
 import { BaseModelStructure } from './basemodel.struct'
 import { MiscFileStructure } from './module/file.struct'
 import { LiteModStructure } from './module/litemod.struct'
@@ -19,7 +19,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
         super(absoluteRoot, '', 'servers', baseUrl)
     }
 
-    public async getSpecModel() {
+    public async getSpecModel(): Promise<Server[]> {
         if (this.resolvedModels == null) {
             this.resolvedModels = await this._doSeverRetrieval()
         }
@@ -33,7 +33,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
             forgeVersion?: string
             liteloaderVersion?: string
         }
-    ) {
+    ): Promise<void> {
         const effectiveId = `${id}-${minecraftVersion}`
         const absoluteServerRoot = resolvePath(this.containerDirectory, effectiveId)
         const relativeServerRoot = join(this.relativeRoot, effectiveId)
@@ -81,7 +81,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 const match = this.ID_REGEX.exec(file)
                 if (match == null) {
                     console.warn(`Server directory ${file} does not match the defined standard.`)
-                    console.warn(`All server ids must end with -<minecraft version> (ex. -1.12.2)`)
+                    console.warn('All server ids must end with -<minecraft version> (ex. -1.12.2)')
                     continue
                 }
 

@@ -6,17 +6,17 @@ export interface VersionManifest113 {
     type: string
     mainClass: string
     inheritsFrom: string
-    logging: any
+    logging: {}
     arguments: {
         game: string[]
     }
     libraries: Array<{
-        name: string,
+        name: string
         downloads: {
             artifact: {
-                path: string,
-                url: string,
-                sha1: string,
+                path: string
+                url: string
+                sha1: string
                 size: number
             }
         }

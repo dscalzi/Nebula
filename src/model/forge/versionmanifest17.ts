@@ -8,13 +8,13 @@ export interface VersionManifest17 {
     mainClass: string
     inheritsFrom: string
     jar: string
-    logging: any
+    logging: {}
     libraries: Array<{
-        name: string,
-        url?: string,
-        checksums?: string[],
-        serverreq?: boolean,
-        clientreq?: boolean,
+        name: string
+        url?: string
+        checksums?: string[]
+        serverreq?: boolean
+        clientreq?: boolean
         comment?: string
     }>
 

@@ -1,8 +1,7 @@
 import { createHash } from 'crypto'
 import { lstat, pathExists, readdir, readFile, Stats } from 'fs-extra'
+import { Module, Type, TypeMetadata } from 'helios-distribution-types'
 import { resolve } from 'path'
-import { Module } from '../../../spec/module'
-import { Type, TypeMetadata } from '../../../spec/type'
 import { BaseModelStructure } from '../basemodel.struct'
 
 export abstract class ModuleStructure extends BaseModelStructure<Module> {
@@ -25,7 +24,7 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         return this.resolvedModels
     }
 
-    protected generateMavenIdentifier(name: string, version: string) {
+    protected generateMavenIdentifier(name: string, version: string): string {
         return `generated.${this.type.toLowerCase()}:${name}:${version}@${TypeMetadata[this.type].defaultExtension}`
     }
 

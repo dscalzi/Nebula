@@ -10,11 +10,11 @@ export class VersionUtil {
 
     public static readonly MINECRAFT_VERSION_REGEX = /(\d+).(\d+).(\d+)/
 
-    public static isMinecraftVersion(version: string) {
+    public static isMinecraftVersion(version: string): boolean {
         return VersionUtil.MINECRAFT_VERSION_REGEX.test(version)
     }
 
-    public static getMinecraftVersionComponents(version: string) {
+    public static getMinecraftVersionComponents(version: string): { major: number, minor: number, revision: number } {
         if (VersionUtil.isMinecraftVersion(version)) {
             const result = VersionUtil.MINECRAFT_VERSION_REGEX.exec(version)
             if (result != null) {
@@ -36,11 +36,11 @@ export class VersionUtil {
         return false
     }
 
-    public static isPromotionVersion(version: string) {
+    public static isPromotionVersion(version: string): boolean {
         return VersionUtil.PROMOTION_TYPE.indexOf(version.toLowerCase()) > -1
     }
 
-    public static async getPromotionIndex() {
+    public static async getPromotionIndex(): Promise<PromotionsSlim> {
         const response = await Axios({
             method: 'get',
             url: 'https://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json',
@@ -49,18 +49,18 @@ export class VersionUtil {
         return response.data as PromotionsSlim
     }
 
-    public static getPromotedVersionStrict(index: PromotionsSlim, minecraftVersion: string, promotion: string) {
+    public static getPromotedVersionStrict(index: PromotionsSlim, minecraftVersion: string, promotion: string): string {
         const workingPromotion = promotion.toLowerCase()
         return index.promos[`${minecraftVersion}-${workingPromotion}`]
     }
 
-    public static async getPromotedForgeVersion(minecraftVersion: string, promotion: string) {
+    public static async getPromotedForgeVersion(minecraftVersion: string, promotion: string): Promise<string> {
         const workingPromotion = promotion.toLowerCase()
         const res = await VersionUtil.getPromotionIndex()
         let version = res.promos[`${minecraftVersion}-${workingPromotion}`]
         if (version == null) {
             console.warn(`No ${workingPromotion} version found for Forge ${minecraftVersion}.`)
-            console.warn(`Attempting to pull latest version instead.`)
+            console.warn('Attempting to pull latest version instead.')
             version = res.promos[`${minecraftVersion}-latest`]
             if (version == null) {
                 throw new Error(`No latest version found for Forge ${minecraftVersion}.`)

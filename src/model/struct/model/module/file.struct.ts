@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Stats } from 'fs'
+import { Type } from 'helios-distribution-types'
 import { join } from 'path'
 import { resolve } from 'url'
-import { Type } from '../../../spec/type'
 import { ModuleStructure } from './module.struct'
 
 export class MiscFileStructure extends ModuleStructure {
