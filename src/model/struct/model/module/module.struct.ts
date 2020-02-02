@@ -33,6 +33,29 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
     protected async abstract getModuleUrl(name: string, path: string, stats: Stats): Promise<string>
     protected async abstract getModulePath(name: string, path: string, stats: Stats): Promise<string | null>
 
+    protected async parseModule(file: string, filePath: string, stats: Stats): Promise<Module> {
+        const buf = await readFile(filePath)
+        const mdl: Module = {
+            id: await this.getModuleId(file, filePath, stats, buf),
+            name: await this.getModuleName(file, filePath, stats, buf),
+            type: this.type,
+            required: {
+                value: false,
+                def: false
+            },
+            artifact: {
+                size: stats.size,
+                MD5: createHash('md5').update(buf).digest('hex'),
+                url: await this.getModuleUrl(file, filePath, stats)
+            }
+        }
+        const pth = await this.getModulePath(file, filePath, stats)
+        if (pth) {
+            mdl.artifact.path = pth
+        }
+        return mdl
+    }
+
     private async _doModuleRetrieval(): Promise<Module[]> {
 
         const accumulator: Module[] = []
@@ -43,26 +66,7 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
                 const filePath = resolve(this.containerDirectory, file)
                 const stats = await lstat(filePath)
                 if (stats.isFile()) {
-                    const buf = await readFile(filePath)
-                    const mdl: Module = {
-                        id: await this.getModuleId(file, filePath, stats, buf),
-                        name: await this.getModuleName(file, filePath, stats, buf),
-                        type: this.type,
-                        required: {
-                            value: false,
-                            def: false
-                        },
-                        artifact: {
-                            size: stats.size,
-                            MD5: createHash('md5').update(buf).digest('hex'),
-                            url: await this.getModuleUrl(file, filePath, stats)
-                        }
-                    }
-                    const pth = await this.getModulePath(file, filePath, stats)
-                    if (pth) {
-                        mdl.artifact.path = pth
-                    }
-                    accumulator.push(mdl)
+                    accumulator.push(await this.parseModule(file, filePath, stats))
                 }
             }
         }

@@ -12,7 +12,7 @@ Generate a distribution.json for Helios.
 
 1. Clone the repository
 2. Install the dependencies (`npm i`)
-3. Create a `.env` file at the root directory and set the required values.
+3. Create a `.env` file at the root directory of the cloned folder and set the required values.
 
 Example
 ```properties
