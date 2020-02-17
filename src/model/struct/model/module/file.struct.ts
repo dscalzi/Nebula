@@ -4,7 +4,7 @@ import { Type, Module } from 'helios-distribution-types'
 import { resolve as resolveURL } from 'url'
 import { ModuleStructure } from './module.struct'
 import { readdir, stat } from 'fs-extra'
-import { join, resolve } from 'path'
+import { join, resolve, sep } from 'path'
 
 export class MiscFileStructure extends ModuleStructure {
 
@@ -46,7 +46,7 @@ export class MiscFileStructure extends ModuleStructure {
         return name
     }
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {
-        return resolveURL(this.baseUrl, join(this.relativeRoot, name))
+        return resolveURL(this.baseUrl, join(this.relativeRoot, ...path.substr(this.containerDirectory.length+1).split(sep)))
     }
     protected async getModulePath(name: string, path: string, stats: Stats): Promise<string | null> {
         return path.substr(this.containerDirectory.length+1).replace(/\\/g, '/')
