@@ -84,6 +84,11 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                     } else {
                         this.forgeModMetadata[name] = (resolved as McModInfo[])[0]
                     }
+                    // No way to resolve this AFAIK
+                    if(this.forgeModMetadata[name]!.version.indexOf('@') > -1 || this.forgeModMetadata[name]!.version.indexOf('$') > -1) {
+                        // Ex. @VERSION@, ${version}
+                        this.forgeModMetadata[name]!.version = '0.0.0'
+                    }
                 } catch (err) {
                     console.error(`ForgeMod ${name} contains an invalid mcmod.info file.`)
                     createDefault = true
