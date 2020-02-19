@@ -27,11 +27,11 @@
   "homepage": "https://github.com/dscalzi/Nebula#readme",
   "devDependencies": {
     "@types/adm-zip": "^0.4.32",
-    "@types/fs-extra": "^8.0.1",
+    "@types/fs-extra": "^8.1.0",
     "@types/node": "^12.12.27",
     "@types/yargs": "^15.0.3",
-    "@typescript-eslint/eslint-plugin": "^2.19.2",
-    "@typescript-eslint/parser": "^2.19.2",
+    "@typescript-eslint/eslint-plugin": "^2.20.0",
+    "@typescript-eslint/parser": "^2.20.0",
     "eslint": "^6.8.0",
     "rimraf": "^3.0.2",
     "typescript": "^3.7.5"
