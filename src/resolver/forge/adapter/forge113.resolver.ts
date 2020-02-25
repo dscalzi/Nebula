@@ -160,35 +160,38 @@ export class Forge113Adapter extends ForgeResolver {
                 group: LibRepoStructure.FORGE_GROUP,
                 artifact: LibRepoStructure.FORGE_ARTIFACT,
                 version: this.artifactVersion,
-                classifier: undefined
+                classifiers: [undefined]
             },
             {
                 name: 'universal jar',
                 group: LibRepoStructure.FORGE_GROUP,
                 artifact: LibRepoStructure.FORGE_ARTIFACT,
                 version: this.artifactVersion,
-                classifier: 'universal'
+                classifiers: ['universal']
             },
             {
                 name: 'client jar',
                 group: LibRepoStructure.FORGE_GROUP,
                 artifact: LibRepoStructure.FORGE_ARTIFACT,
                 version: this.artifactVersion,
-                classifier: 'client'
+                classifiers: ['client']
             },
             {
                 name: 'client slim',
                 group: LibRepoStructure.MINECRAFT_GROUP,
                 artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
                 version: this.minecraftVersion,
-                classifier: 'slim'
+                classifiers: [
+                    'slim',
+                    'slim-stable'
+                ]
             },
             {
                 name: 'client data',
                 group: LibRepoStructure.MINECRAFT_GROUP,
                 artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
                 version: this.minecraftVersion,
-                classifier: 'data',
+                classifiers: ['data'],
                 skipIfNotPresent: true
             },
             {
@@ -196,14 +199,17 @@ export class Forge113Adapter extends ForgeResolver {
                 group: LibRepoStructure.MINECRAFT_GROUP,
                 artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
                 version: this.minecraftVersion,
-                classifier: 'extra'
+                classifiers: [
+                    'extra',
+                    'extra-stable'
+                ]
             },
             {
                 name: 'client srg',
                 group: LibRepoStructure.MINECRAFT_GROUP,
                 artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
                 version: `${this.minecraftVersion}-${mcpVersion}`,
-                classifier: 'srg'
+                classifiers: ['srg']
             }
         ]
 
@@ -211,50 +217,63 @@ export class Forge113Adapter extends ForgeResolver {
 
         for (const entry of generatedFiles) {
 
-            const targetLocalPath = join(
-                libDir,
-                MavenUtil.mavenComponentsToPath(entry.group, entry.artifact, entry.version, entry.classifier)
-            )
+            const targetLocations: string[] = []
+            let located = false
 
-            const exists = await pathExists(targetLocalPath)
-            if (exists) {
+            classifierLoop:
+            for (const _classifier of entry.classifiers) {
 
-                mdls.push({
-                    id: MavenUtil.mavenComponentsToIdentifier(
-                        entry.group,
-                        entry.artifact,
-                        entry.version,
-                        entry.classifier
-                    ),
-                    name: `Minecraft Forge (${entry.name})`,
-                    type: Type.Library,
-                    artifact: this.generateArtifact(
-                        await readFile(targetLocalPath),
-                        await lstat(targetLocalPath),
-                        this.repoStructure.getLibRepoStruct().getArtifactUrlByComponents(
-                            this.baseUrl,
+                const targetLocalPath = join(
+                    libDir,
+                    MavenUtil.mavenComponentsToPath(entry.group, entry.artifact, entry.version, _classifier)
+                )
+
+                targetLocations.push(targetLocalPath)
+
+                const exists = await pathExists(targetLocalPath)
+                if (exists) {
+
+                    mdls.push({
+                        id: MavenUtil.mavenComponentsToIdentifier(
                             entry.group,
                             entry.artifact,
                             entry.version,
-                            entry.classifier
-                        )
-                    ),
-                    subModules: []
-                })
+                            _classifier
+                        ),
+                        name: `Minecraft Forge (${entry.name})`,
+                        type: Type.Library,
+                        artifact: this.generateArtifact(
+                            await readFile(targetLocalPath),
+                            await lstat(targetLocalPath),
+                            this.repoStructure.getLibRepoStruct().getArtifactUrlByComponents(
+                                this.baseUrl,
+                                entry.group,
+                                entry.artifact,
+                                entry.version,
+                                _classifier
+                            )
+                        ),
+                        subModules: []
+                    })
 
-                const destination = this.repoStructure.getLibRepoStruct().getArtifactByComponents(
-                    entry.group,
-                    entry.artifact,
-                    entry.version,
-                    entry.classifier
-                )
+                    const destination = this.repoStructure.getLibRepoStruct().getArtifactByComponents(
+                        entry.group,
+                        entry.artifact,
+                        entry.version,
+                        _classifier
+                    )
 
-                await move(targetLocalPath, destination, {overwrite: true})
+                    await move(targetLocalPath, destination, {overwrite: true})
 
-            } else {
-                if (!entry.skipIfNotPresent) {
-                    throw new Error(`Required file ${entry.name} not found at expected location ${targetLocalPath}!`)
+                    located = true
+                    break classifierLoop
+
                 }
+
+            }
+
+            if (!entry.skipIfNotPresent && !located) {
+                throw new Error(`Required file ${entry.name} not found at any expected location:\n\t${targetLocations.join('\n\t')}`)
             }
 
         }

@@ -145,11 +145,13 @@ const generateServerCommand: yargs.CommandModule = {
             `\n\t├ Forge version: ${argv.forge}`,
             `\n\t└ LiteLoader version: ${argv.liteloader}`)
 
-        if (VersionUtil.isPromotionVersion(argv.forge as string)) {
-            console.debug(`Resolving ${argv.forge} Forge Version..`)
-            const version = await VersionUtil.getPromotedForgeVersion(argv.version as string, argv.forge as string)
-            console.debug(`Forge version set to ${version}`)
-            argv.forge = version
+        if(argv.forge != null) {
+            if (VersionUtil.isPromotionVersion(argv.forge as string)) {
+                console.debug(`Resolving ${argv.forge} Forge Version..`)
+                const version = await VersionUtil.getPromotedForgeVersion(argv.version as string, argv.forge as string)
+                console.debug(`Forge version set to ${version}`)
+                argv.forge = version
+            }
         }
 
         const serverStruct = new ServerStructure(argv.root as string, getBaseURL())
