@@ -14,11 +14,17 @@ Generate a distribution.json for Helios.
 2. Install the dependencies (`npm i`)
 3. Create a `.env` file at the root directory of the cloned folder and set the required values.
 
-Example
+Example .env :
 ```properties
 JAVA_EXECUTABLE=C:\Program Files\AdoptOpenJDK\jdk-8.0.232.09-hotspot\bin\java.exe
 ROOT=D:\TestRoot2
 BASE_URL=http://localhost:8080/
+```
+
+4. Build
+
+```bash
+npm run build
 ```
 
 ## Usage
@@ -87,7 +93,7 @@ Options:
 >
 > Example Usage
 >
-> `generate server Test1 1.12.2 --root C:/TestRoot --forge 14.23.5.2847`
+> `node dist/index.js generate server Test1 1.12.2 --root C:/TestRoot --forge 14.23.5.2847`
 >
 
 ---
@@ -110,7 +116,7 @@ Options:
 >
 > Example Usage
 >
-> `generate distribution --root C:/TestRoot --baseUrl https://myhost.com`
+> `node dist/index.js generate distribution --root C:/TestRoot --baseUrl https://myhost.com`
 >
 
 ---
@@ -119,7 +125,7 @@ Options:
 
 Get the latest version of Forge.
 
-`latest-forge <version>`
+`node dist/index.js latest-forge <version>`
 
 ---
 
@@ -127,7 +133,7 @@ Get the latest version of Forge.
 
 Get the recommended version of Forge. If no recommended build is available, it will pull the latest version.
 
-`recommended-forge <version>`
+`node dist/index.js recommended-forge <version>`
 
 ---
 
