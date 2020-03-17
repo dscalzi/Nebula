@@ -28,13 +28,13 @@
   "devDependencies": {
     "@types/adm-zip": "^0.4.32",
     "@types/fs-extra": "^8.1.0",
-    "@types/node": "^12.12.28",
-    "@types/yargs": "^15.0.3",
-    "@typescript-eslint/eslint-plugin": "^2.21.0",
-    "@typescript-eslint/parser": "^2.21.0",
+    "@types/node": "^12.12.30",
+    "@types/yargs": "^15.0.4",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
     "eslint": "^6.8.0",
     "rimraf": "^3.0.2",
-    "typescript": "^3.8.2"
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "adm-zip": "^0.4.14",
@@ -42,7 +42,7 @@
     "dotenv": "^8.2.0",
     "fs-extra": "^8.1.0",
     "toml": "^3.0.0",
-    "yargs": "^15.1.0",
+    "yargs": "^15.3.1",
     "helios-distribution-types": "^1.0.0-pre.1"
   }
 }
