@@ -7,6 +7,7 @@ import { ServerMeta } from '../../nebula/servermeta'
 import { BaseModelStructure } from './basemodel.struct'
 import { MiscFileStructure } from './module/file.struct'
 import { LiteModStructure } from './module/litemod.struct'
+import { LibraryStructure } from './module/library.struct'
 
 export class ServerStructure extends BaseModelStructure<Server> {
 
@@ -63,6 +64,9 @@ export class ServerStructure extends BaseModelStructure<Server> {
             const lms = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
             await lms.init()
         }
+
+        const libS = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+        await libS.init()
 
         const mfs = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
         await mfs.init()
@@ -130,8 +134,12 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 const fileStruct = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
                 const fileModules = await fileStruct.getSpecModel()
 
+                const libraryStruct = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+                const libraryModules = await libraryStruct.getSpecModel()
+
                 const modules = [
                     forgeItselfModule,
+                    ...libraryModules,
                     ...forgeModModules,
                     ...liteModModules,
                     ...fileModules

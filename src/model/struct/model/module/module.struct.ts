@@ -11,7 +11,8 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         relativeRoot: string,
         structRoot: string,
         baseUrl: string,
-        protected type: Type
+        protected type: Type,
+        protected filter?: ((name: string, path: string, stats: Stats) => boolean)
     ) {
         super(absoluteRoot, relativeRoot, structRoot, baseUrl)
     }
@@ -66,7 +67,10 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
                 const filePath = resolve(this.containerDirectory, file)
                 const stats = await lstat(filePath)
                 if (stats.isFile()) {
-                    accumulator.push(await this.parseModule(file, filePath, stats))
+                    if(this.filter == null || this.filter(file, filePath, stats)) {
+                        accumulator.push(await this.parseModule(file, filePath, stats))
+                    }
+                    
                 }
             }
         }

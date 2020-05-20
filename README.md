@@ -159,6 +159,7 @@ Ex.
 
 * `TestServer-1.12.2`
   * `files` All modules of type `File`.
+  * `libraries` All modules of type `Library`
   * `forgemods` All modules of type `ForgeMod`.
   * `litemods` All modules of type `LiteMod`.
   * `TestServer-1.12.2.png` Server icon file.
