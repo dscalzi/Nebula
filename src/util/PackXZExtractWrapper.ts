@@ -21,7 +21,7 @@ export class PackXZExtractWrapper {
     }
 
     private static execute(command: string, paths: string[]): Promise<void> {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             const child = spawn(JavaUtil.getJavaExecutable(), [
                 '-jar',
                 PackXZExtractWrapper.getPackXZExtract(),
@@ -33,6 +33,10 @@ export class PackXZExtractWrapper {
             child.on('close', code => {
                 console.log('[PackXZExtract]', 'Exited with code', code)
                 resolve()
+            })
+            child.on('error', (err) => {
+                console.log('[PackXZExtract]', 'Error during process execution', err)
+                reject(err)
             })
         })
     }

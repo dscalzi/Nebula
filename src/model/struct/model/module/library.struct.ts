@@ -1,5 +1,5 @@
 import { ModuleStructure } from './module.struct'
-import { Type } from 'helios-distribution-types'
+import { Type, TypeMetadata } from 'helios-distribution-types'
 import { Stats } from 'fs-extra'
 import { join } from 'path'
 import { resolve } from 'url'
@@ -7,7 +7,6 @@ import { resolve } from 'url'
 export class LibraryStructure extends ModuleStructure {
 
     private readonly crudeRegex = /(.+)-([\d.]+).[jJ][aA][rR]/
-    private readonly libraryExt = '.jar'
 
     constructor(
         absoluteRoot: string,
@@ -15,7 +14,7 @@ export class LibraryStructure extends ModuleStructure {
         baseUrl: string
     ) {
         super(absoluteRoot, relativeRoot, 'libraries', baseUrl, Type.Library, (name: string) => {
-            return name.toLowerCase().endsWith(this.libraryExt)
+            return name.toLowerCase().endsWith(TypeMetadata[this.type].defaultExtension!)
         })
     }
 
@@ -28,7 +27,7 @@ export class LibraryStructure extends ModuleStructure {
             }
         } else {
             return {
-                name: name.substring(0, name.toLowerCase().indexOf(this.libraryExt)),
+                name: name.substring(0, name.toLowerCase().indexOf(TypeMetadata[this.type].defaultExtension!)),
                 version: '0.0.0'
             }
         }
