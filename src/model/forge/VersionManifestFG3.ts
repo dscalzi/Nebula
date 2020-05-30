@@ -6,7 +6,7 @@ export interface VersionManifestFG3 {
     type: string
     mainClass: string
     inheritsFrom: string
-    logging: {}
+    logging: Record<string, unknown>
     arguments: {
         game: string[]
     }

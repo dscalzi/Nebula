@@ -79,7 +79,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
             if (raw) {
                 // Assuming the main mod will be the first entry in this file.
                 try {
-                    const resolved = JSON.parse(raw) as object
+                    const resolved = JSON.parse(raw) as (McModInfoList | McModInfo[])
                     if (Object.prototype.hasOwnProperty.call(resolved, 'modListVersion')) {
                         this.forgeModMetadata[name] = (resolved as McModInfoList).modList[0]
                     } else {

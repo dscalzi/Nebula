@@ -8,7 +8,7 @@ export interface VersionManifestFG2 {
     mainClass: string
     inheritsFrom: string
     jar: string
-    logging: {}
+    logging: Record<string, unknown>
     libraries: Array<{
         name: string
         url?: string
