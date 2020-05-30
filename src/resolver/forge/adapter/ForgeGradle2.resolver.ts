@@ -11,11 +11,15 @@ import { VersionUtil } from '../../../util/versionutil'
 import { ForgeResolver } from '../forge.resolver'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
 
+type ArrayElement<A> = A extends readonly (infer T)[] ? T : never
+
 export class ForgeGradle2Adapter extends ForgeResolver {
 
     public static isForVersion(version: MinecraftVersion): boolean {
         return VersionUtil.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
     }
+
+    protected readonly MOJANG_REMOTE_REPOSITORY = 'https://libraries.minecraft.net/'
 
     constructor(
         absoluteRoot: string,
@@ -100,8 +104,8 @@ export class ForgeGradle2Adapter extends ForgeResolver {
             }
             console.debug(`Processing ${lib.name}..`)
 
-            const extension = this.determineExtension(lib.checksums)
-            const localPath = libRepo.getArtifactById(lib.name, extension) as string
+            const extension = await this.determineExtension(lib, libRepo)
+            const localPath = libRepo.getArtifactById(lib.name, extension)
 
             const postProcess = extension === 'jar.pack.xz'
 
@@ -126,7 +130,7 @@ export class ForgeGradle2Adapter extends ForgeResolver {
             }
 
             if (queueDownload) {
-                await libRepo.downloadArtifactById(lib.url || 'https://libraries.minecraft.net/', lib.name, extension)
+                await libRepo.downloadArtifactById(lib.url || this.MOJANG_REMOTE_REPOSITORY, lib.name, extension)
                 libBuf = await readFile(localPath)
             } else {
                 console.debug('Using local copy.')
@@ -176,13 +180,41 @@ export class ForgeGradle2Adapter extends ForgeResolver {
         return forgeModule
     }
 
-    private determineExtension(checksums: string[] | undefined): string {
-        return checksums != null && checksums.length > 1 ? 'jar.pack.xz' : 'jar'
+    private async determineExtension(lib: ArrayElement<VersionManifestFG2['libraries']>, libRepo: LibRepoStructure): Promise<string> {
+        if(lib.url == null) {
+            return 'jar'
+        }
+        console.log('Determing extension..')
+        const possibleExt = [
+            'jar.pack.xz',
+            'jar'
+        ]
+        // Check locally.
+        for(const ext of possibleExt) {
+            const localPath = libRepo.getArtifactById(lib.name, ext)
+            const exists = await libRepo.artifactExists(localPath)
+            if(exists) {
+                return ext
+            }
+        }
+        // Check remote.
+        for(const ext of possibleExt) {
+            const exists = await libRepo.headArtifactById(this.REMOTE_REPOSITORY, lib.name, ext)
+            if(exists) {
+                return ext
+            }
+        }
+        // Default to jar.
+        return 'jar'
     }
 
     private async processPackXZFiles(
         processingQueue: Array<{id: string, localPath: string}>
     ): Promise<Array<{id: string, MD5: string}>> {
+
+        if(processingQueue.length == 0) {
+            return []
+        }
 
         const accumulator = []
 

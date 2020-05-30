@@ -70,4 +70,28 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
         })
     }
 
+    public async headArtifactById(url: string, mavenIdentifier: string, extension?: string): Promise<boolean> {
+        return this.headArtifactBase(url, MavenUtil.mavenIdentifierToString(mavenIdentifier, extension) as string)
+    }
+
+    public async headArtifactByComponents(
+        url: string, group: string, artifact: string, version: string, classifier?: string, extension?: string
+    ): Promise<boolean> {
+        return this.headArtifactBase(url,
+            MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension))
+    }
+
+    private async headArtifactBase(url: string, relative: string): Promise<boolean> {
+        const resolvedURL = resolveURL(url, relative).toString()
+        try {
+            const response = await axios({
+                method: 'head',
+                url: resolvedURL
+            })
+            return response.status === 200
+        } catch (ignored) {
+            return false
+        }
+    }
+
 }
