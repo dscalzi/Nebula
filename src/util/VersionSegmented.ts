@@ -1,5 +1,7 @@
+import { MinecraftVersion } from './MinecraftVersion'
+
 export interface VersionSegmented {
 
-    isForVersion(version: string): boolean
+    isForVersion(version: MinecraftVersion): boolean
 
 }

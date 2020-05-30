@@ -1,6 +1,7 @@
 import { Module } from 'helios-distribution-types'
 import { VersionSegmented } from '../util/VersionSegmented'
 import { Resolver } from './resolver'
+import { MinecraftVersion } from '../util/MinecraftVersion'
 
 export abstract class BaseResolver implements Resolver, VersionSegmented {
 
@@ -11,7 +12,6 @@ export abstract class BaseResolver implements Resolver, VersionSegmented {
     ) {}
 
     public abstract getModule(): Promise<Module>
-
-    public abstract isForVersion(version: string): boolean
+    public abstract isForVersion(version: MinecraftVersion): boolean
 
 }

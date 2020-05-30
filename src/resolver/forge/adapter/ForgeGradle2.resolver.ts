@@ -3,16 +3,17 @@ import { createHash } from 'crypto'
 import { copy, lstat, mkdirs, pathExists, readFile, remove } from 'fs-extra'
 import { Module, Type } from 'helios-distribution-types'
 import { basename, join } from 'path'
-import { VersionManifest17 } from '../../../model/forge/versionmanifest17'
+import { VersionManifestFG2 } from '../../../model/forge/versionmanifestFG2'
 import { LibRepoStructure } from '../../../model/struct/repo/librepo.struct'
 import { MavenUtil } from '../../../util/maven'
 import { PackXZExtractWrapper } from '../../../util/PackXZExtractWrapper'
 import { VersionUtil } from '../../../util/versionutil'
 import { ForgeResolver } from '../forge.resolver'
+import { MinecraftVersion } from '../../../util/MinecraftVersion'
 
-export class Forge17Adapter extends ForgeResolver {
+export class ForgeGradle2Adapter extends ForgeResolver {
 
-    public static isForVersion(version: string): boolean {
+    public static isForVersion(version: MinecraftVersion): boolean {
         return VersionUtil.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
     }
 
@@ -20,7 +21,7 @@ export class Forge17Adapter extends ForgeResolver {
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string,
-        minecraftVersion: string,
+        minecraftVersion: MinecraftVersion,
         forgeVersion: string
     ) {
         super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, forgeVersion)
@@ -30,8 +31,8 @@ export class Forge17Adapter extends ForgeResolver {
         return this.getForgeByVersion()
     }
 
-    public isForVersion(version: string): boolean {
-        return Forge17Adapter.isForVersion(version)
+    public isForVersion(version: MinecraftVersion): boolean {
+        return ForgeGradle2Adapter.isForVersion(version)
     }
 
     public async getForgeByVersion(): Promise<Module> {
@@ -67,7 +68,7 @@ export class Forge17Adapter extends ForgeResolver {
             throw new Error('Failed to find version.json in forge universal jar.')
         }
 
-        versionManifest = JSON.parse(versionManifest) as VersionManifest17
+        versionManifest = JSON.parse(versionManifest) as VersionManifestFG2
 
         const forgeModule: Module = {
             id: MavenUtil.mavenComponentsToIdentifier(

@@ -8,6 +8,7 @@ import { BaseModelStructure } from './basemodel.struct'
 import { MiscFileStructure } from './module/file.struct'
 import { LiteModStructure } from './module/litemod.struct'
 import { LibraryStructure } from './module/library.struct'
+import { MinecraftVersion } from '../../../util/MinecraftVersion'
 
 export class ServerStructure extends BaseModelStructure<Server> {
 
@@ -29,7 +30,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
     public async createServer(
         id: string,
-        minecraftVersion: string,
+        minecraftVersion: MinecraftVersion,
         options: {
             forgeVersion?: string
             liteloaderVersion?: string
@@ -107,7 +108,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
                 // Read server meta
                 const serverMeta: ServerMeta = JSON.parse(await readFile(resolvePath(absoluteServerRoot, 'servermeta.json'), 'utf-8'))
-                const minecraftVersion = match[2]
+                const minecraftVersion = new MinecraftVersion(match[2])
 
                 const forgeResolver = VersionSegmentedRegistry.getForgeResolver(
                     minecraftVersion,

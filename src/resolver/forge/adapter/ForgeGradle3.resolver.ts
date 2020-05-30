@@ -2,16 +2,17 @@ import { spawn } from 'child_process'
 import { copy, lstat, mkdirs, move, pathExists, readFile, remove, writeFile } from 'fs-extra'
 import { Module, Type } from 'helios-distribution-types'
 import { basename, dirname, join } from 'path'
-import { VersionManifest113 } from '../../../model/forge/versionmanifest113'
+import { VersionManifestFG3 } from '../../../model/forge/versionmanifestFG3'
 import { LibRepoStructure } from '../../../model/struct/repo/librepo.struct'
 import { JavaUtil } from '../../../util/javautil'
 import { MavenUtil } from '../../../util/maven'
 import { VersionUtil } from '../../../util/versionutil'
 import { ForgeResolver } from '../forge.resolver'
+import { MinecraftVersion } from '../../../util/MinecraftVersion'
 
-export class Forge113Adapter extends ForgeResolver {
+export class ForgeGradle3Adapter extends ForgeResolver {
 
-    public static isForVersion(version: string): boolean {
+    public static isForVersion(version: MinecraftVersion): boolean {
         return VersionUtil.isVersionAcceptable(version, [13, 14, 15])
     }
 
@@ -19,7 +20,7 @@ export class Forge113Adapter extends ForgeResolver {
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string,
-        minecraftVersion: string,
+        minecraftVersion: MinecraftVersion,
         forgeVersion: string
     ) {
         super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, forgeVersion)
@@ -29,8 +30,8 @@ export class Forge113Adapter extends ForgeResolver {
         return this.process()
     }
 
-    public isForVersion(version: string): boolean {
-        return Forge113Adapter.isForVersion(version)
+    public isForVersion(version: MinecraftVersion): boolean {
+        return ForgeGradle3Adapter.isForVersion(version)
     }
 
     private async process(): Promise<Module> {
@@ -77,7 +78,7 @@ export class Forge113Adapter extends ForgeResolver {
 
         console.debug('Processing Version Manifest')
         const versionManifestTuple = await this.processVersionManifest()
-        const versionManifest = versionManifestTuple[0] as VersionManifest113
+        const versionManifest = versionManifestTuple[0] as VersionManifestFG3
 
         console.debug('Processing generated forge files.')
         const forgeModule = await this.processForgeModule(versionManifest)
@@ -95,7 +96,7 @@ export class Forge113Adapter extends ForgeResolver {
         return forgeModule
     }
 
-    private async processLibraries(manifest: VersionManifest113): Promise<Module[]> {
+    private async processLibraries(manifest: VersionManifestFG3): Promise<Module[]> {
 
         const libDir = join(this.repoStructure.getWorkDirectory(), 'libraries')
         const libRepo = this.repoStructure.getLibRepoStruct()
@@ -149,7 +150,7 @@ export class Forge113Adapter extends ForgeResolver {
 
     }
 
-    private async processForgeModule(versionManifest: VersionManifest113): Promise<Module> {
+    private async processForgeModule(versionManifest: VersionManifestFG3): Promise<Module> {
 
         const libDir = join(this.repoStructure.getWorkDirectory(), 'libraries')
         const mcpVersion = this.getMCPVersion(versionManifest.arguments.game)
@@ -180,7 +181,7 @@ export class Forge113Adapter extends ForgeResolver {
                 name: 'client slim',
                 group: LibRepoStructure.MINECRAFT_GROUP,
                 artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                version: this.minecraftVersion,
+                version: this.minecraftVersion.toString(),
                 classifiers: [
                     'slim',
                     'slim-stable'
@@ -190,7 +191,7 @@ export class Forge113Adapter extends ForgeResolver {
                 name: 'client data',
                 group: LibRepoStructure.MINECRAFT_GROUP,
                 artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                version: this.minecraftVersion,
+                version: this.minecraftVersion.toString(),
                 classifiers: ['data'],
                 skipIfNotPresent: true
             },
@@ -198,7 +199,7 @@ export class Forge113Adapter extends ForgeResolver {
                 name: 'client extra',
                 group: LibRepoStructure.MINECRAFT_GROUP,
                 artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                version: this.minecraftVersion,
+                version: this.minecraftVersion.toString(),
                 classifiers: [
                     'extra',
                     'extra-stable'
@@ -285,14 +286,14 @@ export class Forge113Adapter extends ForgeResolver {
         return forgeModule
     }
 
-    private async processVersionManifest(): Promise<[VersionManifest113, Module]> {
+    private async processVersionManifest(): Promise<[VersionManifestFG3, Module]> {
         const workDir = this.repoStructure.getWorkDirectory()
         const versionRepo = this.repoStructure.getVersionRepoStruct()
         const versionName = versionRepo.getFileName(this.minecraftVersion, this.forgeVersion)
         const versionManifestPath = join(workDir, 'versions', versionName, `${versionName}.json`)
 
         const versionManifestBuf = await readFile(versionManifestPath)
-        const versionManifest = JSON.parse(versionManifestBuf.toString()) as VersionManifest113
+        const versionManifest = JSON.parse(versionManifestBuf.toString()) as VersionManifestFG3
 
         const versionManifestModule: Module = {
             id: this.artifactVersion,

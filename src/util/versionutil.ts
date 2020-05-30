@@ -1,5 +1,6 @@
 import Axios from 'axios'
 import { PromotionsSlim } from '../model/forge/promotionsslim'
+import { MinecraftVersion } from './MinecraftVersion'
 
 export class VersionUtil {
 
@@ -10,28 +11,9 @@ export class VersionUtil {
 
     public static readonly MINECRAFT_VERSION_REGEX = /(\d+).(\d+).(\d+)/
 
-    public static isMinecraftVersion(version: string): boolean {
-        return VersionUtil.MINECRAFT_VERSION_REGEX.test(version)
-    }
-
-    public static getMinecraftVersionComponents(version: string): { major: number, minor: number, revision: number } {
-        if (VersionUtil.isMinecraftVersion(version)) {
-            const result = VersionUtil.MINECRAFT_VERSION_REGEX.exec(version)
-            if (result != null) {
-                return {
-                    major: Number(result[1]),
-                    minor: Number(result[2]),
-                    revision: Number(result[3])
-                }
-            }
-        }
-        throw new Error(`${version} is not a valid minecraft version!`)
-    }
-
-    public static isVersionAcceptable(version: string, acceptable: number[]): boolean {
-        const versionComponents = VersionUtil.getMinecraftVersionComponents(version)
-        if (versionComponents != null && versionComponents.major === 1) {
-            return acceptable.find((element) => versionComponents.minor === element) != null
+    public static isVersionAcceptable(version: MinecraftVersion, acceptable: number[]): boolean {
+        if (version.getMajor() === 1) {
+            return acceptable.find((element) => version.getMinor() === element) != null
         }
         return false
     }
@@ -49,12 +31,12 @@ export class VersionUtil {
         return response.data as PromotionsSlim
     }
 
-    public static getPromotedVersionStrict(index: PromotionsSlim, minecraftVersion: string, promotion: string): string {
+    public static getPromotedVersionStrict(index: PromotionsSlim, minecraftVersion: MinecraftVersion, promotion: string): string {
         const workingPromotion = promotion.toLowerCase()
         return index.promos[`${minecraftVersion}-${workingPromotion}`]
     }
 
-    public static async getPromotedForgeVersion(minecraftVersion: string, promotion: string): Promise<string> {
+    public static async getPromotedForgeVersion(minecraftVersion: MinecraftVersion, promotion: string): Promise<string> {
         const workingPromotion = promotion.toLowerCase()
         const res = await VersionUtil.getPromotionIndex()
         let version = res.promos[`${minecraftVersion}-${workingPromotion}`]

@@ -1,4 +1,4 @@
-export interface VersionManifest113 {
+export interface VersionManifestFG3 {
 
     id: string
     time: string

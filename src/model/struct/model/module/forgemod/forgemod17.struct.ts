@@ -5,10 +5,11 @@ import { VersionUtil } from '../../../../../util/versionutil'
 import { McModInfo } from '../../../../forge/mcmodinfo'
 import { McModInfoList } from '../../../../forge/mcmodinfolist'
 import { BaseForgeModStructure } from '../forgemod.struct'
+import { MinecraftVersion } from '../../../../../util/MinecraftVersion'
 
 export class ForgeModStructure17 extends BaseForgeModStructure {
 
-    public static isForVersion(version: string): boolean {
+    public static isForVersion(version: MinecraftVersion): boolean {
         return VersionUtil.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
     }
 
@@ -22,7 +23,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
         super(absoluteRoot, relativeRoot, baseUrl)
     }
 
-    public isForVersion(version: string): boolean {
+    public isForVersion(version: MinecraftVersion): boolean {
         return ForgeModStructure17.isForVersion(version)
     }
 

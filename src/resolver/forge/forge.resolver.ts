@@ -3,6 +3,7 @@ import { Stats } from 'fs-extra'
 import { Artifact } from 'helios-distribution-types'
 import { RepoStructure } from '../../model/struct/repo/repo.struct'
 import { BaseResolver } from '../baseresolver'
+import { MinecraftVersion } from '../../util/MinecraftVersion'
 
 export abstract class ForgeResolver extends BaseResolver {
 
@@ -15,7 +16,7 @@ export abstract class ForgeResolver extends BaseResolver {
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string,
-        protected minecraftVersion: string,
+        protected minecraftVersion: MinecraftVersion,
         protected forgeVersion: string
     ) {
         super(absoluteRoot, relativeRoot, baseUrl)

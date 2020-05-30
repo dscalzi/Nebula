@@ -5,12 +5,13 @@ import { capitalize } from '../../../../../util/stringutils'
 import { VersionUtil } from '../../../../../util/versionutil'
 import { ModsToml } from '../../../../forge/modstoml'
 import { BaseForgeModStructure } from '../forgemod.struct'
+import { MinecraftVersion } from '../../../../../util/MinecraftVersion'
 
 export class ForgeModStructure113 extends BaseForgeModStructure {
 
     public static readonly IMPLEMENTATION_VERSION_REGEX = /^Implementation-Version: (.+)[\r\n]/
 
-    public static isForVersion(version: string): boolean {
+    public static isForVersion(version: MinecraftVersion): boolean {
         return VersionUtil.isVersionAcceptable(version, [13, 14, 15])
     }
 
@@ -24,7 +25,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
         super(absoluteRoot, relativeRoot, baseUrl)
     }
 
-    public isForVersion(version: string): boolean {
+    public isForVersion(version: MinecraftVersion): boolean {
         return ForgeModStructure113.isForVersion(version)
     }
 

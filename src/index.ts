@@ -9,6 +9,7 @@ import { DistributionStructure } from './model/struct/model/distribution.struct'
 import { ServerStructure } from './model/struct/model/server.struct'
 import { VersionSegmentedRegistry } from './util/VersionSegmentedRegistry'
 import { VersionUtil } from './util/versionutil'
+import { MinecraftVersion } from './util/MinecraftVersion'
 
 dotenv.config()
 
@@ -145,10 +146,12 @@ const generateServerCommand: yargs.CommandModule = {
             `\n\t├ Forge version: ${argv.forge}`,
             `\n\t└ LiteLoader version: ${argv.liteloader}`)
 
+        const minecraftVersion = new MinecraftVersion(argv.version as string)
+
         if(argv.forge != null) {
             if (VersionUtil.isPromotionVersion(argv.forge as string)) {
                 console.debug(`Resolving ${argv.forge} Forge Version..`)
-                const version = await VersionUtil.getPromotedForgeVersion(argv.version as string, argv.forge as string)
+                const version = await VersionUtil.getPromotedForgeVersion(minecraftVersion, argv.forge as string)
                 console.debug(`Forge version set to ${version}`)
                 argv.forge = version
             }
@@ -157,7 +160,7 @@ const generateServerCommand: yargs.CommandModule = {
         const serverStruct = new ServerStructure(argv.root as string, getBaseURL())
         serverStruct.createServer(
             argv.id as string,
-            argv.version as string,
+            minecraftVersion,
             {
                 forgeVersion: argv.forge as string,
                 liteloaderVersion: argv.liteloader as string
@@ -225,7 +228,8 @@ const latestForgeCommand: yargs.CommandModule = {
     handler: async (argv) => {
         console.debug(`Invoked latest-forge with version ${argv.version}.`)
 
-        const forgeVer = await VersionUtil.getPromotedForgeVersion(argv.version as string, 'latest')
+        const minecraftVersion = new MinecraftVersion(argv.version as string)
+        const forgeVer = await VersionUtil.getPromotedForgeVersion(minecraftVersion, 'latest')
         console.log(`Latest version: Forge ${forgeVer} (${argv.version})`)
     }
 }
@@ -237,18 +241,18 @@ const recommendedForgeCommand: yargs.CommandModule = {
         console.debug(`Invoked recommended-forge with version ${argv.version}.`)
 
         const index = await VersionUtil.getPromotionIndex()
-        const mcVer = argv.version as string
+        const minecraftVersion = new MinecraftVersion(argv.version as string)
 
-        let forgeVer = VersionUtil.getPromotedVersionStrict(index, mcVer, 'recommended')
+        let forgeVer = VersionUtil.getPromotedVersionStrict(index, minecraftVersion, 'recommended')
         if (forgeVer != null) {
-            console.log(`Recommended version: Forge ${forgeVer} (${mcVer})`)
+            console.log(`Recommended version: Forge ${forgeVer} (${minecraftVersion})`)
         } else {
-            console.log(`No recommended build for ${mcVer}. Checking for latest version..`)
-            forgeVer = VersionUtil.getPromotedVersionStrict(index, mcVer, 'latest')
+            console.log(`No recommended build for ${minecraftVersion}. Checking for latest version..`)
+            forgeVer = VersionUtil.getPromotedVersionStrict(index, minecraftVersion, 'latest')
             if (forgeVer != null) {
-                console.log(`Latest version: Forge ${forgeVer} (${mcVer})`)
+                console.log(`Latest version: Forge ${forgeVer} (${minecraftVersion})`)
             } else {
-                console.log(`No build available for ${mcVer}.`)
+                console.log(`No build available for ${minecraftVersion}.`)
             }
         }
 
@@ -264,7 +268,8 @@ const testCommand: yargs.CommandModule = {
     handler: async (argv) => {
         console.debug(`Invoked test with mcVer ${argv.mcVer} forgeVer ${argv.forgeVer}`)
         console.log(process.cwd())
-        const resolver = VersionSegmentedRegistry.getForgeResolver(argv.mcVer as string,
+        const mcVer = new MinecraftVersion(argv.mcVer as string)
+        const resolver = VersionSegmentedRegistry.getForgeResolver(mcVer,
             argv.forgeVer as string, getRoot(), '', getBaseURL())
         if (resolver != null) {
             const mdl = await resolver.getModule()

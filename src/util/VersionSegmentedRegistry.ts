@@ -1,15 +1,16 @@
 import { ForgeModStructure113 } from '../model/struct/model/module/forgemod/forgemod113.struct'
 import { ForgeModStructure17 } from '../model/struct/model/module/forgemod/forgemod17.struct'
-import { Forge113Adapter } from '../resolver/forge/adapter/forge113.resolver'
-import { Forge17Adapter } from '../resolver/forge/adapter/forge17.resolver'
+import { ForgeGradle3Adapter } from '../resolver/forge/adapter/ForgeGradle3.resolver'
+import { ForgeGradle2Adapter } from '../resolver/forge/adapter/ForgeGradle2.resolver'
 import { ForgeResolver } from '../resolver/forge/forge.resolver'
 import { BaseForgeModStructure } from '../model/struct/model/module/forgemod.struct'
+import { MinecraftVersion } from './MinecraftVersion'
 
 export class VersionSegmentedRegistry {
 
     public static readonly FORGE_ADAPTER_IMPL = [
-        Forge17Adapter,
-        Forge113Adapter
+        ForgeGradle2Adapter,
+        ForgeGradle3Adapter
     ]
 
     public static readonly FORGEMOD_STRUCT_IML = [
@@ -18,7 +19,7 @@ export class VersionSegmentedRegistry {
     ]
 
     public static getForgeResolver(
-        minecraftVersion: string,
+        minecraftVersion: MinecraftVersion,
         forgeVersion: string,
         absoluteRoot: string,
         relativeRoot: string,
@@ -33,7 +34,7 @@ export class VersionSegmentedRegistry {
     }
 
     public static getForgeModStruct(
-        minecraftVersion: string,
+        minecraftVersion: MinecraftVersion,
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string
