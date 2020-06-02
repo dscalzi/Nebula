@@ -50,6 +50,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
         if (options.forgeVersion != null) {
             const fms = VersionSegmentedRegistry.getForgeModStruct(
                 minecraftVersion,
+                options.forgeVersion,
                 absoluteServerRoot,
                 relativeServerRoot,
                 this.baseUrl
@@ -123,6 +124,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
                 const forgeModStruct = VersionSegmentedRegistry.getForgeModStruct(
                     minecraftVersion,
+                    serverMeta.forgeVersion,
                     absoluteServerRoot,
                     relativeServerRoot,
                     this.baseUrl

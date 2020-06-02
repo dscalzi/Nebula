@@ -15,11 +15,12 @@ type ArrayElement<A> = A extends readonly (infer T)[] ? T : never
 
 export class ForgeGradle2Adapter extends ForgeResolver {
 
-    public static isForVersion(version: MinecraftVersion): boolean {
+    public static isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {
+        if(version.getMinor() === 12 && !VersionUtil.isOneDotTwelveFG2(libraryVersion)) {
+            return false
+        }
         return VersionUtil.isVersionAcceptable(version, [7, 8, 9, 10, 11, 12])
     }
-
-    protected readonly MOJANG_REMOTE_REPOSITORY = 'https://libraries.minecraft.net/'
 
     constructor(
         absoluteRoot: string,
@@ -35,8 +36,8 @@ export class ForgeGradle2Adapter extends ForgeResolver {
         return this.getForgeByVersion()
     }
 
-    public isForVersion(version: MinecraftVersion): boolean {
-        return ForgeGradle2Adapter.isForVersion(version)
+    public isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {
+        return ForgeGradle2Adapter.isForVersion(version, libraryVersion)
     }
 
     public async getForgeByVersion(): Promise<Module> {

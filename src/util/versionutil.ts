@@ -18,6 +18,19 @@ export class VersionUtil {
         return false
     }
 
+    public static isOneDotTwelveFG2(libraryVersion: string): boolean {
+        const maxFG2 = [14, 23, 5, 2847]
+        const verSplit = libraryVersion.split('.').map(v => Number(v))
+
+        for(let i=0; i<maxFG2.length; i++) {
+            if(verSplit[i] > maxFG2[i]) {
+                return false
+            }
+        }
+        
+        return true
+    }
+
     public static isPromotionVersion(version: string): boolean {
         return VersionUtil.PROMOTION_TYPE.indexOf(version.toLowerCase()) > -1
     }

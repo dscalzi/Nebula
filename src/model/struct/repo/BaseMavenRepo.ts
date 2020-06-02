@@ -50,20 +50,24 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
 
     private async downloadArtifactBase(url: string, relative: string): Promise<void> {
         const resolvedURL = resolveURL(url, relative).toString()
-        console.debug(`Downloading ${resolvedURL}..`)
+        return this.downloadArtifactDirect(resolvedURL, relative)
+    }
+
+    public async downloadArtifactDirect(url: string, path: string): Promise<void> {
+        console.debug(`Downloading ${url}..`)
         const response = await axios({
             method: 'get',
-            url: resolvedURL,
+            url,
             responseType: 'stream'
         })
-        const localPath = resolve(this.containerDirectory, relative)
+        const localPath = resolve(this.containerDirectory, path)
         await mkdirs(dirname(localPath))
         const writer = createWriteStream(localPath)
         response.data.pipe(writer)
         // tslint:disable-next-line: no-shadowed-variable
         return new Promise((resolve, reject) => {
             writer.on('finish', () => {
-                console.debug(`Completed download of ${resolvedURL}.`)
+                console.debug(`Completed download of ${url}.`)
                 resolve()
             })
             writer.on('error', reject)

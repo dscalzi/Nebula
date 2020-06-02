@@ -16,7 +16,7 @@ export abstract class BaseForgeModStructure extends ModuleStructure implements V
         super(absoluteRoot, relativeRoot, 'forgemods', baseUrl, Type.ForgeMod)
     }
 
-    public abstract isForVersion(version: MinecraftVersion): boolean
+    public abstract isForVersion(version: MinecraftVersion, libraryVersion: string): boolean
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {

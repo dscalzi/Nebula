@@ -7,6 +7,7 @@ import { MinecraftVersion } from '../../util/MinecraftVersion'
 
 export abstract class ForgeResolver extends BaseResolver {
 
+    protected readonly MOJANG_REMOTE_REPOSITORY = 'https://libraries.minecraft.net/'
     protected readonly REMOTE_REPOSITORY = 'https://files.minecraftforge.net/maven/'
 
     protected repoStructure: RepoStructure

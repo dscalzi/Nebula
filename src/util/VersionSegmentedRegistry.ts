@@ -26,7 +26,7 @@ export class VersionSegmentedRegistry {
         baseURL: string
     ): ForgeResolver {
         for (const impl of VersionSegmentedRegistry.FORGE_ADAPTER_IMPL) {
-            if (impl.isForVersion(minecraftVersion)) {
+            if (impl.isForVersion(minecraftVersion, forgeVersion)) {
                 return new impl(absoluteRoot, relativeRoot, baseURL, minecraftVersion, forgeVersion)
             }
         }
@@ -35,12 +35,13 @@ export class VersionSegmentedRegistry {
 
     public static getForgeModStruct(
         minecraftVersion: MinecraftVersion,
+        forgeVersion: string,
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string
     ): BaseForgeModStructure {
         for (const impl of VersionSegmentedRegistry.FORGEMOD_STRUCT_IML) {
-            if (impl.isForVersion(minecraftVersion)) {
+            if (impl.isForVersion(minecraftVersion, forgeVersion)) {
                 return new impl(absoluteRoot, relativeRoot, baseUrl)
             }
         }

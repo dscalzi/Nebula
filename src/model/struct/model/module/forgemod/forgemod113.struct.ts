@@ -11,7 +11,8 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
 
     public static readonly IMPLEMENTATION_VERSION_REGEX = /^Implementation-Version: (.+)[\r\n]/
 
-    public static isForVersion(version: MinecraftVersion): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public static isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {
         return VersionUtil.isVersionAcceptable(version, [13, 14, 15])
     }
 
@@ -25,8 +26,8 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
         super(absoluteRoot, relativeRoot, baseUrl)
     }
 
-    public isForVersion(version: MinecraftVersion): boolean {
-        return ForgeModStructure113.isForVersion(version)
+    public isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {
+        return ForgeModStructure113.isForVersion(version, libraryVersion)
     }
 
     protected async getModuleId(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {

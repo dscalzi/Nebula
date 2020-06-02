@@ -12,6 +12,6 @@ export abstract class BaseResolver implements Resolver, VersionSegmented {
     ) {}
 
     public abstract getModule(): Promise<Module>
-    public abstract isForVersion(version: MinecraftVersion): boolean
+    public abstract isForVersion(version: MinecraftVersion, libraryVersion: string): boolean
 
 }
