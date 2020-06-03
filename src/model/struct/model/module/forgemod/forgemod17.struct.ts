@@ -6,8 +6,11 @@ import { McModInfo } from '../../../../forge/mcmodinfo'
 import { McModInfoList } from '../../../../forge/mcmodinfolist'
 import { BaseForgeModStructure } from '../forgemod.struct'
 import { MinecraftVersion } from '../../../../../util/MinecraftVersion'
+import { LoggerUtil } from '../../../../../util/LoggerUtil'
 
 export class ForgeModStructure17 extends BaseForgeModStructure {
+
+    private static readonly logger = LoggerUtil.getLogger('ForgeModStructure (1.7)')
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public static isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {
@@ -92,11 +95,11 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                         this.forgeModMetadata[name]!.version = '0.0.0'
                     }
                 } catch (err) {
-                    console.error(`ForgeMod ${name} contains an invalid mcmod.info file.`)
+                    ForgeModStructure17.logger.error(`ForgeMod ${name} contains an invalid mcmod.info file.`)
                     createDefault = true
                 }
             } else {
-                console.error(`ForgeMod ${name} does not contain mcmod.info file.`)
+                ForgeModStructure17.logger.error(`ForgeMod ${name} does not contain mcmod.info file.`)
                 createDefault = true
             }
 

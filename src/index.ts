@@ -10,8 +10,11 @@ import { ServerStructure } from './model/struct/model/server.struct'
 import { VersionSegmentedRegistry } from './util/VersionSegmentedRegistry'
 import { VersionUtil } from './util/versionutil'
 import { MinecraftVersion } from './util/MinecraftVersion'
+import { LoggerUtil } from './util/LoggerUtil'
 
 dotenv.config()
+
+const logger = LoggerUtil.getLogger('Index')
 
 function getRoot(): string {
     return resolvePath(process.env.ROOT as string)
@@ -86,13 +89,13 @@ const initRootCommand: yargs.CommandModule = {
     handler: async (argv) => {
         argv.root = getRoot()
 
-        console.debug(`Root set to ${argv.root}`)
-        console.debug('Invoked init root.')
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug('Invoked init root.')
         try {
             await new DistributionStructure(argv.root as string, '').init()
-            console.log(`Successfully created new root at ${argv.root}`)
+            logger.info(`Successfully created new root at ${argv.root}`)
         } catch (error) {
-            console.error(`Failed to init new root at ${argv.root}`, error)
+            logger.error(`Failed to init new root at ${argv.root}`, error)
         }
     }
 }
@@ -141,8 +144,8 @@ const generateServerCommand: yargs.CommandModule = {
     handler: async (argv) => {
         argv.root = getRoot()
 
-        console.debug(`Root set to ${argv.root}`)
-        console.debug(`Generating server ${argv.id} for Minecraft ${argv.version}.`,
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug(`Generating server ${argv.id} for Minecraft ${argv.version}.`,
             `\n\t├ Forge version: ${argv.forge}`,
             `\n\t└ LiteLoader version: ${argv.liteloader}`)
 
@@ -150,9 +153,9 @@ const generateServerCommand: yargs.CommandModule = {
 
         if(argv.forge != null) {
             if (VersionUtil.isPromotionVersion(argv.forge as string)) {
-                console.debug(`Resolving ${argv.forge} Forge Version..`)
+                logger.debug(`Resolving ${argv.forge} Forge Version..`)
                 const version = await VersionUtil.getPromotedForgeVersion(minecraftVersion, argv.forge as string)
-                console.debug(`Forge version set to ${version}`)
+                logger.debug(`Forge version set to ${version}`)
                 argv.forge = version
             }
         }
@@ -183,16 +186,19 @@ const generateDistroCommand: yargs.CommandModule = {
         argv.root = getRoot()
         argv.baseUrl = getBaseURL()
 
-        console.debug(`Root set to ${argv.root}`)
-        console.debug(`Base Url set to ${argv.baseUrl}`)
-        console.debug(`Invoked generate distro name ${argv.name}.json.`)
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug(`Base Url set to ${argv.baseUrl}`)
+        logger.debug(`Invoked generate distro name ${argv.name}.json.`)
         try {
             const distributionStruct = new DistributionStructure(argv.root as string, argv.baseUrl as string)
             const distro = await distributionStruct.getSpecModel()
-            writeFile(resolvePath(argv.root as string, `${argv.name}.json`), JSON.stringify(distro, null, 2))
-            console.log(distro)
+            const distroPath = resolvePath(argv.root as string, `${argv.name}.json`)
+            writeFile(distroPath, JSON.stringify(distro, null, 2))
+            logger.info(`Successfully generated ${argv.name}.json`)
+            logger.info(`Saved to ${distroPath}`)
+            logger.debug('Preview:\n', distro)
         } catch (error) {
-            console.error(`Failed to generate distribution with root ${argv.root}.`, error)
+            logger.error(`Failed to generate distribution with root ${argv.root}.`, error)
         }
     }
 }
@@ -218,7 +224,7 @@ const validateCommand: yargs.CommandModule = {
         return namePositional(yargs)
     },
     handler: (argv) => {
-        console.debug(`Invoked validate with name ${argv.name}.json`)
+        logger.debug(`Invoked validate with name ${argv.name}.json`)
     }
 }
 
@@ -226,11 +232,11 @@ const latestForgeCommand: yargs.CommandModule = {
     command: 'latest-forge <version>',
     describe: 'Get the latest version of forge.',
     handler: async (argv) => {
-        console.debug(`Invoked latest-forge with version ${argv.version}.`)
+        logger.debug(`Invoked latest-forge with version ${argv.version}.`)
 
         const minecraftVersion = new MinecraftVersion(argv.version as string)
         const forgeVer = await VersionUtil.getPromotedForgeVersion(minecraftVersion, 'latest')
-        console.log(`Latest version: Forge ${forgeVer} (${argv.version})`)
+        logger.info(`Latest version: Forge ${forgeVer} (${argv.version})`)
     }
 }
 
@@ -238,21 +244,21 @@ const recommendedForgeCommand: yargs.CommandModule = {
     command: 'recommended-forge <version>',
     describe: 'Get the recommended version of forge. Returns latest if there is no recommended build.',
     handler: async (argv) => {
-        console.debug(`Invoked recommended-forge with version ${argv.version}.`)
+        logger.debug(`Invoked recommended-forge with version ${argv.version}.`)
 
         const index = await VersionUtil.getPromotionIndex()
         const minecraftVersion = new MinecraftVersion(argv.version as string)
 
         let forgeVer = VersionUtil.getPromotedVersionStrict(index, minecraftVersion, 'recommended')
         if (forgeVer != null) {
-            console.log(`Recommended version: Forge ${forgeVer} (${minecraftVersion})`)
+            logger.info(`Recommended version: Forge ${forgeVer} (${minecraftVersion})`)
         } else {
-            console.log(`No recommended build for ${minecraftVersion}. Checking for latest version..`)
+            logger.info(`No recommended build for ${minecraftVersion}. Checking for latest version..`)
             forgeVer = VersionUtil.getPromotedVersionStrict(index, minecraftVersion, 'latest')
             if (forgeVer != null) {
-                console.log(`Latest version: Forge ${forgeVer} (${minecraftVersion})`)
+                logger.info(`Latest version: Forge ${forgeVer} (${minecraftVersion})`)
             } else {
-                console.log(`No build available for ${minecraftVersion}.`)
+                logger.info(`No build available for ${minecraftVersion}.`)
             }
         }
 
@@ -266,14 +272,14 @@ const testCommand: yargs.CommandModule = {
         return namePositional(yargs)
     },
     handler: async (argv) => {
-        console.debug(`Invoked test with mcVer ${argv.mcVer} forgeVer ${argv.forgeVer}`)
-        console.log(process.cwd())
+        logger.debug(`Invoked test with mcVer ${argv.mcVer} forgeVer ${argv.forgeVer}`)
+        logger.info(process.cwd())
         const mcVer = new MinecraftVersion(argv.mcVer as string)
         const resolver = VersionSegmentedRegistry.getForgeResolver(mcVer,
             argv.forgeVer as string, getRoot(), '', getBaseURL())
         if (resolver != null) {
             const mdl = await resolver.getModule()
-            console.log(inspect(mdl, false, null, true))
+            logger.info(inspect(mdl, false, null, true))
         }
     }
 }

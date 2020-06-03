@@ -9,8 +9,11 @@ import { MiscFileStructure } from './module/file.struct'
 import { LiteModStructure } from './module/litemod.struct'
 import { LibraryStructure } from './module/library.struct'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
+import { LoggerUtil } from '../../../util/LoggerUtil'
 
 export class ServerStructure extends BaseModelStructure<Server> {
+
+    private static readonly logger = LoggerUtil.getLogger('ServerStructure')
 
     private readonly ID_REGEX = /(.+-(.+)$)/
 
@@ -41,7 +44,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
         const relativeServerRoot = join(this.relativeRoot, effectiveId)
 
         if (await pathExists(absoluteServerRoot)) {
-            console.error('Server already exists! Aborting.')
+            ServerStructure.logger.error('Server already exists! Aborting.')
             return
         }
 
@@ -86,8 +89,8 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
                 const match = this.ID_REGEX.exec(file)
                 if (match == null) {
-                    console.warn(`Server directory ${file} does not match the defined standard.`)
-                    console.warn('All server ids must end with -<minecraft version> (ex. -1.12.2)')
+                    ServerStructure.logger.warn(`Server directory ${file} does not match the defined standard.`)
+                    ServerStructure.logger.warn('All server ids must end with -<minecraft version> (ex. -1.12.2)')
                     continue
                 }
 
@@ -103,7 +106,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 }
 
                 if (!iconUrl) {
-                    console.warn(`No icon file found for server ${file}.`)
+                    ServerStructure.logger.warn(`No icon file found for server ${file}.`)
                     iconUrl = '<FILL IN MANUALLY>'
                 }
 
@@ -167,7 +170,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 })
 
             } else {
-                console.warn(`Path ${file} in server directory is not a directory!`)
+                ServerStructure.logger.warn(`Path ${file} in server directory is not a directory!`)
             }
         }
         return accumulator

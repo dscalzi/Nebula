@@ -1,8 +1,11 @@
 import Axios from 'axios'
 import { PromotionsSlim } from '../model/forge/promotionsslim'
 import { MinecraftVersion } from './MinecraftVersion'
+import { LoggerUtil } from './LoggerUtil'
 
 export class VersionUtil {
+
+    private static readonly logger = LoggerUtil.getLogger('VersionUtil')
 
     public static readonly PROMOTION_TYPE = [
         'recommended',
@@ -54,8 +57,8 @@ export class VersionUtil {
         const res = await VersionUtil.getPromotionIndex()
         let version = res.promos[`${minecraftVersion}-${workingPromotion}`]
         if (version == null) {
-            console.warn(`No ${workingPromotion} version found for Forge ${minecraftVersion}.`)
-            console.warn('Attempting to pull latest version instead.')
+            VersionUtil.logger.warn(`No ${workingPromotion} version found for Forge ${minecraftVersion}.`)
+            VersionUtil.logger.warn('Attempting to pull latest version instead.')
             version = res.promos[`${minecraftVersion}-latest`]
             if (version == null) {
                 throw new Error(`No latest version found for Forge ${minecraftVersion}.`)

@@ -6,8 +6,11 @@ import { VersionUtil } from '../../../../../util/versionutil'
 import { ModsToml } from '../../../../forge/modstoml'
 import { BaseForgeModStructure } from '../forgemod.struct'
 import { MinecraftVersion } from '../../../../../util/MinecraftVersion'
+import { LoggerUtil } from '../../../../../util/LoggerUtil'
 
 export class ForgeModStructure113 extends BaseForgeModStructure {
+
+    private static readonly logger = LoggerUtil.getLogger('ForgeModStructure (1.13)')
 
     public static readonly IMPLEMENTATION_VERSION_REGEX = /^Implementation-Version: (.+)[\r\n]/
 
@@ -83,25 +86,25 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                         let version = '0.0.0'
                         const manifest = zip.readAsText('META-INF/MANIFEST.MF')
                         const keys = manifest.split('\n')
-                        console.log(keys)
+                        ForgeModStructure113.logger.debug(keys)
                         for (const key of keys) {
                             const match = ForgeModStructure113.IMPLEMENTATION_VERSION_REGEX.exec(key)
                             if (match != null) {
                                 version = match[1]
                             }
                         }
-                        console.debug(`ForgeMod ${name} contains a version wildcard, inferring ${version}`)
+                        ForgeModStructure113.logger.debug(`ForgeMod ${name} contains a version wildcard, inferring ${version}`)
                         parsed.mods[0].version = version
                     }
 
                     this.forgeModMetadata[name] = parsed
 
                 } catch (err) {
-                    console.error(`ForgeMod ${name} contains an invalid mods.toml file.`)
+                    ForgeModStructure113.logger.error(`ForgeMod ${name} contains an invalid mods.toml file.`)
                     createDefault = true
                 }
             } else {
-                console.error(`ForgeMod ${name} does not contain mods.toml file.`)
+                ForgeModStructure113.logger.error(`ForgeMod ${name} does not contain mods.toml file.`)
                 createDefault = true
             }
 

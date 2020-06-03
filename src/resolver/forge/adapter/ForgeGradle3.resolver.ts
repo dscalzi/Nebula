@@ -1,6 +1,7 @@
 import AdmZip from 'adm-zip'
 import { ForgeResolver } from '../forge.resolver'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
+import { LoggerUtil } from '../../../util/LoggerUtil'
 import { VersionUtil } from '../../../util/versionutil'
 import { Module, Type } from 'helios-distribution-types'
 import { LibRepoStructure } from '../../../model/struct/repo/librepo.struct'
@@ -22,6 +23,8 @@ interface GeneratedFile {
 }
 
 export class ForgeGradle3Adapter extends ForgeResolver {
+
+    private static readonly logger = LoggerUtil.getLogger('FG3 Adapter')
 
     private static readonly WILDCARD_MCP_VERSION = '${mcpVersion}'
 
@@ -133,9 +136,9 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
         // Get Installer
         const installerPath = libRepo.getLocalForge(this.artifactVersion, 'installer')
-        console.debug(`Checking for forge installer at ${installerPath}..`)
+        ForgeGradle3Adapter.logger.debug(`Checking for forge installer at ${installerPath}..`)
         if (!await libRepo.artifactExists(installerPath)) {
-            console.debug('Forge installer not found locally, initializing download..')
+            ForgeGradle3Adapter.logger.debug('Forge installer not found locally, initializing download..')
             await libRepo.downloadArtifactByComponents(
                 this.REMOTE_REPOSITORY,
                 LibRepoStructure.FORGE_GROUP,
@@ -143,9 +146,9 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 this.artifactVersion, 'installer', 'jar'
             )
         } else {
-            console.debug('Using locally discovered forge installer.')
+            ForgeGradle3Adapter.logger.debug('Using locally discovered forge installer.')
         }
-        console.debug(`Beginning processing of Forge v${this.forgeVersion} (Minecraft ${this.minecraftVersion})`)
+        ForgeGradle3Adapter.logger.debug(`Beginning processing of Forge v${this.forgeVersion} (Minecraft ${this.minecraftVersion})`)
 
         if(this.generatedFiles != null && this.generatedFiles.length > 0) {
             // Run installer
@@ -173,28 +176,28 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         // Required for the installer to function.
         await writeFile(join(workDir, 'launcher_profiles.json'), JSON.stringify({}))
 
-        console.debug('Spawning forge installer')
+        ForgeGradle3Adapter.logger.debug('Spawning forge installer')
 
-        console.log('============== [ IMPORTANT ] ==============')
-        console.log('When the installer opens please set the client installation directory to:')
-        console.log(workDir)
-        console.log('===========================================')
+        ForgeGradle3Adapter.logger.info('============== [ IMPORTANT ] ==============')
+        ForgeGradle3Adapter.logger.info('When the installer opens please set the client installation directory to:')
+        ForgeGradle3Adapter.logger.info(workDir)
+        ForgeGradle3Adapter.logger.info('===========================================')
 
         await this.executeInstaller(workingInstaller)
 
-        console.debug('Installer finished, beginning processing..')
+        ForgeGradle3Adapter.logger.debug('Installer finished, beginning processing..')
 
-        console.debug('Processing Version Manifest')
+        ForgeGradle3Adapter.logger.debug('Processing Version Manifest')
         const versionManifestTuple = await this.processVersionManifest()
         const versionManifest = versionManifestTuple[0] as VersionManifestFG3
 
-        console.debug('Processing generated forge files.')
+        ForgeGradle3Adapter.logger.debug('Processing generated forge files.')
         const forgeModule = await this.processForgeModule(versionManifest)
 
         // Attach version.json module.
         forgeModule.subModules?.unshift(versionManifestTuple[1] as Module)
 
-        console.debug('Processing Libraries')
+        ForgeGradle3Adapter.logger.debug('Processing Libraries')
         const libs = await this.processLibraries(versionManifest)
 
         forgeModule.subModules = forgeModule.subModules?.concat(libs)
@@ -388,16 +391,22 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
     private executeInstaller(installerExec: string): Promise<void> {
         return new Promise(resolve => {
+            const fiLogger = LoggerUtil.getLogger('Forge Installer')
             const child = spawn(JavaUtil.getJavaExecutable(), [
                 '-jar',
                 installerExec
             ], {
                 cwd: dirname(installerExec)
             })
-            child.stdout.on('data', (data) => console.log('[Forge Installer]', data.toString('utf8').trim()))
-            child.stderr.on('data', (data) => console.error('[Forge Installer]', data.toString('utf8').trim()))
+            child.stdout.on('data', (data) => fiLogger.info(data.toString('utf8').trim()))
+            child.stderr.on('data', (data) => fiLogger.error(data.toString('utf8').trim()))
             child.on('close', code => {
-                console.log('[Forge Installer]', 'Exited with code', code)
+                if(code === 0) {
+                    fiLogger.info('Exited with code', code)
+                } else {
+                    fiLogger.error('Exited with code', code)
+                }
+                
                 resolve()
             })
         })
@@ -445,7 +454,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
         const libRepo = this.repoStructure.getLibRepoStruct()
         const universalLocalPath = libRepo.getLocalForge(this.artifactVersion, 'universal')
-        console.debug(`Checking for Forge Universal jar at ${universalLocalPath}..`)
+        ForgeGradle3Adapter.logger.debug(`Checking for Forge Universal jar at ${universalLocalPath}..`)
 
         const forgeMdl = versionManifest.libraries.find(val => val.name.startsWith('net.minecraftforge:forge:'))
 
@@ -460,14 +469,14 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             const localUniBuf = await readFile(universalLocalPath)
             const sha1 = createHash('sha1').update(localUniBuf).digest('hex')
             if(sha1 !== forgeMdl.downloads.artifact.sha1) {
-                console.debug('SHA-1 of local universal jar does not match version.json entry.')
-                console.debug('Redownloading Forge Universal jar..')
+                ForgeGradle3Adapter.logger.debug('SHA-1 of local universal jar does not match version.json entry.')
+                ForgeGradle3Adapter.logger.debug('Redownloading Forge Universal jar..')
             } else {
-                console.debug('Using locally discovered forge.')
+                ForgeGradle3Adapter.logger.debug('Using locally discovered forge.')
                 forgeUniversalBuffer = localUniBuf
             }
         } else {
-            console.debug('Forge Universal jar not found locally, initializing download..')
+            ForgeGradle3Adapter.logger.debug('Forge Universal jar not found locally, initializing download..')
         }
 
         // Download if local is missing or corrupt
@@ -480,7 +489,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             forgeUniversalBuffer = await readFile(universalLocalPath)
         }
 
-        console.debug(`Beginning processing of Forge v${this.forgeVersion} (Minecraft ${this.minecraftVersion})`)
+        ForgeGradle3Adapter.logger.debug(`Beginning processing of Forge v${this.forgeVersion} (Minecraft ${this.minecraftVersion})`)
 
         const forgeModule: Module = {
             id: MavenUtil.mavenComponentsToIdentifier(
@@ -521,7 +530,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 // We've already processed forge.
                 continue
             }
-            console.debug(`Processing ${lib.name}..`)
+            ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
 
             const extension = 'jar'
             const localPath = libRepo.getArtifactById(lib.name, extension)
@@ -533,11 +542,11 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 libBuf = await readFile(localPath)
                 const sha1 = createHash('sha1').update(libBuf).digest('hex')
                 if (sha1 !== lib.downloads.artifact.sha1) {
-                    console.debug('Hashes do not match, redownloading..')
+                    ForgeGradle3Adapter.logger.debug('Hashes do not match, redownloading..')
                     queueDownload = true
                 }
             } else {
-                console.debug('Not found locally, downloading..')
+                ForgeGradle3Adapter.logger.debug('Not found locally, downloading..')
                 queueDownload = true
             }
 
@@ -545,7 +554,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 await libRepo.downloadArtifactDirect(lib.downloads.artifact.url, lib.downloads.artifact.path)
                 libBuf = await readFile(localPath)
             } else {
-                console.debug('Using local copy.')
+                ForgeGradle3Adapter.logger.debug('Using local copy.')
             }
 
             const stats = await lstat(localPath)

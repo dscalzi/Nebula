@@ -4,8 +4,11 @@ import { dirname, join, resolve } from 'path'
 import { resolve as resolveURL } from 'url'
 import { MavenUtil } from '../../../util/maven'
 import { BaseFileStructure } from '../BaseFileStructure'
+import { LoggerUtil } from '../../../util/LoggerUtil'
 
 export abstract class BaseMavenRepo extends BaseFileStructure {
+
+    private static readonly logger = LoggerUtil.getLogger('BaseMavenRepo')
 
     constructor(
         absoluteRoot: string,
@@ -54,7 +57,7 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
     }
 
     public async downloadArtifactDirect(url: string, path: string): Promise<void> {
-        console.debug(`Downloading ${url}..`)
+        BaseMavenRepo.logger.debug(`Downloading ${url}..`)
         const response = await axios({
             method: 'get',
             url,
@@ -67,7 +70,7 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
         // tslint:disable-next-line: no-shadowed-variable
         return new Promise((resolve, reject) => {
             writer.on('finish', () => {
-                console.debug(`Completed download of ${url}.`)
+                BaseMavenRepo.logger.debug(`Completed download of ${url}.`)
                 resolve()
             })
             writer.on('error', reject)
