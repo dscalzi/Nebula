@@ -1,4 +1,4 @@
-import AdmZip from 'adm-zip'
+import StreamZip from 'node-stream-zip'
 import { Stats } from 'fs-extra'
 import { Type } from 'helios-distribution-types'
 import { join } from 'path'
@@ -19,12 +19,12 @@ export class LiteModStructure extends ModuleStructure {
         super(absoluteRoot, relativeRoot, 'litemods', baseUrl, Type.LiteMod)
     }
 
-    protected async getModuleId(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {
-        const liteModData = this.getLiteModMetadata(buf, name)
+    protected async getModuleId(name: string, path: string): Promise<string> {
+        const liteModData = await this.getLiteModMetadata(name, path)
         return this.generateMavenIdentifier(liteModData.name, `${liteModData.version}-${liteModData.mcversion}`)
     }
-    protected async getModuleName(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {
-        return capitalize(this.getLiteModMetadata(buf, name).name)
+    protected async getModuleName(name: string, path: string): Promise<string> {
+        return capitalize((await this.getLiteModMetadata(name, path)).name)
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {
@@ -35,27 +35,53 @@ export class LiteModStructure extends ModuleStructure {
         return null
     }
 
-    private getLiteModMetadata(buf: Buffer, name: string): LiteMod {
-        if (!Object.prototype.hasOwnProperty.call(this.liteModMetadata, name)) {
-            const zip = new AdmZip(buf)
-            const zipEntries = zip.getEntries()
+    private getLiteModMetadata(name: string, path: string): Promise<LiteMod> {
+        return new Promise((resolve, reject) => {
+            if (!Object.prototype.hasOwnProperty.call(this.liteModMetadata, name)) {
 
-            let raw
-            for (const entry of zipEntries) {
-                if (entry.entryName === 'litemod.json') {
-                    raw = zip.readAsText(entry)
-                    break
-                }
-            }
+                const zip = new StreamZip({
+                    file: path,
+                    storeEntries: true
+                })
 
-            if (raw) {
-                this.liteModMetadata[name] = JSON.parse(raw) as LiteMod
+                zip.on('error', err => reject(err))
+                zip.on('ready', () => {
+                    try {
+                        const res = this.processZip(zip, name)
+                        zip.close()
+                        resolve(res)
+                        return
+                    } catch(err) {
+                        zip.close()
+                        throw err
+                    }
+                })
+
             } else {
-                throw new Error(`Litemod ${name} does not contain litemod.json file.`)
+                resolve(this.liteModMetadata[name] as LiteMod)
+                return
             }
+
+        })
+    }
+
+    private processZip(zip: StreamZip, name: string): LiteMod {
+
+        let raw: Buffer | undefined
+        try {
+            raw = zip.entryDataSync('litemod.json')
+        } catch(err) {
+            // ignored
+        }
+
+        if (raw) {
+            this.liteModMetadata[name] = JSON.parse(raw.toString()) as LiteMod
+        } else {
+            throw new Error(`Litemod ${name} does not contain litemod.json file.`)
         }
 
         return this.liteModMetadata[name] as LiteMod
+
     }
 
 }

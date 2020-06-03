@@ -1,5 +1,4 @@
-import AdmZip from 'adm-zip'
-import { Stats } from 'fs-extra'
+import StreamZip from 'node-stream-zip'
 import toml from 'toml'
 import { capitalize } from '../../../../../util/stringutils'
 import { VersionUtil } from '../../../../../util/versionutil'
@@ -33,59 +32,90 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
         return ForgeModStructure113.isForVersion(version, libraryVersion)
     }
 
-    protected async getModuleId(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {
-        const fmData = this.getForgeModMetadata(buf, name)
+    protected async getModuleId(name: string, path: string): Promise<string> {
+        const fmData = await this.getForgeModMetadata(name, path)
         return this.generateMavenIdentifier(fmData.mods[0].modId, fmData.mods[0].version)
     }
-    protected async getModuleName(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {
-        return capitalize((this.getForgeModMetadata(buf, name)).mods[0].displayName)
+    protected async getModuleName(name: string, path: string): Promise<string> {
+        return capitalize((await this.getForgeModMetadata(name, path)).mods[0].displayName)
     }
 
-    private getForgeModMetadata(buf: Buffer, name: string): ModsToml {
-        if (!Object.prototype.hasOwnProperty.call(this.forgeModMetadata, name)) {
-            const zip = new AdmZip(buf)
-            const zipEntries = zip.getEntries()
+    private getForgeModMetadata(name: string, path: string): Promise<ModsToml> {
+        return new Promise((resolve, reject) => {
+            if (!Object.prototype.hasOwnProperty.call(this.forgeModMetadata, name)) {
 
-            // Optifine is a tweak that can be loaded as a forge mod. It does not
-            // appear to contain a mcmod.info class. This a special case we will
-            // account for.
-            if (name.toLowerCase().indexOf('optifine') > -1) {
-                // Read zip for changelog.txt
-                let rawChangelog
-                for (const entry of zipEntries) {
-                    if (entry.entryName === 'changelog.txt') {
-                        rawChangelog = zip.readAsText(entry)
-                        break
+                const zip = new StreamZip({
+                    file: path,
+                    storeEntries: true
+                })
+
+                zip.on('error', err => reject(err))
+                zip.on('ready', () => {
+                    try {
+                        const res = this.processZip(zip, name)
+                        zip.close()
+                        resolve(res)
+                        return
+                    } catch(err) {
+                        zip.close()
+                        throw err
                     }
-                }
-                if (!rawChangelog) {
-                    throw new Error('Failed to read OptiFine changelog.')
-                }
-                const info = rawChangelog.split('\n')[0].trim()
-                const version = info.split(' ')[1]
-                this.forgeModMetadata[name] = ({
-                    modid: 'optifine',
-                    name: info,
-                    version,
-                    mcversion: version.substring(0, version.indexOf('_'))
-                }) as unknown as ModsToml
-                return this.forgeModMetadata[name] as ModsToml
+                })
+
+            } else {
+                resolve(this.forgeModMetadata[name] as ModsToml)
+                return
             }
 
-            const raw = zip.readAsText('META-INF/mods.toml')
+        })
+    }
 
-            let createDefault = false
+    private processZip(zip: StreamZip, name: string): ModsToml {
 
-            if (raw) {
-                // Assuming the main mod will be the first entry in this file.
-                try {
-                    const parsed = toml.parse(raw) as ModsToml
+        // Optifine is a tweak that can be loaded as a forge mod. It does not
+        // appear to contain a mcmod.info class. This a special case we will
+        // account for.
+        if (name.toLowerCase().indexOf('optifine') > -1) {
 
-                    // tslint:disable-next-line: no-invalid-template-strings
-                    if (parsed.mods[0].version === '${file.jarVersion}') {
-                        let version = '0.0.0'
-                        const manifest = zip.readAsText('META-INF/MANIFEST.MF')
-                        const keys = manifest.split('\n')
+            // Read zip for changelog.txt
+            let changelogBuf: Buffer
+            try {
+                changelogBuf = zip.entryDataSync('changelog.txt')
+            } catch(err) {
+                throw new Error('Failed to read OptiFine changelog.')
+            }
+
+            const info = changelogBuf.toString().split('\n')[0].trim()
+            const version = info.split(' ')[1]
+            this.forgeModMetadata[name] = ({
+                modid: 'optifine',
+                name: info,
+                version,
+                mcversion: version.substring(0, version.indexOf('_'))
+            }) as unknown as ModsToml
+            return this.forgeModMetadata[name] as ModsToml
+        }
+
+        let raw: Buffer | undefined
+        try {
+            raw = zip.entryDataSync('META-INF/mods.toml')
+        } catch(err) {
+            // ignored
+        }
+
+        let createDefault = false
+
+        if (raw) {
+            // Assuming the main mod will be the first entry in this file.
+            try {
+                const parsed = toml.parse(raw.toString()) as ModsToml
+
+                // tslint:disable-next-line: no-invalid-template-strings
+                if (parsed.mods[0].version === '${file.jarVersion}') {
+                    let version = '0.0.0'
+                    try {
+                        const manifest = zip.entryDataSync('META-INF/MANIFEST.MF')
+                        const keys = manifest.toString().split('\n')
                         ForgeModStructure113.logger.debug(keys)
                         for (const key of keys) {
                             const match = ForgeModStructure113.IMPLEMENTATION_VERSION_REGEX.exec(key)
@@ -94,36 +124,37 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                             }
                         }
                         ForgeModStructure113.logger.debug(`ForgeMod ${name} contains a version wildcard, inferring ${version}`)
-                        parsed.mods[0].version = version
+                    } catch {
+                        ForgeModStructure113.logger.debug(`ForgeMod ${name} contains a version wildcard yet no MANIFEST.MF.. Defaulting to ${version}`)
                     }
-
-                    this.forgeModMetadata[name] = parsed
-
-                } catch (err) {
-                    ForgeModStructure113.logger.error(`ForgeMod ${name} contains an invalid mods.toml file.`)
-                    createDefault = true
+                    parsed.mods[0].version = version
                 }
-            } else {
-                ForgeModStructure113.logger.error(`ForgeMod ${name} does not contain mods.toml file.`)
+
+                this.forgeModMetadata[name] = parsed
+
+            } catch (err) {
+                ForgeModStructure113.logger.error(`ForgeMod ${name} contains an invalid mods.toml file.`)
                 createDefault = true
             }
+        } else {
+            ForgeModStructure113.logger.error(`ForgeMod ${name} does not contain mods.toml file.`)
+            createDefault = true
+        }
 
-            if (createDefault) {
-                this.forgeModMetadata[name] = ({
-                    modLoader: 'javafml',
-                    loaderVersion: '',
-                    mods: [{
-                        modId: name.substring(0, name.lastIndexOf('.')).toLowerCase(),
-                        version: '0.0.0',
-                        displayName: name,
-                        description: ''
-                    }]
-                })
-            }
+        if (createDefault) {
+            this.forgeModMetadata[name] = ({
+                modLoader: 'javafml',
+                loaderVersion: '',
+                mods: [{
+                    modId: name.substring(0, name.lastIndexOf('.')).toLowerCase(),
+                    version: '0.0.0',
+                    displayName: name,
+                    description: ''
+                }]
+            })
         }
 
         return this.forgeModMetadata[name] as ModsToml
-
     }
 
 }

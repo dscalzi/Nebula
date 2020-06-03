@@ -16,7 +16,8 @@
             "preLaunchTask": "compile",
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
-            ]
+            ],
+            "outputCapture": "std"
         }
     ]
 }

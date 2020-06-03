@@ -39,10 +39,10 @@ export class MiscFileStructure extends ModuleStructure {
         return acc
     }
 
-    protected async getModuleId(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {
+    protected async getModuleId(name: string, path: string): Promise<string> {
         return name
     }
-    protected async getModuleName(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {
+    protected async getModuleName(name: string, path: string): Promise<string> {
         return name
     }
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {

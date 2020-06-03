@@ -1,4 +1,3 @@
-import AdmZip from 'adm-zip'
 import { ForgeResolver } from '../forge.resolver'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
 import { LoggerUtil } from '../../../util/LoggerUtil'
@@ -420,29 +419,19 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         }
         return null
     }
-
+    
     private async processWithoutInstaller(installerPath: string): Promise<Module> {
 
         // Extract version.json from installer.
 
-        const forgeInstallerBuffer = await readFile(installerPath)
-        const zip = new AdmZip(forgeInstallerBuffer)
-        const zipEntries = zip.getEntries()
-
-        let versionManifest
-
-        for (const entry of zipEntries) {
-            if (entry.entryName === 'version.json') {
-                versionManifest = zip.readAsText(entry)
-                break
-            }
-        }
-
-        if (!versionManifest) {
+        let versionManifestBuf: Buffer
+        try {
+            versionManifestBuf = await this.getVersionManifestFromJar(installerPath)
+        } catch(err) {
             throw new Error('Failed to find version.json in forge installer jar.')
         }
-
-        versionManifest = JSON.parse(versionManifest) as VersionManifestFG3
+        
+        const versionManifest = JSON.parse(versionManifestBuf.toString()) as VersionManifestFG3
 
         // Save Version Manifest
         const versionManifestDest = this.repoStructure.getVersionRepoStruct().getVersionManifest(

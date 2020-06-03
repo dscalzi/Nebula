@@ -1,4 +1,3 @@
-import AdmZip from 'adm-zip'
 import { createHash } from 'crypto'
 import { copy, lstat, mkdirs, pathExists, readFile, remove } from 'fs-extra'
 import { Module, Type } from 'helios-distribution-types'
@@ -59,24 +58,14 @@ export class ForgeGradle2Adapter extends ForgeResolver {
         }
         ForgeGradle2Adapter.logger.debug(`Beginning processing of Forge v${this.forgeVersion} (Minecraft ${this.minecraftVersion})`)
 
-        const forgeUniversalBuffer = await readFile(targetLocalPath)
-        const zip = new AdmZip(forgeUniversalBuffer)
-        const zipEntries = zip.getEntries()
-
-        let versionManifest
-
-        for (const entry of zipEntries) {
-            if (entry.entryName === 'version.json') {
-                versionManifest = zip.readAsText(entry)
-                break
-            }
-        }
-
-        if (!versionManifest) {
+        let versionManifestBuf: Buffer
+        try {
+            versionManifestBuf = await this.getVersionManifestFromJar(targetLocalPath)
+        } catch(err) {
             throw new Error('Failed to find version.json in forge universal jar.')
         }
 
-        versionManifest = JSON.parse(versionManifest) as VersionManifestFG2
+        const versionManifest = JSON.parse(versionManifestBuf.toString()) as VersionManifestFG2
 
         const forgeModule: Module = {
             id: MavenUtil.mavenComponentsToIdentifier(
@@ -87,7 +76,7 @@ export class ForgeGradle2Adapter extends ForgeResolver {
             name: 'Minecraft Forge',
             type: Type.ForgeHosted,
             artifact: this.generateArtifact(
-                forgeUniversalBuffer,
+                await readFile(targetLocalPath),
                 await lstat(targetLocalPath),
                 libRepo.getArtifactUrlByComponents(
                     this.baseUrl,

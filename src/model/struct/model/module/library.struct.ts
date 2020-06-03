@@ -34,12 +34,12 @@ export class LibraryStructure extends ModuleStructure {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected async getModuleId(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {
+    protected async getModuleId(name: string, path: string): Promise<string> {
         const inference = this.attemptCrudeInference(name)
         return this.generateMavenIdentifier(inference.name, inference.version)
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected async getModuleName(name: string, path: string, stats: Stats, buf: Buffer): Promise<string> {
+    protected async getModuleName(name: string, path: string): Promise<string> {
         const inference = this.attemptCrudeInference(name)
         return inference.name
     }

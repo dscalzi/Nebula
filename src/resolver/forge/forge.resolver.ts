@@ -1,3 +1,4 @@
+import StreamZip from 'node-stream-zip'
 import { createHash } from 'crypto'
 import { Stats } from 'fs-extra'
 import { Artifact } from 'helios-distribution-types'
@@ -79,6 +80,26 @@ export abstract class ForgeResolver extends BaseResolver {
             MD5: createHash('md5').update(buf).digest('hex'),
             url
         }
+    }
+
+    protected async getVersionManifestFromJar(jarPath: string): Promise<Buffer>{
+        return new Promise((resolve, reject) => {
+            const zip = new StreamZip({
+                file: jarPath,
+                storeEntries: true
+            })
+            zip.on('ready', () => {
+                try {
+                    const data = zip.entryDataSync('version.json')
+                    zip.close()
+                    resolve(data)
+                } catch(err) {
+                    reject(err)
+                }
+                
+            })
+            zip.on('error', err => reject(err))
+        })
     }
 
 }

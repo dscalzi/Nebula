@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/dscalzi/Nebula#readme",
   "devDependencies": {
-    "@types/adm-zip": "^0.4.33",
     "@types/fs-extra": "^9.0.1",
     "@types/node": "^12.12.43",
     "@types/triple-beam": "^1.3.1",
@@ -38,12 +37,12 @@
     "typescript": "^3.9.3"
   },
   "dependencies": {
-    "adm-zip": "^0.4.14",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
     "fs-extra": "^9.0.0",
     "helios-distribution-types": "^1.0.0-pre.1",
     "moment": "^2.26.0",
+    "node-stream-zip": "^1.11.2",
     "toml": "^3.0.0",
     "triple-beam": "^1.3.0",
     "winston": "^3.2.1",

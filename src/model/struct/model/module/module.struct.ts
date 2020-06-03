@@ -29,16 +29,16 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         return `generated.${this.type.toLowerCase()}:${name}:${version}@${TypeMetadata[this.type].defaultExtension}`
     }
 
-    protected async abstract getModuleId(name: string, path: string, stats: Stats, buf: Buffer): Promise<string>
-    protected async abstract getModuleName(name: string, path: string, stats: Stats, buf: Buffer): Promise<string>
+    protected async abstract getModuleId(name: string, path: string): Promise<string>
+    protected async abstract getModuleName(name: string, path: string): Promise<string>
     protected async abstract getModuleUrl(name: string, path: string, stats: Stats): Promise<string>
     protected async abstract getModulePath(name: string, path: string, stats: Stats): Promise<string | null>
 
     protected async parseModule(file: string, filePath: string, stats: Stats): Promise<Module> {
         const buf = await readFile(filePath)
         const mdl: Module = {
-            id: await this.getModuleId(file, filePath, stats, buf),
-            name: await this.getModuleName(file, filePath, stats, buf),
+            id: await this.getModuleId(file, filePath),
+            name: await this.getModuleName(file, filePath),
             type: this.type,
             required: {
                 value: false,
