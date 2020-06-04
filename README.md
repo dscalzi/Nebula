@@ -6,13 +6,19 @@ Generate a distribution.json for Helios.
 
 * Node.js 12
 * Java 8+ (https://adoptopenjdk.net/)
-  * This is required to process [XZ](https://tukaani.org/xz/format.html) files.
+  * This is required to run the forge installer and process [XZ](https://tukaani.org/xz/format.html) files.
+
+
+### Notes
+
+* Nebula is not 100% complete. Unfinished items are listed on the [TODO list](https://github.com/dscalzi/Nebula/issues/2).
+* Currently only supports creating Forge based servers. Vanilla support will be added when Helios v2 is complete.
 
 ## Setup
 
 1. Clone the repository
 2. Install the dependencies (`npm i`)
-3. Create a `.env` file at the root directory of the cloned folder and set the required values.
+3. Create a file called [`.env`][dotenvnpm] at the root directory of the cloned folder and set the required values.
 
 Example
 ```properties
@@ -25,15 +31,33 @@ BASE_URL=http://localhost:8080/
 
 Nebula is not complete. The following usage is tentative.
 
-#### Notes
+#### TL;DR Usage
 
-Rather than updating the entire usage with minor changes, please read these notes.
-
-* Root and BaseUrl options are currently disabled. This information is being pulled from the `.env` for now.
+* Follow the setup instructions above.
+* Run the `init root` command.
+* Generate servers using the `g server` command.
+* Put all files in their respective folders (documented below).
+* Generate the distribution using the `g distro` command.
+* When in doubt, reread this document and then ask on Discord.
 
 ## Commands
 
 Commands will be documented here. You can run any command with the `--help` option to view more information.
+
+#### Command Usage
+
+*Recommended*
+
+* Run `npm run start -- <COMMAND>`
+
+*Other*
+
+* Build the project using `npm run build`
+* Run `node dist/index.js <COMMAND>`
+
+*Note: If you modify any files, you will have to rebuild the project. npm start does this automatically.*
+
+---
 
 ### Init
 
@@ -49,11 +73,7 @@ __*Subcommands*__
 
 Generate an empty standard file structure.
 
-`init root <options>`
-
-Options:
-
-* `--root <string>` Specify the root directory.
+`init root`
 
 ---
 
@@ -75,7 +95,6 @@ Generate an new server in the root directory. Options are provided to include fo
 
 Options:
 
-* `--root <string>` Specify the root directory.
 * `--forge <string>` Specify forge version. This is WITHOUT the minecraft version (ex. 14.23.5.2847)
   * OPTIONAL (default: null)
   * If not provided forge will not be enabled.
@@ -87,7 +106,7 @@ Options:
 >
 > Example Usage
 >
-> `generate server Test1 1.12.2 --root C:/TestRoot --forge 14.23.5.2847`
+> `generate server Test1 1.12.2 --forge 14.23.5.2847`
 >
 
 ---
@@ -96,21 +115,16 @@ Options:
 
 Generate a distribution file from the root file structure.
 
-`generate distro [name] <options>`
+`generate distro [name]`
 
 Arguments:
 * `name` The name of the distribution file.
   * OPTIONAL (default: `distribution`)
 
-Options:
-
-* `--root <string>` Specify the root directory.
-* `--baseUrl <string>` Base url of your file host.
-
 >
 > Example Usage
 >
-> `generate distribution --root C:/TestRoot --baseUrl https://myhost.com`
+> `generate distro`
 >
 
 ---
@@ -163,3 +177,6 @@ Ex.
   * `forgemods` All modules of type `ForgeMod`.
   * `litemods` All modules of type `LiteMod`.
   * `TestServer-1.12.2.png` Server icon file.
+
+
+[dotenvnpm]: https://www.npmjs.com/package/dotenv
