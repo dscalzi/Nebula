@@ -6,8 +6,6 @@ import { resolve } from 'url'
 
 export class LibraryStructure extends ModuleStructure {
 
-    private readonly crudeRegex = /(.+)-([\d.]+).[jJ][aA][rR]/
-
     constructor(
         absoluteRoot: string,
         relativeRoot: string,
@@ -16,21 +14,6 @@ export class LibraryStructure extends ModuleStructure {
         super(absoluteRoot, relativeRoot, 'libraries', baseUrl, Type.Library, (name: string) => {
             return name.toLowerCase().endsWith(TypeMetadata[this.type].defaultExtension!)
         })
-    }
-
-    private attemptCrudeInference(name: string): { name: string, version: string } {
-        const result = this.crudeRegex.exec(name)
-        if(result != null) {
-            return {
-                name: result[1],
-                version: result[2]
-            }
-        } else {
-            return {
-                name: name.substring(0, name.toLowerCase().indexOf(TypeMetadata[this.type].defaultExtension!)),
-                version: '0.0.0'
-            }
-        }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

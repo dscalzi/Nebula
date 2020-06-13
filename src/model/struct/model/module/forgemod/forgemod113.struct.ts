@@ -103,16 +103,31 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
             // ignored
         }
 
-        let createDefault = false
-
         if (raw) {
-            // Assuming the main mod will be the first entry in this file.
             try {
                 const parsed = toml.parse(raw.toString()) as ModsToml
+                this.forgeModMetadata[name] = parsed
+            } catch (err) {
+                ForgeModStructure113.logger.error(`ForgeMod ${name} contains an invalid mods.toml file.`)
+            }
+        } else {
+            ForgeModStructure113.logger.error(`ForgeMod ${name} does not contain mods.toml file.`)
+        }
 
-                // tslint:disable-next-line: no-invalid-template-strings
-                if (parsed.mods[0].version === '${file.jarVersion}') {
-                    let version = '0.0.0'
+        const crudeInference = this.attemptCrudeInference(name)
+
+        if(this.forgeModMetadata[name] != null) {
+
+            const x = this.forgeModMetadata[name]!
+            for(const entry of x.mods) {
+
+                if(entry.modId === this.EXAMPLE_MOD_ID) {
+                    entry.modId = crudeInference.name.toLowerCase()
+                    entry.displayName = crudeInference.name
+                }
+
+                if (entry.version === '${file.jarVersion}') {
+                    let version = crudeInference.version
                     try {
                         const manifest = zip.entryDataSync('META-INF/MANIFEST.MF')
                         const keys = manifest.toString().split('\n')
@@ -127,28 +142,18 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                     } catch {
                         ForgeModStructure113.logger.debug(`ForgeMod ${name} contains a version wildcard yet no MANIFEST.MF.. Defaulting to ${version}`)
                     }
-                    parsed.mods[0].version = version
+                    entry.version = version
                 }
-
-                this.forgeModMetadata[name] = parsed
-
-            } catch (err) {
-                ForgeModStructure113.logger.error(`ForgeMod ${name} contains an invalid mods.toml file.`)
-                createDefault = true
             }
-        } else {
-            ForgeModStructure113.logger.error(`ForgeMod ${name} does not contain mods.toml file.`)
-            createDefault = true
-        }
 
-        if (createDefault) {
+        } else {
             this.forgeModMetadata[name] = ({
                 modLoader: 'javafml',
                 loaderVersion: '',
                 mods: [{
-                    modId: name.substring(0, name.lastIndexOf('.')).toLowerCase(),
-                    version: '0.0.0',
-                    displayName: name,
+                    modId: crudeInference.name.toLowerCase(),
+                    version: crudeInference.version,
+                    displayName: crudeInference.name,
                     description: ''
                 }]
             })

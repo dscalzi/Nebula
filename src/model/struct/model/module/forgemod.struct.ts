@@ -8,6 +8,8 @@ import { MinecraftVersion } from '../../../../util/MinecraftVersion'
 
 export abstract class BaseForgeModStructure extends ModuleStructure implements VersionSegmented {
 
+    protected readonly EXAMPLE_MOD_ID = 'examplemod'
+
     constructor(
         absoluteRoot: string,
         relativeRoot: string,

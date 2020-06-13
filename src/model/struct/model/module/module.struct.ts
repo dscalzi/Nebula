@@ -6,6 +6,9 @@ import { BaseModelStructure } from '../basemodel.struct'
 
 export abstract class ModuleStructure extends BaseModelStructure<Module> {
 
+    private readonly crudeRegex = /(.+?)-(.+).[jJ][aA][rR]/
+    protected readonly DEFAULT_VERSION = '0.0.0'
+
     constructor(
         absoluteRoot: string,
         relativeRoot: string,
@@ -27,6 +30,21 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
 
     protected generateMavenIdentifier(name: string, version: string): string {
         return `generated.${this.type.toLowerCase()}:${name}:${version}@${TypeMetadata[this.type].defaultExtension}`
+    }
+
+    protected attemptCrudeInference(name: string): { name: string, version: string } {
+        const result = this.crudeRegex.exec(name)
+        if(result != null) {
+            return {
+                name: result[1],
+                version: result[2]
+            }
+        } else {
+            return {
+                name: name.substring(0, name.lastIndexOf('.')),
+                version: this.DEFAULT_VERSION
+            }
+        }
     }
 
     protected async abstract getModuleId(name: string, path: string): Promise<string>

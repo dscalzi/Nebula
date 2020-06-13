@@ -100,36 +100,45 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
             // ignored
         }
 
-        let createDefault = false
-
         if (raw) {
             // Assuming the main mod will be the first entry in this file.
             try {
                 const resolved = JSON.parse(raw.toString()) as (McModInfoList | McModInfo[])
+
                 if (Object.prototype.hasOwnProperty.call(resolved, 'modListVersion')) {
                     this.forgeModMetadata[name] = (resolved as McModInfoList).modList[0]
                 } else {
                     this.forgeModMetadata[name] = (resolved as McModInfo[])[0]
                 }
-                // No way to resolve this AFAIK
-                if(this.forgeModMetadata[name]!.version.indexOf('@') > -1 || this.forgeModMetadata[name]!.version.indexOf('$') > -1) {
-                    // Ex. @VERSION@, ${version}
-                    this.forgeModMetadata[name]!.version = '0.0.0'
-                }
+
             } catch (err) {
                 ForgeModStructure17.logger.error(`ForgeMod ${name} contains an invalid mcmod.info file.`)
-                createDefault = true
             }
         } else {
             ForgeModStructure17.logger.error(`ForgeMod ${name} does not contain mcmod.info file.`)
-            createDefault = true
         }
 
-        if (createDefault) {
+        // Validate
+        const crudeInference = this.attemptCrudeInference(name)
+        if(this.forgeModMetadata[name] != null) {
+            
+            const x = this.forgeModMetadata[name]!
+            if(x.modid === this.EXAMPLE_MOD_ID) {
+                x.modid = crudeInference.name.toLowerCase()
+                x.name = crudeInference.name
+            }
+
+            // Ex. @VERSION@, ${version}
+            const isVersionWildcard = this.forgeModMetadata[name]!.version.indexOf('@') > -1 || this.forgeModMetadata[name]!.version.indexOf('$') > -1
+            if(isVersionWildcard) {
+                x.version = crudeInference.version
+            }
+            
+        } else {
             this.forgeModMetadata[name] = ({
-                modid: name.substring(0, name.lastIndexOf('.')).toLowerCase(),
-                name,
-                version: '0.0.0'
+                modid: crudeInference.name.toLowerCase(),
+                name: crudeInference.name,
+                version: crudeInference.version
             }) as unknown as McModInfo
         }
 
