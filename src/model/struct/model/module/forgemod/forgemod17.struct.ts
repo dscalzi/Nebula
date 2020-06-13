@@ -124,7 +124,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
         if(this.forgeModMetadata[name] != null) {
             
             const x = this.forgeModMetadata[name]!
-            if(x.modid === this.EXAMPLE_MOD_ID) {
+            if(x.modid == null || x.modid === '' || x.modid === this.EXAMPLE_MOD_ID) {
                 x.modid = crudeInference.name.toLowerCase()
                 x.name = crudeInference.name
             }
