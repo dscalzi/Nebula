@@ -89,7 +89,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                 name: info,
                 version,
                 mcversion: version.substring(0, version.indexOf('_'))
-            }) as unknown as McModInfo
+            }) as McModInfo
             return this.forgeModMetadata[name] as McModInfo
         }
 
@@ -139,7 +139,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                 modid: crudeInference.name.toLowerCase(),
                 name: crudeInference.name,
                 version: crudeInference.version
-            }) as unknown as McModInfo
+            }) as McModInfo
         }
 
         return this.forgeModMetadata[name] as McModInfo

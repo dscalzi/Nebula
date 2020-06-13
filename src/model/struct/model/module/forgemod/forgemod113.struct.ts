@@ -87,12 +87,19 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
 
             const info = changelogBuf.toString().split('\n')[0].trim()
             const version = info.split(' ')[1]
+
             this.forgeModMetadata[name] = ({
-                modid: 'optifine',
-                name: info,
-                version,
-                mcversion: version.substring(0, version.indexOf('_'))
-            }) as unknown as ModsToml
+                modLoader: 'javafml',
+                loaderVersion: '',
+                mods: [{
+                    modId: 'optifine',
+                    version,
+                    displayName: 'OptiFine',
+                    description: `OptiFine is a Minecraft optimization mod.
+                    It allows Minecraft to run faster and look better with full support for shaders, HD textures and many configuration options.`
+                }]
+            })
+
             return this.forgeModMetadata[name] as ModsToml
         }
 

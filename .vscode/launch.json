@@ -11,7 +11,8 @@
             "program": "${workspaceFolder}\\src\\index.ts",
             "args": [
                 "g",
-                "distro"
+                "distro",
+                "xyz"
             ],
             "preLaunchTask": "compile",
             "outFiles": [
