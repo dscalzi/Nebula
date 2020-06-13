@@ -58,7 +58,8 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                         return
                     } catch(err) {
                         zip.close()
-                        throw err
+                        reject(err)
+                        return
                     }
                 })
 

@@ -56,7 +56,8 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                         return
                     } catch(err) {
                         zip.close()
-                        throw err
+                        reject(err)
+                        return
                     }
                 })
 
@@ -129,10 +130,15 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
             }
 
             // Ex. @VERSION@, ${version}
-            const isVersionWildcard = this.forgeModMetadata[name]!.version.indexOf('@') > -1 || this.forgeModMetadata[name]!.version.indexOf('$') > -1
-            if(isVersionWildcard) {
+            if(this.forgeModMetadata[name]!.version != null) {
+                const isVersionWildcard = this.forgeModMetadata[name]!.version.indexOf('@') > -1 || this.forgeModMetadata[name]!.version.indexOf('$') > -1
+                if(isVersionWildcard) {
+                    x.version = crudeInference.version
+                }
+            } else {
                 x.version = crudeInference.version
             }
+            
             
         } else {
             this.forgeModMetadata[name] = ({

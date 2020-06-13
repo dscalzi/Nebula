@@ -53,7 +53,8 @@ export class LiteModStructure extends ModuleStructure {
                         return
                     } catch(err) {
                         zip.close()
-                        throw err
+                        reject(err)
+                        return
                     }
                 })
 
