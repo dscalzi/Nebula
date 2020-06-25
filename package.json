@@ -30,9 +30,9 @@
     "@types/node": "^12.12.47",
     "@types/triple-beam": "^1.3.1",
     "@types/yargs": "^15.0.5",
-    "@typescript-eslint/eslint-plugin": "^3.2.0",
-    "@typescript-eslint/parser": "^3.2.0",
-    "eslint": "^7.2.0",
+    "@typescript-eslint/eslint-plugin": "^3.4.0",
+    "@typescript-eslint/parser": "^3.4.0",
+    "eslint": "^7.3.1",
     "rimraf": "^3.0.2",
     "typescript": "^3.9.5"
   },
@@ -41,11 +41,11 @@
     "dotenv": "^8.2.0",
     "fs-extra": "^9.0.1",
     "helios-distribution-types": "^1.0.0-pre.1",
-    "moment": "^2.26.0",
+    "moment": "^2.27.0",
     "node-stream-zip": "^1.11.2",
     "toml": "^3.0.0",
     "triple-beam": "^1.3.0",
-    "winston": "^3.2.1",
+    "winston": "^3.3.3",
     "yargs": "^15.3.1"
   }
 }

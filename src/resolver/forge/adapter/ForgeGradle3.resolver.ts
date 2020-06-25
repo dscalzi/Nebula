@@ -31,7 +31,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         if(version.getMinor() === 12 && VersionUtil.isOneDotTwelveFG2(libraryVersion)) {
             return false
         }
-        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15])
+        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16])
     }
 
     private generatedFiles: GeneratedFile[] | undefined
@@ -49,8 +49,8 @@ export class ForgeGradle3Adapter extends ForgeResolver {
     }
 
     private configure(): void {
-        // Configure for 13, 14, 15
-        if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15])) {
+        // Configure for 13, 14, 15, 16
+        if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16])) {
             this.generatedFiles = [
                 {
                     name: 'base jar',

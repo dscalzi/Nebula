@@ -15,7 +15,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public static isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {
-        return VersionUtil.isVersionAcceptable(version, [13, 14, 15])
+        return VersionUtil.isVersionAcceptable(version, [13, 14, 15, 16])
     }
 
     private forgeModMetadata: {[property: string]: ModsToml | undefined} = {}
