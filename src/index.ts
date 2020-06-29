@@ -20,6 +20,13 @@ function getRoot(): string {
     return resolvePath(process.env.ROOT as string)
 }
 
+function getHeliosDataFolder(): string | null {
+    if(process.env.HELIOS_DATA_FOLDER) {
+        return resolvePath(process.env.HELIOS_DATA_FOLDER as string)
+    }
+    return null
+}
+
 function getBaseURL(): string {
     let baseUrl = process.env.BASE_URL as string
     // Users must provide protocol in all other instances.
@@ -31,6 +38,16 @@ function getBaseURL(): string {
         }
     }
     return (new URL(baseUrl)).toString()
+}
+
+function installLocalOption(yargs: yargs.Argv) {
+    return yargs.option('installLocal', {
+        describe: 'Install the generated distribution to your local Helios data folder.',
+        type: 'boolean',
+        demandOption: false,
+        global: false,
+        default: false
+    })
 }
 
 // function rootOption(yargs: yargs.Argv) {
@@ -177,8 +194,7 @@ const generateDistroCommand: yargs.CommandModule = {
     command: 'distro [name]',
     describe: 'Generate a distribution index from the root file structure.',
     builder: (yargs) => {
-        // yargs = rootOption(yargs)
-        // yargs = baseUrlOption(yargs)
+        yargs = installLocalOption(yargs)
         yargs = namePositional(yargs)
         return yargs
     },
@@ -186,17 +202,36 @@ const generateDistroCommand: yargs.CommandModule = {
         argv.root = getRoot()
         argv.baseUrl = getBaseURL()
 
+        const finalName = `${argv.name}.json`
+
         logger.debug(`Root set to ${argv.root}`)
         logger.debug(`Base Url set to ${argv.baseUrl}`)
-        logger.debug(`Invoked generate distro name ${argv.name}.json.`)
+        logger.debug(`Install option set to ${argv.install}`)
+        logger.debug(`Invoked generate distro name ${finalName}.`)
+
+        const doLocalInstall = argv.installLocal as boolean
+        const heliosDataFolder = getHeliosDataFolder()
+        if(doLocalInstall && heliosDataFolder == null) {
+            logger.error('You MUST specify HELIOS_DATA_FOLDER in your .env when using the --install option.')
+            return
+        }
+
         try {
             const distributionStruct = new DistributionStructure(argv.root as string, argv.baseUrl as string)
             const distro = await distributionStruct.getSpecModel()
-            const distroPath = resolvePath(argv.root as string, `${argv.name}.json`)
-            writeFile(distroPath, JSON.stringify(distro, null, 2))
-            logger.info(`Successfully generated ${argv.name}.json`)
+            const distroOut = JSON.stringify(distro, null, 2)
+            const distroPath = resolvePath(argv.root as string, finalName)
+            writeFile(distroPath, distroOut)
+            logger.info(`Successfully generated ${finalName}`)
             logger.info(`Saved to ${distroPath}`)
             logger.debug('Preview:\n', distro)
+            if(doLocalInstall) {
+                const finalDestination = resolvePath(heliosDataFolder!, finalName)
+                logger.info(`Installing distribution to ${finalDestination}`)
+                writeFile(finalDestination, distroOut)
+                logger.info('Success!')
+            }
+            
         } catch (error) {
             logger.error(`Failed to generate distribution with root ${argv.root}.`, error)
         }

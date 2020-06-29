@@ -25,6 +25,7 @@ Example
 JAVA_EXECUTABLE=C:\Program Files\AdoptOpenJDK\jdk-8.0.232.09-hotspot\bin\java.exe
 ROOT=D:\TestRoot2
 BASE_URL=http://localhost:8080/
+HELIOS_DATA_FOLDER=C:\Users\user\AppData\Roaming\Helios Launcher
 ```
 
 ## Usage
@@ -121,10 +122,19 @@ Arguments:
 * `name` The name of the distribution file.
   * OPTIONAL (default: `distribution`)
 
+Options:
+
+* `--installLocal` Have the application install a copy of the generated distribution to the Helios data folder.
+  * OPTIONAL (default: false)
+  * This is useful to easily test the new distribution.json in dev mode on Helios.
+  * Tip: Set name to `dev_distribution` when using this option.
+
 >
 > Example Usage
 >
 > `generate distro`
+>
+> `generate distro dev_distribution --installLocal`
 >
 
 ---

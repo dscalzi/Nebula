@@ -7,14 +7,26 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Generate Distribution",
             "program": "${workspaceFolder}\\src\\index.ts",
             "args": [
-                "g",
-                "distro",
-                "xyz"
+                "g", "distro"
             ],
-            "preLaunchTask": "compile",
+            "preLaunchTask": "build",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
+            "outputCapture": "std",
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Install Dev Distribution",
+            "program": "${workspaceFolder}\\src\\index.ts",
+            "args": [
+                "g", "distro", "dev_distribution", "--installLocal"
+            ],
+            "preLaunchTask": "build",
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ],
