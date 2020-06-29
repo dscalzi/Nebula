@@ -51,6 +51,10 @@ export class ForgeGradle3Adapter extends ForgeResolver {
     private configure(): void {
         // Configure for 13, 14, 15, 16
         if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16])) {
+
+            // https://github.com/MinecraftForge/MinecraftForge/commit/97d4652f5fe15931b980117efabdff332f9f6428
+            const mcpUnifiedVersion = `${this.minecraftVersion}-${ForgeGradle3Adapter.WILDCARD_MCP_VERSION}`
+
             this.generatedFiles = [
                 {
                     name: 'base jar',
@@ -74,16 +78,6 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     classifiers: ['client']
                 },
                 {
-                    name: 'client slim',
-                    group: LibRepoStructure.MINECRAFT_GROUP,
-                    artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                    version: this.minecraftVersion.toString(),
-                    classifiers: [
-                        'slim',
-                        'slim-stable'
-                    ]
-                },
-                {
                     name: 'client data',
                     group: LibRepoStructure.MINECRAFT_GROUP,
                     artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
@@ -92,26 +86,69 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     skipIfNotPresent: true
                 },
                 {
-                    name: 'client extra',
-                    group: LibRepoStructure.MINECRAFT_GROUP,
-                    artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                    version: this.minecraftVersion.toString(),
-                    classifiers: [
-                        'extra',
-                        'extra-stable'
-                    ]
-                },
-                {
                     name: 'client srg',
                     group: LibRepoStructure.MINECRAFT_GROUP,
                     artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                    version: `${this.minecraftVersion}-${ForgeGradle3Adapter.WILDCARD_MCP_VERSION}`,
+                    version: mcpUnifiedVersion,
                     classifiers: ['srg']
                 }
             ]
             this.wildcardsInUse = [
                 ForgeGradle3Adapter.WILDCARD_MCP_VERSION
             ]
+
+            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15])) {
+
+                this.generatedFiles.push(
+                    {
+                        name: 'client slim',
+                        group: LibRepoStructure.MINECRAFT_GROUP,
+                        artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
+                        version: this.minecraftVersion.toString(),
+                        classifiers: [
+                            'slim',
+                            'slim-stable'
+                        ]
+                    },
+                    {
+                        name: 'client extra',
+                        group: LibRepoStructure.MINECRAFT_GROUP,
+                        artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
+                        version: this.minecraftVersion.toString(),
+                        classifiers: [
+                            'extra',
+                            'extra-stable'
+                        ]
+                    }
+                )
+            } else {
+
+                this.generatedFiles.push(
+                    {
+                        name: 'client slim',
+                        group: LibRepoStructure.MINECRAFT_GROUP,
+                        artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
+                        version: mcpUnifiedVersion,
+                        classifiers: [
+                            'slim',
+                            'slim-stable'
+                        ]
+                    },
+                    {
+                        name: 'client extra',
+                        group: LibRepoStructure.MINECRAFT_GROUP,
+                        artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
+                        version: mcpUnifiedVersion,
+                        classifiers: [
+                            'extra',
+                            'extra-stable'
+                        ]
+                    }
+                )
+
+            }
+
+
             return
         }
 
