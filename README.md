@@ -1,6 +1,6 @@
 # Nebula
 
-Generate a distribution.json for Helios.
+Generate a distribution.json for Helios. Documentation on this format can be found [here][distro.md].
 
 ## Requirements
 
@@ -185,8 +185,65 @@ Ex.
   * `files` All modules of type `File`.
   * `libraries` All modules of type `Library`
   * `forgemods` All modules of type `ForgeMod`.
+    * This is a directory of toggleable modules. See the note below.
   * `litemods` All modules of type `LiteMod`.
+    * This is a directory of toggleable modules. See the note below.
   * `TestServer-1.12.2.png` Server icon file.
+
+#### Toggleable Modules
+
+If a directory represents a toggleable mod, it will have three subdirectories. You must filter your files into these three.
+
+* `required` Modules that are required.
+* `optionalon` Modules that are optional and enabled by default.
+* `optionaloff` Modules that are optional and disabled by default.
+
+### Additional Metadata
+
+To preserve metadata that cannot be inferred via file structure, two files exist. Default values will be generated when applicable. Customize to fit your needs. These values should be self explanatory. If further details are required, see the [distribution.json specification document][distro.md]. 
+
+#### ${ROOT}/meta/distrometa.json
+
+Represents the additiona metadata on the distribution object. Sample:
+
+```json
+{
+  "meta": {
+      "rss": "<LINK TO RSS FEED>",
+      "discord": {
+          "clientId": "<FILL IN OR REMOVE DISCORD OBJECT>",
+          "smallImageText": "<FILL IN OR REMOVE DISCORD OBJECT>",
+          "smallImageKey": "<FILL IN OR REMOVE DISCORD OBJECT>"
+      }
+  }
+}
+```
+
+#### servers/${YOUR_SERVER}/servermeta.json
+
+Represents the additional metadata on the server object (for a YOUR_SERVER). Sample:
+
+```json
+{
+  "meta": {
+    "version": "1.0.0",
+    "name": "Test (Minecraft 1.12.2)",
+    "description": "Test Running Minecraft 1.12.2 (Forge v14.23.5.2854)",
+    "address": "localhost:25565",
+    "discord": {
+      "shortId": "1.12.2 Test Server",
+      "largeImageText": "1.12.2 Test Server",
+      "largeImageKey": "seal-circle"
+    },
+    "mainServer": false,
+    "autoconnect": true
+  },
+  "forge": {
+    "version": "14.23.5.2854"
+  }
+}
+```
 
 
 [dotenvnpm]: https://www.npmjs.com/package/dotenv
+[distro.md]: https://github.com/dscalzi/HeliosLauncher/blob/master/docs/distro.md

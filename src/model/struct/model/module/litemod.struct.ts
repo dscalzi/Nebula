@@ -5,9 +5,9 @@ import { join } from 'path'
 import { resolve } from 'url'
 import { capitalize } from '../../../../util/stringutils'
 import { LiteMod } from '../../../liteloader/litemod'
-import { ModuleStructure } from './module.struct'
+import { ToggleableModuleStructure } from './toggleablemodule.struct'
 
-export class LiteModStructure extends ModuleStructure {
+export class LiteModStructure extends ToggleableModuleStructure {
 
     private liteModMetadata: {[property: string]: LiteMod | undefined} = {}
 
@@ -28,7 +28,7 @@ export class LiteModStructure extends ModuleStructure {
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {
-        return resolve(this.baseUrl, join(this.relativeRoot, name))
+        return resolve(this.baseUrl, join(this.relativeRoot, this.getActiveNamespace(), name))
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModulePath(name: string, path: string, stats: Stats): Promise<string | null> {

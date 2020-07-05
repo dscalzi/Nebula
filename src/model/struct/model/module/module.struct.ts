@@ -22,7 +22,7 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
 
     public async getSpecModel(): Promise<Module[]> {
         if (this.resolvedModels == null) {
-            this.resolvedModels = await this._doModuleRetrieval()
+            this.resolvedModels = await this._doModuleRetrieval(this.containerDirectory)
         }
 
         return this.resolvedModels
@@ -58,10 +58,6 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
             id: await this.getModuleId(file, filePath),
             name: await this.getModuleName(file, filePath),
             type: this.type,
-            required: {
-                value: false,
-                def: false
-            },
             artifact: {
                 size: stats.size,
                 MD5: createHash('md5').update(buf).digest('hex'),
@@ -75,14 +71,14 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         return mdl
     }
 
-    private async _doModuleRetrieval(): Promise<Module[]> {
+    protected async _doModuleRetrieval(scanDirectory: string): Promise<Module[]> {
 
         const accumulator: Module[] = []
 
-        if (await pathExists(this.containerDirectory)) {
-            const files = await readdir(this.containerDirectory)
+        if (await pathExists(scanDirectory)) {
+            const files = await readdir(scanDirectory)
             for (const file of files) {
-                const filePath = resolve(this.containerDirectory, file)
+                const filePath = resolve(scanDirectory, file)
                 const stats = await lstat(filePath)
                 if (stats.isFile()) {
                     if(this.filter == null || this.filter(file, filePath, stats)) {

@@ -3,10 +3,10 @@ import { Type } from 'helios-distribution-types'
 import { join } from 'path'
 import { resolve } from 'url'
 import { VersionSegmented } from '../../../../util/VersionSegmented'
-import { ModuleStructure } from './module.struct'
 import { MinecraftVersion } from '../../../../util/MinecraftVersion'
+import { ToggleableModuleStructure } from './toggleablemodule.struct'
 
-export abstract class BaseForgeModStructure extends ModuleStructure implements VersionSegmented {
+export abstract class BaseForgeModStructure extends ToggleableModuleStructure implements VersionSegmented {
 
     protected readonly EXAMPLE_MOD_ID = 'examplemod'
 
@@ -22,7 +22,7 @@ export abstract class BaseForgeModStructure extends ModuleStructure implements V
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {
-        return resolve(this.baseUrl, join(this.relativeRoot, name))
+        return resolve(this.baseUrl, join(this.relativeRoot, this.getActiveNamespace(), name))
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModulePath(name: string, path: string, stats: Stats): Promise<string | null> {
