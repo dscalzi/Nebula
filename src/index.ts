@@ -206,13 +206,13 @@ const generateDistroCommand: yargs.CommandModule = {
 
         logger.debug(`Root set to ${argv.root}`)
         logger.debug(`Base Url set to ${argv.baseUrl}`)
-        logger.debug(`Install option set to ${argv.install}`)
+        logger.debug(`Install option set to ${argv.installLocal}`)
         logger.debug(`Invoked generate distro name ${finalName}.`)
 
         const doLocalInstall = argv.installLocal as boolean
         const heliosDataFolder = getHeliosDataFolder()
         if(doLocalInstall && heliosDataFolder == null) {
-            logger.error('You MUST specify HELIOS_DATA_FOLDER in your .env when using the --install option.')
+            logger.error('You MUST specify HELIOS_DATA_FOLDER in your .env when using the --installLocal option.')
             return
         }
 
