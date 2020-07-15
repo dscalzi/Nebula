@@ -8,6 +8,7 @@ import { LiteMod } from '../../../liteloader/litemod'
 import { ToggleableModuleStructure } from './toggleablemodule.struct'
 import { MinecraftVersion } from '../../../../util/MinecraftVersion'
 import { LibraryType } from '../../../claritas/ClaritasLibraryType'
+import { MetadataUtil } from '../../../../util/MetadataUtil'
 
 export class LiteModStructure extends ToggleableModuleStructure {
 
@@ -28,7 +29,8 @@ export class LiteModStructure extends ToggleableModuleStructure {
 
     protected async getModuleId(name: string, path: string): Promise<string> {
         const liteModData = await this.getLiteModMetadata(name, path)
-        return this.generateMavenIdentifier(this.getClaritasGroup(path), liteModData.name, `${liteModData.version}-${liteModData.mcversion}`)
+        return this.generateMavenIdentifier(
+            MetadataUtil.completeGroupInference(this.getClaritasGroup(path), liteModData.name), liteModData.name, `${liteModData.version}-${liteModData.mcversion}`)
     }
     protected async getModuleName(name: string, path: string): Promise<string> {
         return capitalize((await this.getLiteModMetadata(name, path)).name)
