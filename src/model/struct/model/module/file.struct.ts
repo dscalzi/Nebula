@@ -5,15 +5,21 @@ import { resolve as resolveURL } from 'url'
 import { ModuleStructure } from './module.struct'
 import { readdir, stat } from 'fs-extra'
 import { join, resolve, sep } from 'path'
+import { MinecraftVersion } from '../../../../util/MinecraftVersion'
 
 export class MiscFileStructure extends ModuleStructure {
 
     constructor(
         absoluteRoot: string,
         relativeRoot: string,
-        baseUrl: string
+        baseUrl: string,
+        minecraftVersion: MinecraftVersion
     ) {
-        super(absoluteRoot, relativeRoot, 'files', baseUrl, Type.File)
+        super(absoluteRoot, relativeRoot, 'files', baseUrl, minecraftVersion, Type.File)
+    }
+
+    public getLoggerName(): string {
+        return 'MiscFileStructure'
     }
 
     public async getSpecModel(): Promise<Module[]> {

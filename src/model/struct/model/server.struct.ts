@@ -9,11 +9,8 @@ import { MiscFileStructure } from './module/file.struct'
 import { LiteModStructure } from './module/litemod.struct'
 import { LibraryStructure } from './module/library.struct'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
-import { LoggerUtil } from '../../../util/LoggerUtil'
 
 export class ServerStructure extends BaseModelStructure<Server> {
-
-    private static readonly logger = LoggerUtil.getLogger('ServerStructure')
 
     private readonly ID_REGEX = /(.+-(.+)$)/
     private readonly SERVER_META_FILE = 'servermeta.json'
@@ -23,6 +20,10 @@ export class ServerStructure extends BaseModelStructure<Server> {
         baseUrl: string
     ) {
         super(absoluteRoot, '', 'servers', baseUrl)
+    }
+
+    public getLoggerName(): string {
+        return 'ServerStructure'
     }
 
     public async getSpecModel(): Promise<Server[]> {
@@ -45,7 +46,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
         const relativeServerRoot = join(this.relativeRoot, effectiveId)
 
         if (await pathExists(absoluteServerRoot)) {
-            ServerStructure.logger.error('Server already exists! Aborting.')
+            this.logger.error('Server already exists! Aborting.')
             return
         }
 
@@ -66,7 +67,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
         }
 
         if (options.liteloaderVersion != null) {
-            const lms = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+            const lms = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
             await lms.init()
             serverMetaOpts.liteloaderVersion = options.liteloaderVersion
         }
@@ -74,10 +75,10 @@ export class ServerStructure extends BaseModelStructure<Server> {
         const serverMeta: ServerMeta = getDefaultServerMeta(id, minecraftVersion.toString(), serverMetaOpts)
         await writeFile(resolvePath(absoluteServerRoot, this.SERVER_META_FILE), JSON.stringify(serverMeta, null, 2))
 
-        const libS = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+        const libS = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
         await libS.init()
 
-        const mfs = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+        const mfs = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
         await mfs.init()
 
     }
@@ -93,8 +94,8 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
                 const match = this.ID_REGEX.exec(file)
                 if (match == null) {
-                    ServerStructure.logger.warn(`Server directory ${file} does not match the defined standard.`)
-                    ServerStructure.logger.warn('All server ids must end with -<minecraft version> (ex. -1.12.2)')
+                    this.logger.warn(`Server directory ${file} does not match the defined standard.`)
+                    this.logger.warn('All server ids must end with -<minecraft version> (ex. -1.12.2)')
                     continue
                 }
 
@@ -110,7 +111,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 }
 
                 if (!iconUrl) {
-                    ServerStructure.logger.warn(`No icon file found for server ${file}.`)
+                    this.logger.warn(`No icon file found for server ${file}.`)
                 }
 
                 // Read server meta
@@ -146,16 +147,16 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
                 
                 if(serverMeta.liteloader) {
-                    const liteModStruct = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+                    const liteModStruct = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
                     const liteModModules = await liteModStruct.getSpecModel()
                     modules.push(...liteModModules)
                 }
                 
-                const libraryStruct = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+                const libraryStruct = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
                 const libraryModules = await libraryStruct.getSpecModel()
                 modules.push(...libraryModules)
 
-                const fileStruct = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl)
+                const fileStruct = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
                 const fileModules = await fileStruct.getSpecModel()
                 modules.push(...fileModules)
 
@@ -174,7 +175,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 })
 
             } else {
-                ServerStructure.logger.warn(`Path ${file} in server directory is not a directory!`)
+                this.logger.warn(`Path ${file} in server directory is not a directory!`)
             }
         }
         return accumulator

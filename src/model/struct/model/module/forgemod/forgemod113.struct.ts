@@ -5,11 +5,8 @@ import { VersionUtil } from '../../../../../util/versionutil'
 import { ModsToml } from '../../../../forge/modstoml'
 import { BaseForgeModStructure } from '../forgemod.struct'
 import { MinecraftVersion } from '../../../../../util/MinecraftVersion'
-import { LoggerUtil } from '../../../../../util/LoggerUtil'
 
 export class ForgeModStructure113 extends BaseForgeModStructure {
-
-    private static readonly logger = LoggerUtil.getLogger('ForgeModStructure (1.13)')
 
     public static readonly IMPLEMENTATION_VERSION_REGEX = /^Implementation-Version: (.+)[\r\n]/
 
@@ -23,18 +20,23 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
     constructor(
         absoluteRoot: string,
         relativeRoot: string,
-        baseUrl: string
+        baseUrl: string,
+        minecraftVersion: MinecraftVersion
     ) {
-        super(absoluteRoot, relativeRoot, baseUrl)
+        super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion)
     }
 
     public isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {
         return ForgeModStructure113.isForVersion(version, libraryVersion)
     }
 
+    public getLoggerName(): string {
+        return 'ForgeModStructure (1.13)'
+    }
+
     protected async getModuleId(name: string, path: string): Promise<string> {
         const fmData = await this.getForgeModMetadata(name, path)
-        return this.generateMavenIdentifier(fmData.mods[0].modId, fmData.mods[0].version)
+        return this.generateMavenIdentifier(this.getClaritasGroup(path), fmData.mods[0].modId, fmData.mods[0].version)
     }
     protected async getModuleName(name: string, path: string): Promise<string> {
         return capitalize((await this.getForgeModMetadata(name, path)).mods[0].displayName)
@@ -52,7 +54,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                 zip.on('error', err => reject(err))
                 zip.on('ready', () => {
                     try {
-                        const res = this.processZip(zip, name)
+                        const res = this.processZip(zip, name, path)
                         zip.close()
                         resolve(res)
                         return
@@ -71,7 +73,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
         })
     }
 
-    private processZip(zip: StreamZip, name: string): ModsToml {
+    private processZip(zip: StreamZip, name: string, path: string): ModsToml {
 
         // Optifine is a tweak that can be loaded as a forge mod. It does not
         // appear to contain a mcmod.info class. This a special case we will
@@ -116,11 +118,20 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                 const parsed = toml.parse(raw.toString()) as ModsToml
                 this.forgeModMetadata[name] = parsed
             } catch (err) {
-                ForgeModStructure113.logger.error(`ForgeMod ${name} contains an invalid mods.toml file.`)
+                this.logger.error(`ForgeMod ${name} contains an invalid mods.toml file.`)
             }
         } else {
-            ForgeModStructure113.logger.error(`ForgeMod ${name} does not contain mods.toml file.`)
+            this.logger.error(`ForgeMod ${name} does not contain mods.toml file.`)
         }
+
+        const cRes = this.claritasResult?.[path]
+
+        if(cRes == null) {
+            this.logger.error(`Claritas failed to yield metadata for ForgeMod ${name}!`)
+            this.logger.error('Is this mod malformated or does Claritas need an update?')
+        }
+
+        const claritasId = cRes?.id
 
         const crudeInference = this.attemptCrudeInference(name)
 
@@ -130,7 +141,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
             for(const entry of x.mods) {
 
                 if(entry.modId === this.EXAMPLE_MOD_ID) {
-                    entry.modId = crudeInference.name.toLowerCase()
+                    entry.modId = this.discernResult(claritasId, crudeInference.name.toLowerCase())
                     entry.displayName = crudeInference.name
                 }
 
@@ -139,16 +150,16 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                     try {
                         const manifest = zip.entryDataSync('META-INF/MANIFEST.MF')
                         const keys = manifest.toString().split('\n')
-                        ForgeModStructure113.logger.debug(keys)
+                        this.logger.debug(keys)
                         for (const key of keys) {
                             const match = ForgeModStructure113.IMPLEMENTATION_VERSION_REGEX.exec(key)
                             if (match != null) {
                                 version = match[1]
                             }
                         }
-                        ForgeModStructure113.logger.debug(`ForgeMod ${name} contains a version wildcard, inferring ${version}`)
+                        this.logger.debug(`ForgeMod ${name} contains a version wildcard, inferring ${version}`)
                     } catch {
-                        ForgeModStructure113.logger.debug(`ForgeMod ${name} contains a version wildcard yet no MANIFEST.MF.. Defaulting to ${version}`)
+                        this.logger.debug(`ForgeMod ${name} contains a version wildcard yet no MANIFEST.MF.. Defaulting to ${version}`)
                     }
                     entry.version = version
                 }
@@ -159,7 +170,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                 modLoader: 'javafml',
                 loaderVersion: '',
                 mods: [{
-                    modId: crudeInference.name.toLowerCase(),
+                    modId: this.discernResult(claritasId, crudeInference.name.toLowerCase()),
                     version: crudeInference.version,
                     displayName: crudeInference.name,
                     description: ''

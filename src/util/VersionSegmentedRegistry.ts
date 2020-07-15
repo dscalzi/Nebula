@@ -42,7 +42,7 @@ export class VersionSegmentedRegistry {
     ): BaseForgeModStructure {
         for (const impl of VersionSegmentedRegistry.FORGEMOD_STRUCT_IML) {
             if (impl.isForVersion(minecraftVersion, forgeVersion)) {
-                return new impl(absoluteRoot, relativeRoot, baseUrl)
+                return new impl(absoluteRoot, relativeRoot, baseUrl, minecraftVersion)
             }
         }
         throw new Error(`No forge mod structure found for Minecraft ${minecraftVersion}!`)

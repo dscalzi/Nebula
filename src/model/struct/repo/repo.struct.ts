@@ -17,6 +17,10 @@ export class RepoStructure extends BaseFileStructure {
         this.versionRepoStruct = new VersionRepoStructure(this.containerDirectory, this.relativeRoot)
     }
 
+    public getLoggerName(): string {
+        return 'RepoStructure'
+    }
+
     public async init(): Promise<void> {
         super.init()
         await this.libRepoStruct.init()

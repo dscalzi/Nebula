@@ -12,6 +12,10 @@ export class VersionRepoStructure extends BaseFileStructure {
         super(absoluteRoot, relativeRoot, 'versions')
     }
 
+    public getLoggerName(): string {
+        return 'VersionRepoStructure'
+    }
+
     public getFileName(minecraftVersion: MinecraftVersion, forgeVersion: string): string {
         return `${minecraftVersion}-forge-${forgeVersion}`
     }

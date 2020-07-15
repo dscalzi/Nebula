@@ -3,17 +3,35 @@ import { lstat, pathExists, readdir, readFile, Stats } from 'fs-extra'
 import { Module, Type, TypeMetadata } from 'helios-distribution-types'
 import { resolve } from 'path'
 import { BaseModelStructure } from '../basemodel.struct'
+import { LibraryType } from '../../../claritas/ClaritasLibraryType'
+import { ClaritasResult, ClaritasModuleMetadata } from '../../../claritas/ClaritasResult'
+import { ClaritasWrapper } from '../../../../util/java/ClaritasWrapper'
+import { MinecraftVersion } from '../../../../util/MinecraftVersion'
+
+export interface ModuleCandidate {
+    file: string
+    filePath: string
+    stats: Stats
+}
+
+export interface ClaritasException {
+    exceptionName: string
+    proxyMetadata: ClaritasModuleMetadata
+}
 
 export abstract class ModuleStructure extends BaseModelStructure<Module> {
 
     private readonly crudeRegex = /(.+?)-(.+).[jJ][aA][rR]/
     protected readonly DEFAULT_VERSION = '0.0.0'
 
+    protected claritasResult!: ClaritasResult
+
     constructor(
         absoluteRoot: string,
         relativeRoot: string,
         structRoot: string,
         baseUrl: string,
+        protected minecraftVersion: MinecraftVersion,
         protected type: Type,
         protected filter?: ((name: string, path: string, stats: Stats) => boolean)
     ) {
@@ -22,14 +40,18 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
 
     public async getSpecModel(): Promise<Module[]> {
         if (this.resolvedModels == null) {
-            this.resolvedModels = await this._doModuleRetrieval(this.containerDirectory)
+            this.resolvedModels = await this._doModuleRetrieval(await this._doModuleDiscovery(this.containerDirectory))
         }
 
         return this.resolvedModels
     }
 
-    protected generateMavenIdentifier(name: string, version: string): string {
-        return `generated.${this.type.toLowerCase()}:${name}:${version}@${TypeMetadata[this.type].defaultExtension}`
+    protected getDefaultGroup(): string {
+        return `generated.${this.type.toLowerCase()}`
+    }
+
+    protected generateMavenIdentifier(group: string, id: string, version: string): string {
+        return `${group}:${id}:${version}@${TypeMetadata[this.type].defaultExtension}`
     }
 
     protected attemptCrudeInference(name: string): { name: string, version: string } {
@@ -45,6 +67,18 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
                 version: this.DEFAULT_VERSION
             }
         }
+    }
+
+    protected getClaritasGroup(path: string): string {
+        return this.claritasResult[path]?.group || this.getDefaultGroup()
+    }
+
+    protected getClaritasExceptions(): ClaritasException[] {
+        return []
+    }
+
+    protected getClaritasType(): LibraryType | null {
+        return null
     }
 
     protected async abstract getModuleId(name: string, path: string): Promise<string>
@@ -71,9 +105,9 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         return mdl
     }
 
-    protected async _doModuleRetrieval(scanDirectory: string): Promise<Module[]> {
+    protected async _doModuleDiscovery(scanDirectory: string): Promise<ModuleCandidate[]> {
 
-        const accumulator: Module[] = []
+        const moduleCandidates: ModuleCandidate[] = []
 
         if (await pathExists(scanDirectory)) {
             const files = await readdir(scanDirectory)
@@ -82,13 +116,63 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
                 const stats = await lstat(filePath)
                 if (stats.isFile()) {
                     if(this.filter == null || this.filter(file, filePath, stats)) {
-                        accumulator.push(await this.parseModule(file, filePath, stats))
+                        moduleCandidates.push({file, filePath, stats})
                     }
-                    
                 }
             }
         }
 
+        return moduleCandidates
+
+    }
+
+    protected async _doModuleRetrieval(moduleCandidates: ModuleCandidate[], options?: {
+        preProcess?: (candidate: ModuleCandidate) => void
+        postProcess?: (module: Module) => void
+    }): Promise<Module[]> {
+
+        const accumulator: Module[] = []
+        
+        if(moduleCandidates.length > 0) {
+
+            // Invoke Claritas
+            if(this.getClaritasType() != null) {
+                const claritasExecutor = new ClaritasWrapper()
+
+                let claritasCandidates = moduleCandidates
+                const exceptionCandidates: [ModuleCandidate, ClaritasException][] = []
+                for(const exception of this.getClaritasExceptions()) {
+                    const exceptionCandidate = moduleCandidates.find((value) => value.file.toLowerCase().indexOf(exception.exceptionName) > -1)
+                    if(exceptionCandidate != null) {
+                        exceptionCandidates.push([exceptionCandidate, exception])
+                        claritasCandidates = claritasCandidates.filter((value) => value.file.toLowerCase().indexOf(exception.exceptionName) === -1)
+                    }
+                }
+
+                this.claritasResult = await claritasExecutor.execute(
+                    this.getClaritasType()!,
+                    this.minecraftVersion,
+                    claritasCandidates.map(entry => entry.filePath)
+                )
+                if(this.claritasResult == null) {
+                    this.logger.error('Failed to process Claritas result!')
+                } else {
+                    for(const [candidate, exception] of exceptionCandidates) {
+                        this.claritasResult[candidate.filePath] = exception.proxyMetadata
+                    }
+                }
+            }
+    
+            // Process Modules
+            for(const candidate of moduleCandidates) {
+                options?.preProcess?.(candidate)
+                const mdl = await this.parseModule(candidate.file, candidate.filePath, candidate.stats)
+                options?.postProcess?.(mdl)
+                accumulator.push(mdl)
+            }
+
+        }
+        
         return accumulator
 
     }

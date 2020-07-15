@@ -1,7 +1,8 @@
-import { ModuleStructure } from './module.struct'
+import { ModuleStructure, ModuleCandidate } from './module.struct'
 import { Type, Module } from 'helios-distribution-types'
 import { Stats, mkdirs } from 'fs-extra'
 import { resolve } from 'path'
+import { MinecraftVersion } from '../../../../util/MinecraftVersion'
 
 export enum ToggleableNamespace {
 
@@ -9,6 +10,10 @@ export enum ToggleableNamespace {
     OPTIONAL_ON = 'optionalon',
     OPTIONAL_OFF = 'optionaloff'
 
+}
+
+export interface ToggleableModuleCandidate extends ModuleCandidate {
+    namespace: ToggleableNamespace
 }
 
 export abstract class ToggleableModuleStructure extends ModuleStructure {
@@ -20,10 +25,11 @@ export abstract class ToggleableModuleStructure extends ModuleStructure {
         relativeRoot: string,
         structRoot: string,
         baseUrl: string,
-        protected type: Type,
-        protected filter?: ((name: string, path: string, stats: Stats) => boolean)
+        minecraftVersion: MinecraftVersion,
+        type: Type,
+        filter?: ((name: string, path: string, stats: Stats) => boolean)
     ) {
-        super(absoluteRoot, relativeRoot, structRoot, baseUrl, type, filter)
+        super(absoluteRoot, relativeRoot, structRoot, baseUrl, minecraftVersion, type, filter)
     }
 
     public async init(): Promise<void> {
@@ -36,13 +42,21 @@ export abstract class ToggleableModuleStructure extends ModuleStructure {
     public async getSpecModel(): Promise<Module[]> {
         if (this.resolvedModels == null) {
 
-            this.resolvedModels = []
+            const moduleCandidates: ToggleableModuleCandidate[] = []
             for(const value of Object.values(ToggleableNamespace)) {
-                this.activeNamespace = value
-                const models = await this._doModuleRetrieval(resolve(this.containerDirectory, value))
-                models.forEach(this.getNamespaceMapper(value))
-                this.resolvedModels = this.resolvedModels.concat(models)
+                moduleCandidates.push(...(await super._doModuleDiscovery(resolve(this.containerDirectory, value))).map(val => ({...val, namespace: value})))
             }
+
+            this.resolvedModels = await this._doModuleRetrieval(moduleCandidates, {
+                preProcess: (candidate) => {
+                    this.activeNamespace = (candidate as ToggleableModuleCandidate).namespace
+                },
+                postProcess: (module) => {
+                    this.getNamespaceMapper(this.activeNamespace as ToggleableNamespace)(module)
+                }
+            })
+
+            // Cleanup
             this.activeNamespace = undefined
 
         }

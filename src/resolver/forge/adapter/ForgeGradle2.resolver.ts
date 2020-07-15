@@ -5,7 +5,7 @@ import { basename, join } from 'path'
 import { VersionManifestFG2 } from '../../../model/forge/VersionManifestFG2'
 import { LibRepoStructure } from '../../../model/struct/repo/librepo.struct'
 import { MavenUtil } from '../../../util/maven'
-import { PackXZExtractWrapper } from '../../../util/PackXZExtractWrapper'
+import { PackXZExtractWrapper } from '../../../util/java/PackXZExtractWrapper'
 import { VersionUtil } from '../../../util/versionutil'
 import { ForgeResolver } from '../forge.resolver'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
@@ -227,7 +227,8 @@ export class ForgeGradle2Adapter extends ForgeResolver {
         }
 
         ForgeGradle2Adapter.logger.debug('Spawning PackXZExtract.')
-        await PackXZExtractWrapper.extractUnpack(files)
+        const packXZExecutor = new PackXZExtractWrapper()
+        await packXZExecutor.extractUnpack(files)
         ForgeGradle2Adapter.logger.debug('All files extracted, calculating hashes..')
 
         for (const entry of processingQueue) {
