@@ -126,6 +126,36 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
 
     }
 
+    protected async invokeClaritas(moduleCandidates: ModuleCandidate[]): Promise<void> {
+        if(this.getClaritasType() != null) {
+            const claritasExecutor = new ClaritasWrapper()
+
+            let claritasCandidates = moduleCandidates
+            const exceptionCandidates: [ModuleCandidate, ClaritasException][] = []
+            for(const exception of this.getClaritasExceptions()) {
+                const exceptionCandidate = moduleCandidates.find((value) => value.file.toLowerCase().indexOf(exception.exceptionName) > -1)
+                if(exceptionCandidate != null) {
+                    exceptionCandidates.push([exceptionCandidate, exception])
+                    claritasCandidates = claritasCandidates.filter((value) => value.file.toLowerCase().indexOf(exception.exceptionName) === -1)
+                }
+            }
+
+            this.claritasResult = await claritasExecutor.execute(
+                this.getClaritasType()!,
+                this.minecraftVersion,
+                claritasCandidates.map(entry => entry.filePath)
+            )
+
+            if(this.claritasResult == null) {
+                this.logger.error('Failed to process Claritas result!')
+            } else {
+                for(const [candidate, exception] of exceptionCandidates) {
+                    this.claritasResult[candidate.filePath] = exception.proxyMetadata
+                }
+            }
+        }
+    }
+
     protected async _doModuleRetrieval(moduleCandidates: ModuleCandidate[], options?: {
         preProcess?: (candidate: ModuleCandidate) => void
         postProcess?: (module: Module) => void
@@ -135,33 +165,8 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         
         if(moduleCandidates.length > 0) {
 
-            // Invoke Claritas
-            if(this.getClaritasType() != null) {
-                const claritasExecutor = new ClaritasWrapper()
-
-                let claritasCandidates = moduleCandidates
-                const exceptionCandidates: [ModuleCandidate, ClaritasException][] = []
-                for(const exception of this.getClaritasExceptions()) {
-                    const exceptionCandidate = moduleCandidates.find((value) => value.file.toLowerCase().indexOf(exception.exceptionName) > -1)
-                    if(exceptionCandidate != null) {
-                        exceptionCandidates.push([exceptionCandidate, exception])
-                        claritasCandidates = claritasCandidates.filter((value) => value.file.toLowerCase().indexOf(exception.exceptionName) === -1)
-                    }
-                }
-
-                this.claritasResult = await claritasExecutor.execute(
-                    this.getClaritasType()!,
-                    this.minecraftVersion,
-                    claritasCandidates.map(entry => entry.filePath)
-                )
-                if(this.claritasResult == null) {
-                    this.logger.error('Failed to process Claritas result!')
-                } else {
-                    for(const [candidate, exception] of exceptionCandidates) {
-                        this.claritasResult[candidate.filePath] = exception.proxyMetadata
-                    }
-                }
-            }
+            // Invoke Claritas and attach result to class.
+            await this.invokeClaritas(moduleCandidates)
     
             // Process Modules
             for(const candidate of moduleCandidates) {
