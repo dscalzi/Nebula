@@ -11,6 +11,7 @@ export abstract class JarExecutor<T> {
     protected stdoutListeners: ((chunk: any) => void)[] = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected stderrListeners: ((chunk: any) => void)[] = []
+    protected onCloseListeners: ((code: number) => Promise<void>)[] = []
 
     protected lastExecutionResult!: T
 
@@ -34,10 +35,14 @@ export abstract class JarExecutor<T> {
             child.stderr.on('data', (data) => this.logger.error(data.toString('utf8').trim()))
             this.stderrListeners.forEach(l => child.stderr.on('data', l))
 
-            child.on('close', code => {
+            child.on('close', async code => {
                 this.logger.info('Exited with code', code)
+                for(const l of this.onCloseListeners) {
+                    await l(code)
+                }
                 resolve(this.lastExecutionResult)
             })
+
             child.on('error', (err) => {
                 this.logger.info('Error during process execution', err)
                 reject(err)

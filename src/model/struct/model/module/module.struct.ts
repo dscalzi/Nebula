@@ -128,7 +128,7 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
 
     protected async invokeClaritas(moduleCandidates: ModuleCandidate[]): Promise<void> {
         if(this.getClaritasType() != null) {
-            const claritasExecutor = new ClaritasWrapper()
+            const claritasExecutor = new ClaritasWrapper(this.absoluteRoot)
 
             let claritasCandidates = moduleCandidates
             const exceptionCandidates: [ModuleCandidate, ClaritasException][] = []
