@@ -3,17 +3,19 @@ import { join, resolve } from 'path'
 import { ClaritasResult } from '../../model/claritas/ClaritasResult'
 import { MinecraftVersion } from '../MinecraftVersion'
 import { LibraryType } from '../../model/claritas/ClaritasLibraryType'
-import { pathExists, remove, readFile } from 'fs-extra'
+import { pathExists, remove, readFile, writeFile, mkdirs } from 'fs-extra'
 
 export class ClaritasWrapper extends JarExecutor<ClaritasResult> {
 
     private readonly WORK_DIR: string
+    private readonly ARG_FILE: string
     private readonly OUTPUT_FILE: string
 
     constructor(cwd: string) {
         super('Claritas')
 
         this.WORK_DIR = resolve(cwd, 'claritasWork')
+        this.ARG_FILE = resolve(this.WORK_DIR, 'claritasArgFile.txt')
         this.OUTPUT_FILE = resolve(this.WORK_DIR, 'claritasOutput.json')
 
         this.onCloseListeners.push(async (code) => {
@@ -37,13 +39,24 @@ export class ClaritasWrapper extends JarExecutor<ClaritasResult> {
         return join(process.cwd(), 'libraries', 'java', 'Claritas.jar')
     }
 
-    public execute(libraryType: LibraryType, mcVersion: MinecraftVersion, absoluteJarPaths: string[]): Promise<ClaritasResult> {
-        return super.executeJar(
+    private async writeArgFile(...programArgs: string[]): Promise<void> {
+        await mkdirs(this.WORK_DIR)
+        await writeFile(
+            this.ARG_FILE,
+            programArgs.join('\n')
+        )
+    }
+
+    public async execute(libraryType: LibraryType, mcVersion: MinecraftVersion, absoluteJarPaths: string[]): Promise<ClaritasResult> {
+        await this.writeArgFile(
             '--absoluteJarPaths', absoluteJarPaths.join(','),
             '--libraryType', libraryType,
             '--mcVersion', mcVersion.toString(),
             '--outputFile', this.OUTPUT_FILE,
             '--previewOutput', 'true'
+        )
+        return await super.executeJar(
+            [`-Dclaritas.argFile=${this.ARG_FILE}`]
         )
     }
 

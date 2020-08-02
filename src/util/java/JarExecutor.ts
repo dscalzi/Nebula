@@ -21,10 +21,11 @@ export abstract class JarExecutor<T> {
 
     protected abstract getJarPath(): string
 
-    protected executeJar(...args: string[]): Promise<T> {
+    protected executeJar(vmOptions: string[], ...args: string[]): Promise<T> {
         this.lastExecutionResult = undefined!
         return new Promise((resolve, reject) => {
             const child = spawn(JavaUtil.getJavaExecutable(), [
+                ...vmOptions,
                 '-jar',
                 this.getJarPath(),
                 ...args

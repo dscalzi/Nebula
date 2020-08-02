@@ -12,7 +12,7 @@ export class PackXZExtractWrapper extends JarExecutor<void> {
     }
 
     protected execute(command: string, paths: string[]): Promise<void> {
-        return super.executeJar(command, paths.join(','))
+        return super.executeJar([], command, paths.join(','))
     }
 
     public extractUnpack(paths: string[]): Promise<void> {
