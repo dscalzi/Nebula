@@ -1,4 +1,4 @@
-import axios from 'axios'
+import got from 'got'
 import { createWriteStream, mkdirs, pathExists } from 'fs-extra'
 import { dirname, join, resolve } from 'path'
 import { resolve as resolveURL } from 'url'
@@ -58,15 +58,11 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
 
     public async downloadArtifactDirect(url: string, path: string): Promise<void> {
         BaseMavenRepo.logger.debug(`Downloading ${url}..`)
-        const response = await axios({
-            method: 'get',
-            url,
-            responseType: 'stream'
-        })
+        const request = await got.stream.get({ url })
         const localPath = resolve(this.containerDirectory, path)
         await mkdirs(dirname(localPath))
         const writer = createWriteStream(localPath)
-        response.data.pipe(writer)
+        request.pipe(writer)
         // tslint:disable-next-line: no-shadowed-variable
         return new Promise((resolve, reject) => {
             writer.on('finish', () => {
@@ -91,11 +87,10 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
     private async headArtifactBase(url: string, relative: string): Promise<boolean> {
         const resolvedURL = resolveURL(url, relative).toString()
         try {
-            const response = await axios({
-                method: 'head',
+            const response = await got.head({
                 url: resolvedURL
             })
-            return response.status === 200
+            return response.statusCode === 200
         } catch (ignored) {
             return false
         }

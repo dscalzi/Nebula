@@ -71,6 +71,11 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
         })
     }
 
+    private isMalformedVersion(version: string): boolean {
+        // Ex. empty, @VERSION@, ${version}
+        return version.trim().length === 0 || version.indexOf('@') > -1 || version.indexOf('$') > -1
+    }
+
     private processZip(zip: StreamZip, name: string, path: string): McModInfo {
         // Optifine is a tweak that can be loaded as a forge mod. It does not
         // appear to contain a mcmod.info class. This a special case we will
@@ -143,10 +148,9 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                 x.name = this.discernResult(claritasName, crudeInference.name)
             }
 
-            // Ex. @VERSION@, ${version}
             if(this.forgeModMetadata[name]!.version != null) {
-                const isVersionWildcard = this.forgeModMetadata[name]!.version.indexOf('@') > -1 || this.forgeModMetadata[name]!.version.indexOf('$') > -1
-                if(isVersionWildcard) {
+                const isMalformedVersion = this.isMalformedVersion(this.forgeModMetadata[name]!.version)
+                if(isMalformedVersion) {
                     x.version = this.discernResult(claritasVersion, crudeInference.version)
                 }
             } else {

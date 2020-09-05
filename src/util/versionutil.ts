@@ -1,4 +1,4 @@
-import Axios from 'axios'
+import got from 'got'
 import { PromotionsSlim } from '../model/forge/promotionsslim'
 import { MinecraftVersion } from './MinecraftVersion'
 import { LoggerUtil } from './LoggerUtil'
@@ -39,12 +39,12 @@ export class VersionUtil {
     }
 
     public static async getPromotionIndex(): Promise<PromotionsSlim> {
-        const response = await Axios({
+        const response = await got.get<PromotionsSlim>({
             method: 'get',
             url: 'https://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json',
             responseType: 'json'
         })
-        return response.data as PromotionsSlim
+        return response.body
     }
 
     public static getPromotedVersionStrict(index: PromotionsSlim, minecraftVersion: MinecraftVersion, promotion: string): string {
