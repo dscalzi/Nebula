@@ -1,5 +1,5 @@
 import { Stats } from 'fs-extra'
-import { Type } from 'helios-distribution-types'
+import { Type, Module } from 'helios-distribution-types'
 import { join } from 'path'
 import { resolve } from 'url'
 import { VersionSegmented } from '../../../../util/VersionSegmented'
@@ -19,6 +19,15 @@ export abstract class BaseForgeModStructure extends ToggleableModuleStructure im
         minecraftVersion: MinecraftVersion
     ) {
         super(absoluteRoot, relativeRoot, 'forgemods', baseUrl, minecraftVersion, Type.ForgeMod)
+    }
+
+    public async getSpecModel(): Promise<Module[]> {
+        // Sort by file name to allow control of load order.
+        return (await super.getSpecModel()).sort((a, b) => {
+            const aFileName = a.artifact.url.substring(a.artifact.url.lastIndexOf('/')+1)
+            const bFileName = b.artifact.url.substring(b.artifact.url.lastIndexOf('/')+1)
+            return aFileName.localeCompare(bFileName)
+        })
     }
 
     public abstract isForVersion(version: MinecraftVersion, libraryVersion: string): boolean
