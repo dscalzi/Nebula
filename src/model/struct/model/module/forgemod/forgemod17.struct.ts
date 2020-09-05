@@ -5,6 +5,7 @@ import { McModInfo } from '../../../../forge/mcmodinfo'
 import { McModInfoList } from '../../../../forge/mcmodinfolist'
 import { BaseForgeModStructure } from '../forgemod.struct'
 import { MinecraftVersion } from '../../../../../util/MinecraftVersion'
+import { ForgeModType_1_7 } from '../../../../claritas/ClaritasResult'
 
 export class ForgeModStructure17 extends BaseForgeModStructure {
 
@@ -131,6 +132,18 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
         if(cRes == null) {
             this.logger.error(`Claritas failed to yield metadata for ForgeMod ${name}!`)
             this.logger.error('Is this mod malformated or does Claritas need an update?')
+        } else {
+            switch(cRes.modType!) {
+                case ForgeModType_1_7.CORE_MOD:
+                    this.logger.warn(`CORE_MOD Discovered: ForgeMod ${name} has no @Mod annotation. Metadata inference capabilities are limited.`)
+                    break
+                case ForgeModType_1_7.TWEAKER:
+                    this.logger.warn(`TWEAKER Discovered: ForgeMod ${name} has no @Mod annotation. Metadata inference capabilities may be limited.`)
+                    break
+                case ForgeModType_1_7.UNKNOWN:
+                    this.logger.error(`Jar file ${name} is not a ForgeMod. Is it a library?`)
+                    break
+            }
         }
 
         const claritasId = cRes?.id
