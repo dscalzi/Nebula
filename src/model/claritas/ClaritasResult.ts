@@ -2,7 +2,7 @@ export interface ClaritasModuleMetadata {
     
     /**
      * Present on ForgeMods (1.7-1.12) of type MOD.
-     * Possibly present on ForgeMods (1.7-1.12) of type CORE_MOD.
+     * Possibly present on ForgeMods (1.7-1.12) of type CORE_MOD and TWEAKER.
      * Always present on ForgeMods 1.13+.
      * Never present in all other circumstances.
      */

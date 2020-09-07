@@ -124,7 +124,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                 this.logger.error(`ForgeMod ${name} contains an invalid mcmod.info file.`)
             }
         } else {
-            this.logger.error(`ForgeMod ${name} does not contain mcmod.info file.`)
+            this.logger.warn(`ForgeMod ${name} does not contain mcmod.info file.`)
         }
 
         const cRes = this.claritasResult[path]
@@ -135,10 +135,10 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
         } else {
             switch(cRes.modType!) {
                 case ForgeModType_1_7.CORE_MOD:
-                    this.logger.warn(`CORE_MOD Discovered: ForgeMod ${name} has no @Mod annotation. Metadata inference capabilities are limited.`)
+                    this.logger.info(`CORE_MOD Discovered: ForgeMod ${name} has no @Mod annotation. Metadata inference capabilities are limited.`)
                     break
                 case ForgeModType_1_7.TWEAKER:
-                    this.logger.warn(`TWEAKER Discovered: ForgeMod ${name} has no @Mod annotation. Metadata inference capabilities may be limited.`)
+                    this.logger.info(`TWEAKER Discovered: ForgeMod ${name} has no @Mod annotation. Metadata inference capabilities may be limited.`)
                     break
                 case ForgeModType_1_7.UNKNOWN:
                     this.logger.error(`Jar file ${name} is not a ForgeMod. Is it a library?`)
