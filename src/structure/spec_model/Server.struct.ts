@@ -9,6 +9,7 @@ import { MiscFileStructure } from './module/File.struct'
 import { LiteModStructure } from './module/LiteMod.struct'
 import { LibraryStructure } from './module/Library.struct'
 import { MinecraftVersion } from '../../util/MinecraftVersion'
+import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil'
 
 export class ServerStructure extends BaseModelStructure<Server> {
 
@@ -73,7 +74,11 @@ export class ServerStructure extends BaseModelStructure<Server> {
             serverMetaOpts.liteloaderVersion = options.liteloaderVersion
         }
 
-        const serverMeta: ServerMeta = getDefaultServerMeta(id, minecraftVersion.toString(), serverMetaOpts)
+        const serverMeta: ServerMeta = addSchemaToObject(
+            getDefaultServerMeta(id, minecraftVersion.toString(), serverMetaOpts),
+            SchemaTypes.ServerMetaSchema,
+            this.absoluteRoot
+        )
         await writeFile(resolvePath(absoluteServerRoot, this.SERVER_META_FILE), JSON.stringify(serverMeta, null, 2))
 
         const libS = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, [])

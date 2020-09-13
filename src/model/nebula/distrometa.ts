@@ -2,6 +2,9 @@ import { Distribution } from 'helios-distribution-types'
 
 export interface DistroMeta {
 
+    /**
+     * Distribution metadata to be forwarded to the distribution file.
+     */
     meta: {
         rss: Distribution['rss']
         discord?: Distribution['discord']

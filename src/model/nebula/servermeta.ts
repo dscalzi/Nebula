@@ -2,8 +2,8 @@ import { Server } from 'helios-distribution-types'
 
 export interface UntrackedFilesOption {
     /**
-     * The subdirectory this applies to. Ex.
-     * [ 'files', 'forgemods' ]
+     * The subdirectory these patterns will be applied to. Ex.
+     * [ "files", "forgegemods" ]
      */
     appliesTo: string[]
     /**
@@ -57,6 +57,9 @@ export function getDefaultServerMeta(id: string, version: string, options?: Serv
 
 export interface ServerMeta {
 
+    /**
+     * Server metadata to be forwarded to the distribution file.
+     */
     meta: {
         version: Server['version']
         name: Server['name']
@@ -67,14 +70,30 @@ export interface ServerMeta {
         autoconnect: Server['autoconnect']
     }
 
+    /**
+     * Properties related to Forge.
+     */
     forge?: {
+        /**
+         * The forge version. This does NOT include the minecraft version.
+         * Ex. 14.23.5.2854
+         */
         version: string
     }
 
+    /**
+     * Properties related to liteloader.
+     */
     liteloader?: {
+        /**
+         * The liteloader version.
+         */
         version: string
     }
 
+    /**
+     * A list of option objects defining patterns for untracked files.
+     */
     untrackedFiles?: UntrackedFilesOption[]
 
 }

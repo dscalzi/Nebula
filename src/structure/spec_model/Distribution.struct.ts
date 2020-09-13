@@ -1,9 +1,13 @@
-import { mkdirs, writeFile, readFile } from 'fs-extra'
+import { mkdirs, writeFile, readFile, pathExists } from 'fs-extra'
 import { Distribution } from 'helios-distribution-types'
 import { SpecModelStructure } from './SpecModelStructure'
 import { ServerStructure } from './Server.struct'
 import { join, resolve } from 'path'
 import { DistroMeta, getDefaultDistroMeta } from '../../model/nebula/distrometa'
+import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil'
+import { LoggerUtil } from '../../util/LoggerUtil'
+
+const logger = LoggerUtil.getLogger('DistributionStructure')
 
 export class DistributionStructure implements SpecModelStructure<Distribution> {
 
@@ -24,8 +28,18 @@ export class DistributionStructure implements SpecModelStructure<Distribution> {
         await mkdirs(this.absoluteRoot)
         await mkdirs(this.metaPath)
 
-        const distroMeta: DistroMeta = getDefaultDistroMeta()
-        await writeFile(resolve(this.metaPath, this.DISTRO_META_FILE), JSON.stringify(distroMeta, null, 2))
+        const distroMetaFile = resolve(this.metaPath, this.DISTRO_META_FILE)
+        if(await pathExists(distroMetaFile)) {
+            logger.warn(`Distro Meta file already exists at ${distroMetaFile}!`)
+            logger.warn('If you wish to regenerate this file, you must delete the existing one!')
+        } else {
+            const distroMeta: DistroMeta = addSchemaToObject(
+                getDefaultDistroMeta(),
+                SchemaTypes.DistroMetaSchema,
+                this.absoluteRoot
+            )
+            await writeFile(distroMetaFile, JSON.stringify(distroMeta, null, 2))
+        }
 
         await this.serverStruct.init()
     }

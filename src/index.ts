@@ -11,6 +11,7 @@ import { VersionSegmentedRegistry } from './util/VersionSegmentedRegistry'
 import { VersionUtil } from './util/versionutil'
 import { MinecraftVersion } from './util/MinecraftVersion'
 import { LoggerUtil } from './util/LoggerUtil'
+import { generateSchemas } from './util/SchemaUtil'
 
 dotenv.config()
 
@@ -109,6 +110,7 @@ const initRootCommand: yargs.CommandModule = {
         logger.debug(`Root set to ${argv.root}`)
         logger.debug('Invoked init root.')
         try {
+            await generateSchemas(argv.root as string)
             await new DistributionStructure(argv.root as string, '').init()
             logger.info(`Successfully created new root at ${argv.root}`)
         } catch (error) {
@@ -238,6 +240,25 @@ const generateDistroCommand: yargs.CommandModule = {
     }
 }
 
+const generateSchemasCommand: yargs.CommandModule = {
+    command: 'schemas',
+    describe: 'Generate json schemas.',
+    handler: async (argv) => {
+        argv.root = getRoot()
+
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug('Invoked generate schemas.')
+
+        try {
+            await generateSchemas(argv.root as string)
+            logger.info('Successfully generated schemas')
+            
+        } catch (error) {
+            logger.error(`Failed to generate schemas with root ${argv.root}.`, error)
+        }
+    }
+}
+
 const generateCommand: yargs.CommandModule = {
     command: 'generate',
     aliases: ['g'],
@@ -246,6 +267,7 @@ const generateCommand: yargs.CommandModule = {
         return yargs
             .command(generateServerCommand)
             .command(generateDistroCommand)
+            .command(generateSchemasCommand)
     },
     handler: (argv) => {
         argv._handled = true
