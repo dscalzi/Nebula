@@ -6,6 +6,7 @@ import { McModInfoList } from '../../../../model/forge/mcmodinfolist'
 import { BaseForgeModStructure } from '../ForgeMod.struct'
 import { MinecraftVersion } from '../../../../util/MinecraftVersion'
 import { ForgeModType_1_7 } from '../../../../model/claritas/ClaritasResult'
+import { UntrackedFilesOption } from '../../../../model/nebula/servermeta'
 
 export class ForgeModStructure17 extends BaseForgeModStructure {
 
@@ -20,9 +21,10 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string,
-        minecraftVersion: MinecraftVersion
+        minecraftVersion: MinecraftVersion,
+        untrackedFiles: UntrackedFilesOption[]
     ) {
-        super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion)
+        super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, untrackedFiles)
     }
 
     public isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {

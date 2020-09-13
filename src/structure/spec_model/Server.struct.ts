@@ -3,7 +3,7 @@ import { Server, Module } from 'helios-distribution-types'
 import { dirname, join, resolve as resolvePath } from 'path'
 import { resolve as resolveUrl } from 'url'
 import { VersionSegmentedRegistry } from '../../util/VersionSegmentedRegistry'
-import { ServerMeta, getDefaultServerMeta, ServerMetaOptions } from '../../model/nebula/servermeta'
+import { ServerMeta, getDefaultServerMeta, ServerMetaOptions, UntrackedFilesOption } from '../../model/nebula/servermeta'
 import { BaseModelStructure } from './BaseModel.struct'
 import { MiscFileStructure } from './module/File.struct'
 import { LiteModStructure } from './module/LiteMod.struct'
@@ -60,14 +60,15 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 options.forgeVersion,
                 absoluteServerRoot,
                 relativeServerRoot,
-                this.baseUrl
+                this.baseUrl,
+                []
             )
             await fms.init()
             serverMetaOpts.forgeVersion = options.forgeVersion
         }
 
         if (options.liteloaderVersion != null) {
-            const lms = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
+            const lms = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, [])
             await lms.init()
             serverMetaOpts.liteloaderVersion = options.liteloaderVersion
         }
@@ -75,10 +76,10 @@ export class ServerStructure extends BaseModelStructure<Server> {
         const serverMeta: ServerMeta = getDefaultServerMeta(id, minecraftVersion.toString(), serverMetaOpts)
         await writeFile(resolvePath(absoluteServerRoot, this.SERVER_META_FILE), JSON.stringify(serverMeta, null, 2))
 
-        const libS = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
+        const libS = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, [])
         await libS.init()
 
-        const mfs = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
+        const mfs = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, [])
         await mfs.init()
 
     }
@@ -117,6 +118,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 // Read server meta
                 const serverMeta: ServerMeta = JSON.parse(await readFile(resolvePath(absoluteServerRoot, this.SERVER_META_FILE), 'utf-8'))
                 const minecraftVersion = new MinecraftVersion(match[2])
+                const untrackedFiles: UntrackedFilesOption[] = serverMeta.untrackedFiles || []
 
                 const modules: Module[] = []
 
@@ -138,7 +140,8 @@ export class ServerStructure extends BaseModelStructure<Server> {
                         serverMeta.forge.version,
                         absoluteServerRoot,
                         relativeServerRoot,
-                        this.baseUrl
+                        this.baseUrl,
+                        untrackedFiles
                     )
 
                     const forgeModModules = await forgeModStruct.getSpecModel()
@@ -147,16 +150,16 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
                 
                 if(serverMeta.liteloader) {
-                    const liteModStruct = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
+                    const liteModStruct = new LiteModStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, untrackedFiles)
                     const liteModModules = await liteModStruct.getSpecModel()
                     modules.push(...liteModModules)
                 }
-                
-                const libraryStruct = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
+
+                const libraryStruct = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, untrackedFiles)
                 const libraryModules = await libraryStruct.getSpecModel()
                 modules.push(...libraryModules)
 
-                const fileStruct = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion)
+                const fileStruct = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, untrackedFiles)
                 const fileModules = await fileStruct.getSpecModel()
                 modules.push(...fileModules)
 

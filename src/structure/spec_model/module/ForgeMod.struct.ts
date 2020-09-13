@@ -7,6 +7,7 @@ import { MinecraftVersion } from '../../../util/MinecraftVersion'
 import { ToggleableModuleStructure } from './ToggleableModule.struct'
 import { LibraryType } from '../../../model/claritas/ClaritasLibraryType'
 import { ClaritasException } from './Module.struct'
+import { UntrackedFilesOption } from '../../../model/nebula/servermeta'
 
 export abstract class BaseForgeModStructure extends ToggleableModuleStructure implements VersionSegmented {
 
@@ -16,9 +17,10 @@ export abstract class BaseForgeModStructure extends ToggleableModuleStructure im
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string,
-        minecraftVersion: MinecraftVersion
+        minecraftVersion: MinecraftVersion,
+        untrackedFiles: UntrackedFilesOption[]
     ) {
-        super(absoluteRoot, relativeRoot, 'forgemods', baseUrl, minecraftVersion, Type.ForgeMod)
+        super(absoluteRoot, relativeRoot, 'forgemods', baseUrl, minecraftVersion, Type.ForgeMod, untrackedFiles)
     }
 
     public async getSpecModel(): Promise<Module[]> {

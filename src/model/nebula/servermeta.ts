@@ -1,5 +1,17 @@
 import { Server } from 'helios-distribution-types'
 
+export interface UntrackedFilesOption {
+    /**
+     * The subdirectory this applies to. Ex.
+     * [ 'files', 'forgemods' ]
+     */
+    appliesTo: string[]
+    /**
+     * Glob patterns to match against the file.
+     */
+    patterns: string[]
+}
+
 export interface ServerMetaOptions {
     forgeVersion?: string
     liteloaderVersion?: string
@@ -37,6 +49,9 @@ export function getDefaultServerMeta(id: string, version: string, options?: Serv
         }
     }
 
+    // Add empty untracked files.
+    servMeta.untrackedFiles = []
+
     return servMeta
 }
 
@@ -59,5 +74,7 @@ export interface ServerMeta {
     liteloader?: {
         version: string
     }
+
+    untrackedFiles?: UntrackedFilesOption[]
 
 }

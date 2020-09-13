@@ -3,6 +3,7 @@ import { Type, Module } from 'helios-distribution-types'
 import { Stats, mkdirs } from 'fs-extra'
 import { resolve } from 'path'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
+import { UntrackedFilesOption } from '../../../model/nebula/servermeta'
 
 export enum ToggleableNamespace {
 
@@ -27,9 +28,10 @@ export abstract class ToggleableModuleStructure extends ModuleStructure {
         baseUrl: string,
         minecraftVersion: MinecraftVersion,
         type: Type,
+        untrackedFiles: UntrackedFilesOption[],
         filter?: ((name: string, path: string, stats: Stats) => boolean)
     ) {
-        super(absoluteRoot, relativeRoot, structRoot, baseUrl, minecraftVersion, type, filter)
+        super(absoluteRoot, relativeRoot, structRoot, baseUrl, minecraftVersion, type, untrackedFiles, filter)
     }
 
     public async init(): Promise<void> {

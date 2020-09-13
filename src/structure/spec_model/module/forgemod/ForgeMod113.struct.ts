@@ -5,6 +5,7 @@ import { VersionUtil } from '../../../../util/versionutil'
 import { ModsToml } from '../../../../model/forge/modstoml'
 import { BaseForgeModStructure } from '../ForgeMod.struct'
 import { MinecraftVersion } from '../../../../util/MinecraftVersion'
+import { UntrackedFilesOption } from '../../../../model/nebula/servermeta'
 
 export class ForgeModStructure113 extends BaseForgeModStructure {
 
@@ -21,9 +22,10 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string,
-        minecraftVersion: MinecraftVersion
+        minecraftVersion: MinecraftVersion,
+        untrackedFiles: UntrackedFilesOption[]
     ) {
-        super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion)
+        super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, untrackedFiles)
     }
 
     public isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {

@@ -6,6 +6,7 @@ import { ModuleStructure } from './Module.struct'
 import { readdir, stat } from 'fs-extra'
 import { join, resolve, sep } from 'path'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
+import { UntrackedFilesOption } from '../../../model/nebula/servermeta'
 
 export class MiscFileStructure extends ModuleStructure {
 
@@ -13,9 +14,10 @@ export class MiscFileStructure extends ModuleStructure {
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string,
-        minecraftVersion: MinecraftVersion
+        minecraftVersion: MinecraftVersion,
+        untrackedFiles: UntrackedFilesOption[]
     ) {
-        super(absoluteRoot, relativeRoot, 'files', baseUrl, minecraftVersion, Type.File)
+        super(absoluteRoot, relativeRoot, 'files', baseUrl, minecraftVersion, Type.File, untrackedFiles)
     }
 
     public getLoggerName(): string {

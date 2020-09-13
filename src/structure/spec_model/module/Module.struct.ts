@@ -1,12 +1,14 @@
+import minimatch from 'minimatch'
 import { createHash } from 'crypto'
 import { lstat, pathExists, readdir, readFile, Stats } from 'fs-extra'
-import { Module, Type, TypeMetadata } from 'helios-distribution-types'
+import { Artifact, Module, Type, TypeMetadata } from 'helios-distribution-types'
 import { resolve } from 'path'
 import { BaseModelStructure } from '../BaseModel.struct'
 import { LibraryType } from '../../../model/claritas/ClaritasLibraryType'
 import { ClaritasResult, ClaritasModuleMetadata } from '../../../model/claritas/ClaritasResult'
 import { ClaritasWrapper } from '../../../util/java/ClaritasWrapper'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
+import { UntrackedFilesOption } from '../../../model/nebula/servermeta'
 
 export interface ModuleCandidate {
     file: string
@@ -24,6 +26,7 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
     private readonly crudeRegex = /(.+?)-(.+).[jJ][aA][rR]/
     protected readonly DEFAULT_VERSION = '0.0.0'
 
+    protected untrackedFilePatterns: string[]          // List of glob patterns. 
     protected claritasResult!: ClaritasResult
 
     constructor(
@@ -33,9 +36,11 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         baseUrl: string,
         protected minecraftVersion: MinecraftVersion,
         protected type: Type,
+        untrackedFiles: UntrackedFilesOption[],
         protected filter?: ((name: string, path: string, stats: Stats) => boolean)
     ) {
         super(absoluteRoot, relativeRoot, structRoot, baseUrl)
+        this.untrackedFilePatterns = this.determineUntrackedFiles(structRoot, untrackedFiles)
     }
 
     public async getSpecModel(): Promise<Module[]> {
@@ -87,16 +92,26 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
     protected async abstract getModulePath(name: string, path: string, stats: Stats): Promise<string | null>
 
     protected async parseModule(file: string, filePath: string, stats: Stats): Promise<Module> {
-        const buf = await readFile(filePath)
+
+        const artifact: Artifact = {
+            size: stats.size,
+            url: await this.getModuleUrl(file, filePath, stats)
+        }
+        
+        const relativeToContainer = filePath.substr(this.containerDirectory.length+1)
+        const untrackedByPattern = this.isFileUntracked(relativeToContainer)
+        if(!untrackedByPattern) {
+            const buf = await readFile(filePath)
+            artifact.MD5 = createHash('md5').update(buf).digest('hex')
+        } else {
+            this.logger.debug(`File ${relativeToContainer} is untracked. Matching pattern: ${untrackedByPattern}`)
+        }
+        
         const mdl: Module = {
             id: await this.getModuleId(file, filePath),
             name: await this.getModuleName(file, filePath),
             type: this.type,
-            artifact: {
-                size: stats.size,
-                MD5: createHash('md5').update(buf).digest('hex'),
-                url: await this.getModuleUrl(file, filePath, stats)
-            }
+            artifact
         }
         const pth = await this.getModulePath(file, filePath, stats)
         if (pth) {
@@ -180,6 +195,20 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         
         return accumulator
 
+    }
+
+    protected determineUntrackedFiles(targetStructRoot: string, untrackedFileOptions?: UntrackedFilesOption[]): string[] {
+        if(untrackedFileOptions) {
+            return untrackedFileOptions
+                .filter(x => x.appliesTo.includes(targetStructRoot))
+                .reduce((acc, cur) => acc.concat(cur.patterns), [] as string[])
+        }
+        return []
+    }
+
+    // Will return the matching pattern, undefined if no match.
+    protected isFileUntracked(pathRelativeToContainer: string): string | undefined {
+        return this.untrackedFilePatterns.find(pattern => minimatch(pathRelativeToContainer, pattern))
     }
 
 }

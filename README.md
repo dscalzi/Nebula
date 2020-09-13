@@ -240,9 +240,50 @@ Represents the additional metadata on the server object (for a YOUR_SERVER). Sam
   },
   "forge": {
     "version": "14.23.5.2854"
-  }
+  },
+  "untrackedFiles": []
 }
 ```
+
+Untracked files is optional. MD5 hashes will not be generated for files matching the provided glob patterns.
+
+```json
+{
+  "untrackedFiles": [
+    {
+      "appliesTo": ["files"],
+      "patterns": [
+        "config/*.cfg",
+        "config/**/*.yml"
+      ]
+    }
+  ]
+}
+```
+
+In the above example, all files of type `cfg` in the config directory will be untracked. Additionally, all files of type `yml` in the config directory and its subdirectories will be untracked. You can tweak these patterns to fit your needs, this is purely an example. The patterns will only be applied to the folders specified in `appliesTo`. As an example, valid values include `files`, `forgemods`, `libraries`, etc.
+
+```json
+{
+  "untrackedFiles": [
+    {
+      "appliesTo": ["files"],
+      "patterns": [
+        "config/*.cfg",
+        "config/**/*.yml"
+      ]
+    },
+    {
+      "appliesTo": ["forgemods", "litemods"],
+      "patterns": [
+        "optionalon/*.jar"
+      ]
+    }
+  ]
+}
+```
+
+Another example where all `optionalon` forgemods and litemods are untracked. **Untracking mods is NOT recommended. This is an example ONLY.**
 
 
 [dotenvnpm]: https://www.npmjs.com/package/dotenv

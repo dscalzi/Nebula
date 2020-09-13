@@ -9,6 +9,7 @@ import { ToggleableModuleStructure } from './ToggleableModule.struct'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
 import { LibraryType } from '../../../model/claritas/ClaritasLibraryType'
 import { MetadataUtil } from '../../../util/MetadataUtil'
+import { UntrackedFilesOption } from '../../../model/nebula/servermeta'
 
 export class LiteModStructure extends ToggleableModuleStructure {
 
@@ -18,9 +19,10 @@ export class LiteModStructure extends ToggleableModuleStructure {
         absoluteRoot: string,
         relativeRoot: string,
         baseUrl: string,
-        minecraftVersion: MinecraftVersion
+        minecraftVersion: MinecraftVersion,
+        untrackedFiles: UntrackedFilesOption[]
     ) {
-        super(absoluteRoot, relativeRoot, 'litemods', baseUrl, minecraftVersion, Type.LiteMod)
+        super(absoluteRoot, relativeRoot, 'litemods', baseUrl, minecraftVersion, Type.LiteMod, untrackedFiles)
     }
 
     public getLoggerName(): string {
