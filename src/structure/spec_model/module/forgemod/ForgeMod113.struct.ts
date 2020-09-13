@@ -1,10 +1,10 @@
 import StreamZip from 'node-stream-zip'
 import toml from 'toml'
-import { capitalize } from '../../../../../util/stringutils'
-import { VersionUtil } from '../../../../../util/versionutil'
-import { ModsToml } from '../../../../forge/modstoml'
-import { BaseForgeModStructure } from '../forgemod.struct'
-import { MinecraftVersion } from '../../../../../util/MinecraftVersion'
+import { capitalize } from '../../../../util/stringutils'
+import { VersionUtil } from '../../../../util/versionutil'
+import { ModsToml } from '../../../../model/forge/modstoml'
+import { BaseForgeModStructure } from '../ForgeMod.struct'
+import { MinecraftVersion } from '../../../../util/MinecraftVersion'
 
 export class ForgeModStructure113 extends BaseForgeModStructure {
 

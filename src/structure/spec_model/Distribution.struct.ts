@@ -1,11 +1,11 @@
 import { mkdirs, writeFile, readFile } from 'fs-extra'
 import { Distribution } from 'helios-distribution-types'
-import { ModelStructure } from './ModelStructure'
-import { ServerStructure } from './server.struct'
+import { SpecModelStructure } from './SpecModelStructure'
+import { ServerStructure } from './Server.struct'
 import { join, resolve } from 'path'
-import { DistroMeta, getDefaultDistroMeta } from '../../nebula/distrometa'
+import { DistroMeta, getDefaultDistroMeta } from '../../model/nebula/distrometa'
 
-export class DistributionStructure implements ModelStructure<Distribution> {
+export class DistributionStructure implements SpecModelStructure<Distribution> {
 
     private readonly DISTRO_META_FILE = 'distrometa.json'
 

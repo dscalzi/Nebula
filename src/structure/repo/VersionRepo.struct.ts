@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { resolve as resolveURL } from 'url'
 import { BaseFileStructure } from '../BaseFileStructure'
-import { MinecraftVersion } from '../../../util/MinecraftVersion'
+import { MinecraftVersion } from '../../util/MinecraftVersion'
 
 export class VersionRepoStructure extends BaseFileStructure {
 

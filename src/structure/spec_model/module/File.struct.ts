@@ -2,10 +2,10 @@
 import { Stats } from 'fs'
 import { Type, Module } from 'helios-distribution-types'
 import { resolve as resolveURL } from 'url'
-import { ModuleStructure } from './module.struct'
+import { ModuleStructure } from './Module.struct'
 import { readdir, stat } from 'fs-extra'
 import { join, resolve, sep } from 'path'
-import { MinecraftVersion } from '../../../../util/MinecraftVersion'
+import { MinecraftVersion } from '../../../util/MinecraftVersion'
 
 export class MiscFileStructure extends ModuleStructure {
 

@@ -2,11 +2,11 @@ import { Stats } from 'fs-extra'
 import { Type, Module } from 'helios-distribution-types'
 import { join } from 'path'
 import { resolve } from 'url'
-import { VersionSegmented } from '../../../../util/VersionSegmented'
-import { MinecraftVersion } from '../../../../util/MinecraftVersion'
-import { ToggleableModuleStructure } from './toggleablemodule.struct'
-import { LibraryType } from '../../../claritas/ClaritasLibraryType'
-import { ClaritasException } from './module.struct'
+import { VersionSegmented } from '../../../util/VersionSegmented'
+import { MinecraftVersion } from '../../../util/MinecraftVersion'
+import { ToggleableModuleStructure } from './ToggleableModule.struct'
+import { LibraryType } from '../../../model/claritas/ClaritasLibraryType'
+import { ClaritasException } from './Module.struct'
 
 export abstract class BaseForgeModStructure extends ToggleableModuleStructure implements VersionSegmented {
 

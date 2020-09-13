@@ -1,7 +1,7 @@
 import { BaseFileStructure } from '../BaseFileStructure'
-import { ModelStructure } from './ModelStructure'
+import { SpecModelStructure } from './SpecModelStructure'
 
-export abstract class BaseModelStructure<T> extends BaseFileStructure implements ModelStructure<T[]> {
+export abstract class BaseModelStructure<T> extends BaseFileStructure implements SpecModelStructure<T[]> {
 
     protected resolvedModels: T[] | undefined
 

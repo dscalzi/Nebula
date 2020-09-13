@@ -2,11 +2,11 @@ import { createHash } from 'crypto'
 import { lstat, pathExists, readdir, readFile, Stats } from 'fs-extra'
 import { Module, Type, TypeMetadata } from 'helios-distribution-types'
 import { resolve } from 'path'
-import { BaseModelStructure } from '../basemodel.struct'
-import { LibraryType } from '../../../claritas/ClaritasLibraryType'
-import { ClaritasResult, ClaritasModuleMetadata } from '../../../claritas/ClaritasResult'
-import { ClaritasWrapper } from '../../../../util/java/ClaritasWrapper'
-import { MinecraftVersion } from '../../../../util/MinecraftVersion'
+import { BaseModelStructure } from '../BaseModel.struct'
+import { LibraryType } from '../../../model/claritas/ClaritasLibraryType'
+import { ClaritasResult, ClaritasModuleMetadata } from '../../../model/claritas/ClaritasResult'
+import { ClaritasWrapper } from '../../../util/java/ClaritasWrapper'
+import { MinecraftVersion } from '../../../util/MinecraftVersion'
 
 export interface ModuleCandidate {
     file: string

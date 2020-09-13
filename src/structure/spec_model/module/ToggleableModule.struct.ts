@@ -1,8 +1,8 @@
-import { ModuleStructure, ModuleCandidate } from './module.struct'
+import { ModuleStructure, ModuleCandidate } from './Module.struct'
 import { Type, Module } from 'helios-distribution-types'
 import { Stats, mkdirs } from 'fs-extra'
 import { resolve } from 'path'
-import { MinecraftVersion } from '../../../../util/MinecraftVersion'
+import { MinecraftVersion } from '../../../util/MinecraftVersion'
 
 export enum ToggleableNamespace {
 

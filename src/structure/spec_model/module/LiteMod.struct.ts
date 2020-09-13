@@ -3,12 +3,12 @@ import { Stats } from 'fs-extra'
 import { Type } from 'helios-distribution-types'
 import { join } from 'path'
 import { resolve } from 'url'
-import { capitalize } from '../../../../util/stringutils'
-import { LiteMod } from '../../../liteloader/litemod'
-import { ToggleableModuleStructure } from './toggleablemodule.struct'
-import { MinecraftVersion } from '../../../../util/MinecraftVersion'
-import { LibraryType } from '../../../claritas/ClaritasLibraryType'
-import { MetadataUtil } from '../../../../util/MetadataUtil'
+import { capitalize } from '../../../util/stringutils'
+import { LiteMod } from '../../../model/liteloader/litemod'
+import { ToggleableModuleStructure } from './ToggleableModule.struct'
+import { MinecraftVersion } from '../../../util/MinecraftVersion'
+import { LibraryType } from '../../../model/claritas/ClaritasLibraryType'
+import { MetadataUtil } from '../../../util/MetadataUtil'
 
 export class LiteModStructure extends ToggleableModuleStructure {
 

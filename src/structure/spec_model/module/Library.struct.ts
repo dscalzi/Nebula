@@ -1,9 +1,9 @@
-import { ModuleStructure } from './module.struct'
+import { ModuleStructure } from './Module.struct'
 import { Type, TypeMetadata } from 'helios-distribution-types'
 import { Stats } from 'fs-extra'
 import { join } from 'path'
 import { resolve } from 'url'
-import { MinecraftVersion } from '../../../../util/MinecraftVersion'
+import { MinecraftVersion } from '../../../util/MinecraftVersion'
 
 export class LibraryStructure extends ModuleStructure {
 

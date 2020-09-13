@@ -1,11 +1,11 @@
 import StreamZip from 'node-stream-zip'
-import { capitalize } from '../../../../../util/stringutils'
-import { VersionUtil } from '../../../../../util/versionutil'
-import { McModInfo } from '../../../../forge/mcmodinfo'
-import { McModInfoList } from '../../../../forge/mcmodinfolist'
-import { BaseForgeModStructure } from '../forgemod.struct'
-import { MinecraftVersion } from '../../../../../util/MinecraftVersion'
-import { ForgeModType_1_7 } from '../../../../claritas/ClaritasResult'
+import { capitalize } from '../../../../util/stringutils'
+import { VersionUtil } from '../../../../util/versionutil'
+import { McModInfo } from '../../../../model/forge/mcmodinfo'
+import { McModInfoList } from '../../../../model/forge/mcmodinfolist'
+import { BaseForgeModStructure } from '../ForgeMod.struct'
+import { MinecraftVersion } from '../../../../util/MinecraftVersion'
+import { ForgeModType_1_7 } from '../../../../model/claritas/ClaritasResult'
 
 export class ForgeModStructure17 extends BaseForgeModStructure {
 

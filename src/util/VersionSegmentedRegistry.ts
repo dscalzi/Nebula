@@ -1,9 +1,9 @@
-import { ForgeModStructure113 } from '../model/struct/model/module/forgemod/forgemod113.struct'
-import { ForgeModStructure17 } from '../model/struct/model/module/forgemod/forgemod17.struct'
+import { ForgeModStructure113 } from '../structure/spec_model/module/forgemod/ForgeMod113.struct'
+import { ForgeModStructure17 } from '../structure/spec_model/module/forgemod/ForgeMod17.struct'
 import { ForgeGradle3Adapter } from '../resolver/forge/adapter/ForgeGradle3.resolver'
 import { ForgeGradle2Adapter } from '../resolver/forge/adapter/ForgeGradle2.resolver'
 import { ForgeResolver } from '../resolver/forge/forge.resolver'
-import { BaseForgeModStructure } from '../model/struct/model/module/forgemod.struct'
+import { BaseForgeModStructure } from '../structure/spec_model/module/ForgeMod.struct'
 import { MinecraftVersion } from './MinecraftVersion'
 
 export class VersionSegmentedRegistry {

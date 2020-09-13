@@ -2,7 +2,7 @@ import StreamZip from 'node-stream-zip'
 import { createHash } from 'crypto'
 import { Stats } from 'fs-extra'
 import { Artifact } from 'helios-distribution-types'
-import { RepoStructure } from '../../model/struct/repo/repo.struct'
+import { RepoStructure } from '../../structure/repo/Repo.struct'
 import { BaseResolver } from '../baseresolver'
 import { MinecraftVersion } from '../../util/MinecraftVersion'
 

@@ -2,7 +2,7 @@ import { mkdirs } from 'fs-extra'
 import { join, resolve } from 'path'
 import { FileStructure } from './FileStructure'
 import { Logger } from 'winston'
-import { LoggerUtil } from '../../util/LoggerUtil'
+import { LoggerUtil } from '../util/LoggerUtil'
 
 export abstract class BaseFileStructure implements FileStructure {
 

@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { BaseFileStructure } from '../BaseFileStructure'
-import { LibRepoStructure } from './librepo.struct'
-import { VersionRepoStructure } from './versionrepo.struct'
+import { LibRepoStructure } from './LibRepo.struct'
+import { VersionRepoStructure } from './VersionRepo.struct'
 
 export class RepoStructure extends BaseFileStructure {
 
