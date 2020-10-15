@@ -1,6 +1,6 @@
 import { createLogger, format, transports, Logger } from 'winston'
 import { SPLAT as SPLAT_Symbol } from 'triple-beam'
-import moment from 'moment'
+import { DateTime } from 'luxon'
 import { inspect } from 'util'
 
 // Workaround until fixed.
@@ -35,7 +35,7 @@ export class LoggerUtil {
                     if(typeof info.message === 'object') {
                         info.message = inspect(info.message, false, 4, true)
                     }
-                    return `[${moment().format('YYYY-MM-DD hh:mm:ss').trim()}] [${info.level}] [${info.label}]: ${info.message}${info.stack ? `\n${info.stack}` : ''}`
+                    return `[${DateTime.local().toFormat('yyyy-MM-dd TT').trim()}] [${info.level}] [${info.label}]: ${info.message}${info.stack ? `\n${info.stack}` : ''}`
                 })
             ),
             level: 'debug',
