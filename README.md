@@ -4,9 +4,9 @@ Generate a distribution.json for Helios. Documentation on this format can be fou
 
 ## Requirements
 
-* Node.js 12
+* Node.js 14
 * Java 8+ (https://adoptopenjdk.net/)
-  * This is required to run the forge installer and process [XZ](https://tukaani.org/xz/format.html) files.
+  * This is required to run the forge installer, process [XZ](https://tukaani.org/xz/format.html) files, and run bytecode analysis on mod files.
 
 
 ### Notes
