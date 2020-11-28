@@ -86,10 +86,10 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         return null
     }
 
-    protected async abstract getModuleId(name: string, path: string): Promise<string>
-    protected async abstract getModuleName(name: string, path: string): Promise<string>
-    protected async abstract getModuleUrl(name: string, path: string, stats: Stats): Promise<string>
-    protected async abstract getModulePath(name: string, path: string, stats: Stats): Promise<string | null>
+    protected abstract getModuleId(name: string, path: string): Promise<string>
+    protected abstract getModuleName(name: string, path: string): Promise<string>
+    protected abstract getModuleUrl(name: string, path: string, stats: Stats): Promise<string>
+    protected abstract getModulePath(name: string, path: string, stats: Stats): Promise<string | null>
 
     protected async parseModule(file: string, filePath: string, stats: Stats): Promise<Module> {
 

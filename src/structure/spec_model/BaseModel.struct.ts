@@ -14,6 +14,6 @@ export abstract class BaseModelStructure<T> extends BaseFileStructure implements
         super(absoluteRoot, relativeRoot, structRoot)
     }
 
-    public abstract async getSpecModel(): Promise<T[]>
+    public abstract getSpecModel(): Promise<T[]>
 
 }
