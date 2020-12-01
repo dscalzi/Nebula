@@ -43,4 +43,8 @@ export class RepoStructure extends BaseFileStructure {
         return join(this.absoluteRoot, 'work')
     }
 
+    public getForgeDirectory(artifactVersion: string): string {
+        return join(this.absoluteRoot, 'forge', artifactVersion)
+    }
+
 }

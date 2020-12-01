@@ -3,7 +3,7 @@ import { Stats } from 'fs'
 import { Type, Module } from 'helios-distribution-types'
 import { resolve as resolveURL } from 'url'
 import { ModuleStructure } from './Module.struct'
-import { readdir, stat } from 'fs-extra'
+import { pathExists, readdir, stat } from 'fs-extra'
 import { join, resolve, sep } from 'path'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
 import { UntrackedFilesOption } from '../../../model/nebula/servermeta'
@@ -34,14 +34,16 @@ export class MiscFileStructure extends ModuleStructure {
 
     protected async recursiveModuleScan(dir: string): Promise<Module[]> {
         let acc: Module[] = []
-        const subdirs = await readdir(dir)
-        for (const file of subdirs) {
-            const filePath = resolve(dir, file)
-            const stats = await stat(filePath)
-            if (stats.isDirectory()) {
-                acc = acc.concat(await this.recursiveModuleScan(filePath))
-            } else {
-                acc.push(await this.parseModule(file, filePath, stats))
+        if (await pathExists(dir)) {
+            const subdirs = await readdir(dir)
+            for (const file of subdirs) {
+                const filePath = resolve(dir, file)
+                const stats = await stat(filePath)
+                if (stats.isDirectory()) {
+                    acc = acc.concat(await this.recursiveModuleScan(filePath))
+                } else {
+                    acc.push(await this.parseModule(file, filePath, stats))
+                }
             }
         }
         return acc
