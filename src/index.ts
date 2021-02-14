@@ -41,6 +41,12 @@ function getBaseURL(): string {
     return (new URL(baseUrl)).toString()
 }
 
+function getSoftWipe(): string {
+    let softWipe = process.env.SOFTWIPE as string
+    logger.debug("Value is " + softWipe)
+    return softWipe
+}
+
 function installLocalOption(yargs: yargs.Argv) {
     return yargs.option('installLocal', {
         describe: 'Install the generated distribution to your local Helios data folder.',
@@ -111,7 +117,7 @@ const initRootCommand: yargs.CommandModule = {
         logger.debug('Invoked init root.')
         try {
             await generateSchemas(argv.root as string)
-            await new DistributionStructure(argv.root as string, '').init()
+            await new DistributionStructure(argv.root as string, '', true).init()
             logger.info(`Successfully created new root at ${argv.root}`)
         } catch (error) {
             logger.error(`Failed to init new root at ${argv.root}`, error)
@@ -203,6 +209,8 @@ const generateDistroCommand: yargs.CommandModule = {
     handler: async (argv) => {
         argv.root = getRoot()
         argv.baseUrl = getBaseURL()
+        let isSoftTrueSet = (getSoftWipe() == 'true');
+        argv.softWipe = isSoftTrueSet
 
         const finalName = `${argv.name}.json`
 
@@ -210,6 +218,7 @@ const generateDistroCommand: yargs.CommandModule = {
         logger.debug(`Base Url set to ${argv.baseUrl}`)
         logger.debug(`Install option set to ${argv.installLocal}`)
         logger.debug(`Invoked generate distro name ${finalName}.`)
+        logger.debug(`Softwipe set to ${argv.softWipe}`)
 
         const doLocalInstall = argv.installLocal as boolean
         const heliosDataFolder = getHeliosDataFolder()
@@ -219,7 +228,7 @@ const generateDistroCommand: yargs.CommandModule = {
         }
 
         try {
-            const distributionStruct = new DistributionStructure(argv.root as string, argv.baseUrl as string)
+            const distributionStruct = new DistributionStructure(argv.root as string, argv.baseUrl as string, argv.softWipe as boolean)
             const distro = await distributionStruct.getSpecModel()
             const distroOut = JSON.stringify(distro, null, 2)
             const distroPath = resolvePath(argv.root as string, finalName)

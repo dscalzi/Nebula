@@ -17,8 +17,10 @@ export class DistributionStructure implements SpecModelStructure<Distribution> {
     private metaPath: string
 
     constructor(
+        
         private absoluteRoot: string,
-        private baseUrl: string
+        private baseUrl: string,
+        public shouldWipe: boolean
     ) {
         this.serverStruct = new ServerStructure(this.absoluteRoot, this.baseUrl)
         this.metaPath = join(this.absoluteRoot, 'meta')
@@ -47,9 +49,11 @@ export class DistributionStructure implements SpecModelStructure<Distribution> {
     public async getSpecModel(): Promise<Distribution> {
 
         const distroMeta: DistroMeta = JSON.parse(await readFile(resolve(this.metaPath, this.DISTRO_META_FILE), 'utf-8'))
-
+        logger.debug("SEE HERE");
+        logger.debug(this.shouldWipe);
         return {
             version: '1.0.0',
+            softWipe: this.shouldWipe,
             rss: distroMeta.meta.rss,
             ...(distroMeta.meta.discord ? {discord: distroMeta.meta.discord} : {}),
             servers: await this.serverStruct.getSpecModel()
