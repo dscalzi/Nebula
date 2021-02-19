@@ -45,18 +45,28 @@ Nebula is not complete. The following usage is tentative.
 
 Commands will be documented here. You can run any command with the `--help` option to view more information.
 
-#### Command Usage
+### Command Usage
+
+This explains how to run the commands listed below. There are a few ways to run commands, pick your preferred method.
+
+Example: To run `init root`, you would do `npm run start -- init root`.
 
 *Recommended*
 
-* Run `npm run start -- <COMMAND>`
+* Run **`npm run start -- <COMMAND>`**
+  * *Why is this recommended? This command will compile the source code first.*
 
 *Other*
 
-* Build the project using `npm run build`
-* Run `node dist/index.js <COMMAND>`
+* Build the project using **`npm run build`**
+* Run **`node dist/index.js <COMMAND>`** OR **`npm run faststart -- <COMMAND>`**
+  * `faststart` is an alias to run the main file without building.
 
-*Note: If you modify any files, you will have to rebuild the project. npm start does this automatically.*
+> ***Note:***
+> - ***If you modify any files, you will have to rebuild the project.***
+> - ***After pulling from git, you will have to rebuild the project.***
+>
+> ***npm start does this automatically.***
 
 ---
 

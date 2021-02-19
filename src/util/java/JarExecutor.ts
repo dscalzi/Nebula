@@ -11,7 +11,7 @@ export abstract class JarExecutor<T> {
     protected stdoutListeners: ((chunk: any) => void)[] = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected stderrListeners: ((chunk: any) => void)[] = []
-    protected onCloseListeners: ((code: number) => Promise<void>)[] = []
+    protected onCloseListeners: ((code: number | null) => Promise<void>)[] = []
 
     protected lastExecutionResult!: T
 
