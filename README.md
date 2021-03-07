@@ -273,7 +273,9 @@ Sample:
 }
 ```
 
-Untracked files is optional. MD5 hashes will not be generated for files matching the provided glob patterns.
+#### Untracked Files
+
+Untracked files is optional. MD5 hashes will not be generated for files matching the provided glob patterns. The launcher will not validate/update files without MD5 hashes.
 
 ```json
 {
