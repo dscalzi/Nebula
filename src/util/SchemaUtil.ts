@@ -24,7 +24,7 @@ export enum SchemaTypes {
     ServerMetaSchema = 'ServerMetaSchema'
 }
 
-function getSchemaFileName(typeName: string) {
+function getSchemaFileName(typeName: string): string {
     return `${typeName}.schema.json`
 }
 

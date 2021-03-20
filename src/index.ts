@@ -41,7 +41,7 @@ function getBaseURL(): string {
     return (new URL(baseUrl)).toString()
 }
 
-function installLocalOption(yargs: yargs.Argv) {
+function installLocalOption(yargs: yargs.Argv): yargs.Argv {
     return yargs.option('installLocal', {
         describe: 'Install the generated distribution to your local Helios data folder.',
         type: 'boolean',

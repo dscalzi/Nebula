@@ -73,11 +73,11 @@ export abstract class ToggleableModuleStructure extends ModuleStructure {
     protected getNamespaceMapper(namespace: ToggleableNamespace): (x: Module) => void {
         switch(namespace) {
             case ToggleableNamespace.REQUIRED:
-                return () => { /* do nothing */ }
+                return (): void => { /* do nothing */ }
             case ToggleableNamespace.OPTIONAL_ON:
-                return (x) => x.required = { value: false }
+                return (x): void => { x.required = { value: false } }
             case ToggleableNamespace.OPTIONAL_OFF:
-                return (x) => x.required = { value: false, def: false }
+                return (x): void => { x.required = { value: false, def: false } }
         }
     }
 
