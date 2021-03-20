@@ -24,11 +24,13 @@ export class VersionSegmentedRegistry {
         forgeVersion: string,
         absoluteRoot: string,
         relativeRoot: string,
-        baseURL: string
+        baseURL: string,
+        discardOutput: boolean,
+        invalidateCache: boolean
     ): ForgeResolver {
         for (const impl of VersionSegmentedRegistry.FORGE_ADAPTER_IMPL) {
             if (impl.isForVersion(minecraftVersion, forgeVersion)) {
-                return new impl(absoluteRoot, relativeRoot, baseURL, minecraftVersion, forgeVersion)
+                return new impl(absoluteRoot, relativeRoot, baseURL, minecraftVersion, forgeVersion, discardOutput, invalidateCache)
             }
         }
         throw new Error(`No forge resolver found for Minecraft ${minecraftVersion}!`)

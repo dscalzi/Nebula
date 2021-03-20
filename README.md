@@ -138,6 +138,14 @@ Options:
   * OPTIONAL (default: false)
   * This is useful to easily test the new distribution.json in dev mode on Helios.
   * Tip: Set name to `dev_distribution` when using this option.
+* `--discardOutput` Delete cached output after it is no longer required. May be useful if disk space is limited.
+  * OPTIONAL (default: false)
+* `--invalidateCache` Invalidate and delete existing caches as they are encountered. Requires fresh cache generation.
+  * OPTIONAL (default: false)
+
+#### Notes
+
+As of Forge 1.13, the installer must be run to generate required files. The installer output is cached by default. This is done to speed up subsequent builds and allow Nebula to be run as a CI job. Options are provided to discard installer output (no caching) and invalidate caches (delete cached output and require fresh generation). To invalidate only a single version cache, manually delete the cached folder.
 
 >
 > Example Usage

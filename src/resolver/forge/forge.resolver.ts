@@ -19,7 +19,9 @@ export abstract class ForgeResolver extends BaseResolver {
         relativeRoot: string,
         baseUrl: string,
         protected minecraftVersion: MinecraftVersion,
-        protected forgeVersion: string
+        protected forgeVersion: string,
+        protected discardOutput: boolean,
+        protected invalidateCache: boolean
     ) {
         super(absoluteRoot, relativeRoot, baseUrl)
         this.repoStructure = new RepoStructure(absoluteRoot, relativeRoot)

@@ -18,9 +18,11 @@ export class DistributionStructure implements SpecModelStructure<Distribution> {
 
     constructor(
         private absoluteRoot: string,
-        private baseUrl: string
+        private baseUrl: string,
+        discardOutput: boolean,
+        invalidateCache: boolean
     ) {
-        this.serverStruct = new ServerStructure(this.absoluteRoot, this.baseUrl)
+        this.serverStruct = new ServerStructure(this.absoluteRoot, this.baseUrl, discardOutput, invalidateCache)
         this.metaPath = join(this.absoluteRoot, 'meta')
     }
 

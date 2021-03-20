@@ -18,7 +18,9 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
     constructor(
         absoluteRoot: string,
-        baseUrl: string
+        baseUrl: string,
+        private discardOutput: boolean,
+        private invalidateCache: boolean
     ) {
         super(absoluteRoot, '', 'servers', baseUrl)
     }
@@ -133,7 +135,9 @@ export class ServerStructure extends BaseModelStructure<Server> {
                         serverMeta.forge.version,
                         dirname(this.containerDirectory),
                         '',
-                        this.baseUrl
+                        this.baseUrl,
+                        this.discardOutput,
+                        this.invalidateCache
                     )
 
                     // Resolve forge

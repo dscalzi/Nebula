@@ -51,6 +51,26 @@ function installLocalOption(yargs: yargs.Argv): yargs.Argv {
     })
 }
 
+function discardOutputOption(yargs: yargs.Argv): yargs.Argv {
+    return yargs.option('discardOutput', {
+        describe: 'Delete cached output after it is no longer required. May be useful if disk space is limited.',
+        type: 'boolean',
+        demandOption: false,
+        global: false,
+        default: false
+    })
+}
+
+function invalidateCacheOption(yargs: yargs.Argv): yargs.Argv {
+    return yargs.option('invalidateCache', {
+        describe: 'Invalidate and delete existing caches as they are encountered. Requires fresh cache generation.',
+        type: 'boolean',
+        demandOption: false,
+        global: false,
+        default: false
+    })
+}
+
 // function rootOption(yargs: yargs.Argv) {
 //     return yargs.option('root', {
 //         describe: 'File structure root.',
@@ -111,7 +131,7 @@ const initRootCommand: yargs.CommandModule = {
         logger.debug('Invoked init root.')
         try {
             await generateSchemas(argv.root as string)
-            await new DistributionStructure(argv.root as string, '').init()
+            await new DistributionStructure(argv.root as string, '', false, false).init()
             logger.info(`Successfully created new root at ${argv.root}`)
         } catch (error) {
             logger.error(`Failed to init new root at ${argv.root}`, error)
@@ -179,7 +199,7 @@ const generateServerCommand: yargs.CommandModule = {
             }
         }
 
-        const serverStruct = new ServerStructure(argv.root as string, getBaseURL())
+        const serverStruct = new ServerStructure(argv.root as string, getBaseURL(), false, false)
         serverStruct.createServer(
             argv.id as string,
             minecraftVersion,
@@ -197,6 +217,8 @@ const generateDistroCommand: yargs.CommandModule = {
     describe: 'Generate a distribution index from the root file structure.',
     builder: (yargs) => {
         yargs = installLocalOption(yargs)
+        yargs = discardOutputOption(yargs)
+        yargs = invalidateCacheOption(yargs)
         yargs = namePositional(yargs)
         return yargs
     },
@@ -209,9 +231,13 @@ const generateDistroCommand: yargs.CommandModule = {
         logger.debug(`Root set to ${argv.root}`)
         logger.debug(`Base Url set to ${argv.baseUrl}`)
         logger.debug(`Install option set to ${argv.installLocal}`)
+        logger.debug(`Discard Output option set to ${argv.discardOutput}`)
+        logger.debug(`Invalidate Cache option set to ${argv.invalidateCache}`)
         logger.debug(`Invoked generate distro name ${finalName}.`)
 
         const doLocalInstall = argv.installLocal as boolean
+        const discardOutput = argv.discardOutput as boolean ?? false
+        const invalidateCache = argv.invalidateCache as boolean ?? false
         const heliosDataFolder = getHeliosDataFolder()
         if(doLocalInstall && heliosDataFolder == null) {
             logger.error('You MUST specify HELIOS_DATA_FOLDER in your .env when using the --installLocal option.')
@@ -219,7 +245,7 @@ const generateDistroCommand: yargs.CommandModule = {
         }
 
         try {
-            const distributionStruct = new DistributionStructure(argv.root as string, argv.baseUrl as string)
+            const distributionStruct = new DistributionStructure(argv.root as string, argv.baseUrl as string, discardOutput, invalidateCache)
             const distro = await distributionStruct.getSpecModel()
             const distroOut = JSON.stringify(distro, null, 2)
             const distroPath = resolvePath(argv.root as string, finalName)
@@ -333,7 +359,7 @@ const testCommand: yargs.CommandModule = {
         logger.info(process.cwd())
         const mcVer = new MinecraftVersion(argv.mcVer as string)
         const resolver = VersionSegmentedRegistry.getForgeResolver(mcVer,
-            argv.forgeVer as string, getRoot(), '', getBaseURL())
+            argv.forgeVer as string, getRoot(), '', getBaseURL(), false, false)
         if (resolver != null) {
             const mdl = await resolver.getModule()
             logger.info(inspect(mdl, false, null, true))

@@ -29,9 +29,11 @@ export class ForgeGradle2Adapter extends ForgeResolver {
         relativeRoot: string,
         baseUrl: string,
         minecraftVersion: MinecraftVersion,
-        forgeVersion: string
+        forgeVersion: string,
+        discardOutput: boolean,
+        invalidateCache: boolean
     ) {
-        super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, forgeVersion)
+        super(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, forgeVersion, discardOutput, invalidateCache)
     }
 
     public async getModule(): Promise<Module> {
