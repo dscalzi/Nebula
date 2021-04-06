@@ -1,7 +1,7 @@
 import { lstat, mkdirs, pathExists, readdir, readFile, writeFile } from 'fs-extra'
 import { Server, Module } from 'helios-distribution-types'
 import { dirname, join, resolve as resolvePath } from 'path'
-import { resolve as resolveUrl } from 'url'
+import { URL } from 'url'
 import { VersionSegmentedRegistry } from '../../util/VersionSegmentedRegistry'
 import { ServerMeta, getDefaultServerMeta, ServerMetaOptions, UntrackedFilesOption } from '../../model/nebula/servermeta'
 import { BaseModelStructure } from './BaseModel.struct'
@@ -114,7 +114,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 for (const subFile of subFiles) {
                     const caseInsensitive = subFile.toLowerCase()
                     if (caseInsensitive.endsWith('.jpg') || caseInsensitive.endsWith('.png')) {
-                        iconUrl = resolveUrl(this.baseUrl, join(relativeServerRoot, subFile))
+                        iconUrl = new URL(join(relativeServerRoot, subFile), this.baseUrl).toString()
                     }
                 }
 

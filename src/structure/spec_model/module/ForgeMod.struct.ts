@@ -1,7 +1,7 @@
 import { Stats } from 'fs-extra'
 import { Type, Module } from 'helios-distribution-types'
 import { join } from 'path'
-import { resolve } from 'url'
+import { URL } from 'url'
 import { VersionSegmented } from '../../../util/VersionSegmented'
 import { MinecraftVersion } from '../../../util/MinecraftVersion'
 import { ToggleableModuleStructure } from './ToggleableModule.struct'
@@ -36,7 +36,7 @@ export abstract class BaseForgeModStructure extends ToggleableModuleStructure im
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {
-        return resolve(this.baseUrl, join(this.relativeRoot, this.getActiveNamespace(), name))
+        return new URL(join(this.relativeRoot, this.getActiveNamespace(), name), this.baseUrl).toString()
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModulePath(name: string, path: string, stats: Stats): Promise<string | null> {

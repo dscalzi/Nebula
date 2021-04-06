@@ -2,7 +2,7 @@ import StreamZip from 'node-stream-zip'
 import { Stats } from 'fs-extra'
 import { Type } from 'helios-distribution-types'
 import { join } from 'path'
-import { resolve } from 'url'
+import { URL } from 'url'
 import { capitalize } from '../../../util/stringutils'
 import { LiteMod } from '../../../model/liteloader/litemod'
 import { ToggleableModuleStructure } from './ToggleableModule.struct'
@@ -39,7 +39,7 @@ export class LiteModStructure extends ToggleableModuleStructure {
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {
-        return resolve(this.baseUrl, join(this.relativeRoot, this.getActiveNamespace(), name))
+        return new URL(join(this.relativeRoot, this.getActiveNamespace(), name), this.baseUrl).toString()
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     protected async getModulePath(name: string, path: string, stats: Stats): Promise<string | null> {

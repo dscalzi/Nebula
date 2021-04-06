@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Stats } from 'fs'
 import { Type, Module } from 'helios-distribution-types'
-import { resolve as resolveURL } from 'url'
+import { URL } from 'url'
 import { ModuleStructure } from './Module.struct'
 import { readdir, stat } from 'fs-extra'
 import { join, resolve, sep } from 'path'
@@ -41,7 +41,9 @@ export class MiscFileStructure extends ModuleStructure {
             if (stats.isDirectory()) {
                 acc = acc.concat(await this.recursiveModuleScan(filePath))
             } else {
-                acc.push(await this.parseModule(file, filePath, stats))
+                if(!this.FILE_NAME_BLACKLIST.includes(file)) {
+                    acc.push(await this.parseModule(file, filePath, stats))
+                }
             }
         }
         return acc
@@ -54,7 +56,7 @@ export class MiscFileStructure extends ModuleStructure {
         return name
     }
     protected async getModuleUrl(name: string, path: string, stats: Stats): Promise<string> {
-        return resolveURL(this.baseUrl, join(this.relativeRoot, ...path.substr(this.containerDirectory.length+1).split(sep)))
+        return new URL(join(this.relativeRoot, ...path.substr(this.containerDirectory.length+1).split(sep)), this.baseUrl).toString()
     }
     protected async getModulePath(name: string, path: string, stats: Stats): Promise<string | null> {
         return path.substr(this.containerDirectory.length+1).replace(/\\/g, '/')
