@@ -32,7 +32,9 @@ HELIOS_DATA_FOLDER=C:\Users\user\AppData\Roaming\Helios Launcher
 
 Nebula is not complete. The following usage is tentative.
 
-#### TL;DR Usage
+#### TL;DR (Too Long; Didn't Read) Usage
+
+This is the barebones overall usage. Please read the rest of this document.
 
 * Follow the setup instructions above.
 * Run the `init root` command.
