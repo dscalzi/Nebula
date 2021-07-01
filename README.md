@@ -5,8 +5,9 @@ Generate a distribution.json for Helios. Documentation on this format can be fou
 ## Requirements
 
 * Node.js 14
-* Java 8+ (https://adoptopenjdk.net/)
+* Java 16+ (https://adoptopenjdk.net/)
   * This is required to run the forge installer, process [XZ](https://tukaani.org/xz/format.html) files, and run bytecode analysis on mod files.
+  * Java 8 may not work for Forge 1.17+. Older versions do work with Java 16 (for nebula's purposes). This will be updated when Forge 1.17 is released.
 
 
 ### Notes
@@ -22,15 +23,18 @@ Generate a distribution.json for Helios. Documentation on this format can be fou
 
 Example
 ```properties
-JAVA_EXECUTABLE=C:\Program Files\AdoptOpenJDK\jdk-8.0.292.10-hotspot\bin\java.exe
+JAVA_EXECUTABLE=C:\Program Files\AdoptOpenJDK\jdk-16.0.1.9-hotspot\bin\java.exe
 ROOT=D:\TestRoot2
 BASE_URL=http://localhost:8080/
 HELIOS_DATA_FOLDER=C:\Users\user\AppData\Roaming\Helios Launcher
 ```
 
+It's recommended to use Java 16 as the executable. Minecraft 1.17 requires Java 16+, so the assumption is that the Forge installer for 1.17 will require Java 16.
+Java 8 may not work for 1.17+. This will be updated when we know definitively. 
+
 ## Usage
 
-Nebula is not complete. The following usage is tentative.
+Nebula is still being developed. Usage may change, but it has remained stable for some time now.
 
 #### TL;DR (Too Long; Didn't Read) Usage
 
