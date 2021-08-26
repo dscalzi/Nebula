@@ -7,6 +7,9 @@ export class LibRepoStructure extends BaseMavenRepo {
 
     public static readonly FORGE_GROUP = 'net.minecraftforge'
     public static readonly FORGE_ARTIFACT = 'forge'
+    public static readonly FMLCORE_ARTIFACT = 'fmlcore'
+    public static readonly JAVAFMLLANGUAGE_ARTIFACT = 'javafmllanguage'
+    public static readonly MCLANGUAGE_ARTIFACT = 'mclanguage'
 
     public static readonly LITELOADER_GROUP = 'com.mumfrey'
     public static readonly LITELOADER_ARTIFACT = 'liteloader'
