@@ -31,7 +31,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         if(version.getMinor() === 12 && VersionUtil.isOneDotTwelveFG2(libraryVersion)) {
             return false
         }
-        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16])
+        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16, 17])
     }
 
     private generatedFiles: GeneratedFile[] | undefined
@@ -51,20 +51,13 @@ export class ForgeGradle3Adapter extends ForgeResolver {
     }
 
     private configure(): void {
-        // Configure for 13, 14, 15, 16
-        if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16])) {
+        // Configure for 13, 14, 15, 16, 17
+        if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16, 17])) {
 
             // https://github.com/MinecraftForge/MinecraftForge/commit/97d4652f5fe15931b980117efabdff332f9f6428
             const mcpUnifiedVersion = `${this.minecraftVersion}-${ForgeGradle3Adapter.WILDCARD_MCP_VERSION}`
 
             this.generatedFiles = [
-                {
-                    name: 'base jar',
-                    group: LibRepoStructure.FORGE_GROUP,
-                    artifact: LibRepoStructure.FORGE_ARTIFACT,
-                    version: this.artifactVersion,
-                    classifiers: [undefined]
-                },
                 {
                     name: 'universal jar',
                     group: LibRepoStructure.FORGE_GROUP,
@@ -99,7 +92,53 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 ForgeGradle3Adapter.WILDCARD_MCP_VERSION
             ]
 
+            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16])) {
+
+                // Base jar present for 1.13-1.16
+
+                this.generatedFiles.unshift(
+                    {
+                        name: 'base jar',
+                        group: LibRepoStructure.FORGE_GROUP,
+                        artifact: LibRepoStructure.FORGE_ARTIFACT,
+                        version: this.artifactVersion,
+                        classifiers: [undefined]
+                    }
+                )
+            }
+
+            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [17])) {
+
+                // Added in 1.17+
+
+                this.generatedFiles.unshift(
+                    {
+                        name: 'fmlcore',
+                        group: LibRepoStructure.FORGE_GROUP,
+                        artifact: LibRepoStructure.FMLCORE_ARTIFACT,
+                        version: this.artifactVersion,
+                        classifiers: [undefined]
+                    },
+                    {
+                        name: 'javafmllanguage',
+                        group: LibRepoStructure.FORGE_GROUP,
+                        artifact: LibRepoStructure.JAVAFMLLANGUAGE_ARTIFACT,
+                        version: this.artifactVersion,
+                        classifiers: [undefined]
+                    },
+                    {
+                        name: 'mclanguage',
+                        group: LibRepoStructure.FORGE_GROUP,
+                        artifact: LibRepoStructure.MCLANGUAGE_ARTIFACT,
+                        version: this.artifactVersion,
+                        classifiers: [undefined]
+                    }
+                )
+            }
+
             if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15])) {
+
+                // 13, 14, 15 use just the MC version.
 
                 this.generatedFiles.push(
                     {
@@ -124,6 +163,8 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     }
                 )
             } else {
+
+                // 16+ uses the mcp unified version.
 
                 this.generatedFiles.push(
                     {
