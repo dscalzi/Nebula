@@ -107,21 +107,6 @@ export class ServerStructure extends BaseModelStructure<Server> {
                     continue
                 }
 
-                let iconUrl: string = null!
-
-                // Resolve server icon
-                const subFiles = await readdir(absoluteServerRoot)
-                for (const subFile of subFiles) {
-                    const caseInsensitive = subFile.toLowerCase()
-                    if (caseInsensitive.endsWith('.jpg') || caseInsensitive.endsWith('.png')) {
-                        iconUrl = new URL(join(relativeServerRoot, subFile), this.baseUrl).toString()
-                    }
-                }
-
-                if (!iconUrl) {
-                    this.logger.warn(`No icon file found for server ${file}.`)
-                }
-
                 // Read server meta
                 const serverMeta: ServerMeta = JSON.parse(await readFile(resolvePath(absoluteServerRoot, this.SERVER_META_FILE), 'utf-8'))
                 const minecraftVersion = new MinecraftVersion(match[2])
@@ -176,7 +161,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                     id: match[1],
                     name: serverMeta.meta.name,
                     description: serverMeta.meta.description,
-                    icon: iconUrl,
+                    icon: serverMeta.meta.icon,
                     version: serverMeta.meta.version,
                     address: serverMeta.meta.address,
                     minecraftVersion: match[2],
