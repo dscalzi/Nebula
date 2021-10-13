@@ -23,7 +23,7 @@ Generate a distribution.json for Helios. Documentation on this format can be fou
 
 Example
 ```properties
-JAVA_EXECUTABLE=C:\Program Files\AdoptOpenJDK\jdk-16.0.1.9-hotspot\bin\java.exe
+JAVA_EXECUTABLE=C:\Program Files\Eclipse Foundation\jdk-17.0.0.35-hotspot\bin\java.exe
 ROOT=D:\TestRoot2
 BASE_URL=http://localhost:8080/
 HELIOS_DATA_FOLDER=C:\Users\user\AppData\Roaming\Helios Launcher
