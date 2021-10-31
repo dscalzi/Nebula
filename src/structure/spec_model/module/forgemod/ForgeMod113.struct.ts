@@ -152,7 +152,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                     try {
                         const manifest = zip.entryDataSync('META-INF/MANIFEST.MF')
                         const keys = manifest.toString().split('\n')
-                        this.logger.debug(keys)
+                        // this.logger.debug(keys)
                         for (const key of keys) {
                             const match = ForgeModStructure113.IMPLEMENTATION_VERSION_REGEX.exec(key)
                             if (match != null) {
