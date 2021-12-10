@@ -67,4 +67,22 @@ export class VersionUtil {
         return version
     }
 
+    public static versionGte(version: string, min: string): boolean {
+
+        const left = version.split('.').map(x => Number(x))
+        const right = min.split('.').map(x => Number(x))
+
+        if(left.length != right.length) {
+            throw new Error('Cannot compare mismatched versions.')
+        }
+
+        for(let i=0; i<left.length; i++) {
+            if(left[i] < right[i]) {
+                return false
+            }
+        }
+
+        return true
+    }
+
 }

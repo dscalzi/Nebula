@@ -100,6 +100,8 @@ export class ServerStructure extends BaseModelStructure<Server> {
             const relativeServerRoot = join(this.relativeRoot, file)
             if ((await lstat(absoluteServerRoot)).isDirectory()) {
 
+                this.logger.info(`Beginning processing of ${file}.`)
+
                 const match = this.ID_REGEX.exec(file)
                 if (match == null) {
                     this.logger.warn(`Server directory ${file} does not match the defined standard.`)
