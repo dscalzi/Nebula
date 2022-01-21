@@ -39,6 +39,7 @@ export abstract class ForgeResolver extends BaseResolver {
         // https://github.com/advisories/GHSA-jfh8-c2jp-5v3q
         // https://www.minecraft.net/en-us/article/important-message--security-vulnerability-java-edition
         // https://twitter.com/gigaherz/status/1469331288368861195
+        // https://gist.github.com/TheCurle/f15a6b63ceee3be58bff5e7a97c3a4e6
 
         const patchMatrix: { [major: number]: string } = {
             18: '38.0.17',
@@ -50,11 +51,11 @@ export abstract class ForgeResolver extends BaseResolver {
             12: '14.23.5.2857'
         }
 
-        const isVUlnerable = major == 1 && (minor <= 18 && minor >= 7)
+        const isVulnerable = major == 1 && (minor <= 18 && minor >= 12)
         const hasPatch = major == 1 && minor >= 12
         let unsafe
 
-        if(isVUlnerable) {
+        if(isVulnerable) {
             if(hasPatch) {
                 unsafe = !VersionUtil.versionGte(this.forgeVersion, patchMatrix[minor])
             } else {
