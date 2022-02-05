@@ -174,19 +174,13 @@ const generateServerCommand: yargs.CommandModule = {
                 type: 'string',
                 default: null
             })
-            .option('liteloader', {
-                describe: 'LiteLoader version.',
-                type: 'string',
-                default: null
-            })
     },
     handler: async (argv) => {
         argv.root = getRoot()
 
         logger.debug(`Root set to ${argv.root}`)
         logger.debug(`Generating server ${argv.id} for Minecraft ${argv.version}.`,
-            `\n\t├ Forge version: ${argv.forge}`,
-            `\n\t└ LiteLoader version: ${argv.liteloader}`)
+            `\n\t└ Forge version: ${argv.forge}`)
 
         const minecraftVersion = new MinecraftVersion(argv.version as string)
 
@@ -204,8 +198,7 @@ const generateServerCommand: yargs.CommandModule = {
             argv.id as string,
             minecraftVersion,
             {
-                forgeVersion: argv.forge as string,
-                liteloaderVersion: argv.liteloader as string
+                forgeVersion: argv.forge as string
             }
         )
 

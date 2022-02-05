@@ -103,7 +103,7 @@ __*SubCommands*__
 
 #### Generate Server
 
-Generate an new server in the root directory. Options are provided to include forge/liteloader in the generated server.
+Generate an new server in the root directory. Options are provided to include forge in the generated server.
 
 `generate server <id> <version> <options>`
 
@@ -113,9 +113,6 @@ Options:
   * OPTIONAL (default: null)
   * If not provided forge will not be enabled.
   * You can provide either `latest` or `recommended` to use the latest/recommended version of forge.
-* `--liteloader <string>` Specify liteloader version.
-  * OPTIONAL (default: null)
-  * If not provided liteloader will not be enabled.
 
 >
 > Example Usage
@@ -215,8 +212,6 @@ Ex.
   * `libraries` All modules of type `Library`
   * `forgemods` All modules of type `ForgeMod`.
     * This is a directory of toggleable modules. See the note below.
-  * `litemods` All modules of type `LiteMod`.
-    * This is a directory of toggleable modules. See the note below.
   * `TestServer-1.12.2.png` Server icon file.
 
 #### Toggleable Modules
@@ -315,7 +310,7 @@ In the above example, all files of type `cfg` in the config directory will be un
       ]
     },
     {
-      "appliesTo": ["forgemods", "litemods"],
+      "appliesTo": ["forgemods"],
       "patterns": [
         "optionalon/*.jar"
       ]
@@ -324,7 +319,7 @@ In the above example, all files of type `cfg` in the config directory will be un
 }
 ```
 
-Another example where all `optionalon` forgemods and litemods are untracked. **Untracking mods is NOT recommended. This is an example ONLY.**
+Another example where all `optionalon` forgemods are untracked. **Untracking mods is NOT recommended. This is an example ONLY.**
 
 ### Note on JSON Schemas
 
