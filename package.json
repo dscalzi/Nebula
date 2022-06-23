@@ -43,7 +43,7 @@
   "dependencies": {
     "dotenv": "^16.0.0",
     "fs-extra": "^10.0.1",
-    "got": "^11.8.3",
+    "got": "^11.8.5",
     "helios-distribution-types": "^1.0.0",
     "luxon": "^2.3.1",
     "minimatch": "^5.0.1",
