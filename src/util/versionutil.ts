@@ -12,7 +12,7 @@ export class VersionUtil {
         'latest'
     ]
 
-    public static readonly MINECRAFT_VERSION_REGEX = /(\d+).(\d+).(\d+)/
+    public static readonly MINECRAFT_VERSION_REGEX = /(\d+).(\d+).?(\d+)?/
 
     public static isVersionAcceptable(version: MinecraftVersion, acceptable: number[]): boolean {
         if (version.getMajor() === 1) {
