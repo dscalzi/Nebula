@@ -51,7 +51,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
     }
 
     private configure(): void {
-        // Configure for 13, 14, 15, 16, 17, 18
+        // Configure for 13, 14, 15, 16, 17, 18, 19
         if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16, 17, 18, 19])) {
 
             // https://github.com/MinecraftForge/MinecraftForge/commit/97d4652f5fe15931b980117efabdff332f9f6428
