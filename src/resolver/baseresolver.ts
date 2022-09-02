@@ -1,7 +1,7 @@
 import { Module } from 'helios-distribution-types'
-import { VersionSegmented } from '../util/VersionSegmented'
-import { Resolver } from './resolver'
-import { MinecraftVersion } from '../util/MinecraftVersion'
+import { VersionSegmented } from '../util/VersionSegmented.js'
+import { Resolver } from './Resolver.js'
+import { MinecraftVersion } from '../util/MinecraftVersion.js'
 
 export abstract class BaseResolver implements Resolver, VersionSegmented {
 

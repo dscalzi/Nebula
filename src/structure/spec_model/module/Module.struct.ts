@@ -3,12 +3,12 @@ import { createHash } from 'crypto'
 import { lstat, pathExists, readdir, readFile, Stats } from 'fs-extra'
 import { Artifact, Module, Type, TypeMetadata } from 'helios-distribution-types'
 import { resolve } from 'path'
-import { BaseModelStructure } from '../BaseModel.struct'
-import { LibraryType } from '../../../model/claritas/ClaritasLibraryType'
-import { ClaritasResult, ClaritasModuleMetadata } from '../../../model/claritas/ClaritasResult'
-import { ClaritasWrapper } from '../../../util/java/ClaritasWrapper'
-import { MinecraftVersion } from '../../../util/MinecraftVersion'
-import { UntrackedFilesOption } from '../../../model/nebula/servermeta'
+import { BaseModelStructure } from '../BaseModel.struct.js'
+import { LibraryType } from '../../../model/claritas/ClaritasLibraryType.js'
+import { ClaritasResult, ClaritasModuleMetadata } from '../../../model/claritas/ClaritasResult.js'
+import { ClaritasWrapper } from '../../../util/java/ClaritasWrapper.js'
+import { MinecraftVersion } from '../../../util/MinecraftVersion.js'
+import { UntrackedFilesOption } from '../../../model/nebula/ServerMeta.js'
 
 export interface ModuleCandidate {
     file: string

@@ -1,7 +1,7 @@
-import { JavaUtil } from './javautil'
+import { JavaUtil } from './JavaUtil.js'
 import { Logger } from 'winston'
 import { spawn } from 'child_process'
-import { LoggerUtil } from '../LoggerUtil'
+import { LoggerUtil } from '../LoggerUtil.js'
 
 export abstract class JarExecutor<T> {
 

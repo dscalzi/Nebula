@@ -1,8 +1,8 @@
-import { JarExecutor } from './JarExecutor'
+import { JarExecutor } from './JarExecutor.js'
 import { join, resolve } from 'path'
-import { ClaritasResult } from '../../model/claritas/ClaritasResult'
-import { MinecraftVersion } from '../MinecraftVersion'
-import { LibraryType } from '../../model/claritas/ClaritasLibraryType'
+import { ClaritasResult } from '../../model/claritas/ClaritasResult.js'
+import { MinecraftVersion } from '../MinecraftVersion.js'
+import { LibraryType } from '../../model/claritas/ClaritasLibraryType.js'
 import { pathExists, remove, readFile, writeFile, mkdirs } from 'fs-extra'
 
 export class ClaritasWrapper extends JarExecutor<ClaritasResult> {

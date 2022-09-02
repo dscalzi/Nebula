@@ -1,10 +1,10 @@
-import { ModuleStructure } from './Module.struct'
+import { ModuleStructure } from './Module.struct.js'
 import { Type, TypeMetadata } from 'helios-distribution-types'
 import { Stats } from 'fs-extra'
 import { join } from 'path'
 import { URL } from 'url'
-import { MinecraftVersion } from '../../../util/MinecraftVersion'
-import { UntrackedFilesOption } from '../../../model/nebula/servermeta'
+import { MinecraftVersion } from '../../../util/MinecraftVersion.js'
+import { UntrackedFilesOption } from '../../../model/nebula/ServerMeta.js'
 
 export class LibraryStructure extends ModuleStructure {
 

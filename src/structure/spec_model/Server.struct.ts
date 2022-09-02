@@ -2,13 +2,13 @@ import { lstat, mkdirs, pathExists, readdir, readFile, writeFile } from 'fs-extr
 import { Server, Module } from 'helios-distribution-types'
 import { dirname, join, resolve as resolvePath } from 'path'
 import { URL } from 'url'
-import { VersionSegmentedRegistry } from '../../util/VersionSegmentedRegistry'
-import { ServerMeta, getDefaultServerMeta, ServerMetaOptions, UntrackedFilesOption } from '../../model/nebula/servermeta'
-import { BaseModelStructure } from './BaseModel.struct'
-import { MiscFileStructure } from './module/File.struct'
-import { LibraryStructure } from './module/Library.struct'
-import { MinecraftVersion } from '../../util/MinecraftVersion'
-import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil'
+import { VersionSegmentedRegistry } from '../../util/VersionSegmentedRegistry.js'
+import { ServerMeta, getDefaultServerMeta, ServerMetaOptions, UntrackedFilesOption } from '../../model/nebula/ServerMeta.js'
+import { BaseModelStructure } from './BaseModel.struct.js'
+import { MiscFileStructure } from './module/File.struct.js'
+import { LibraryStructure } from './module/Library.struct.js'
+import { MinecraftVersion } from '../../util/MinecraftVersion.js'
+import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil.js'
 
 export class ServerStructure extends BaseModelStructure<Server> {
 

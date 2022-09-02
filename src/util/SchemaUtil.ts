@@ -2,9 +2,9 @@ import { mkdirs, pathExists, remove, writeFile } from 'fs-extra'
 import { join, resolve } from 'path'
 import { createGenerator } from 'ts-json-schema-generator'
 import { URL } from 'url'
-import { DistroMeta } from '../model/nebula/distrometa'
-import { ServerMeta } from '../model/nebula/servermeta'
-import { LoggerUtil } from './LoggerUtil'
+import { DistroMeta } from '../model/nebula/DistroMeta.js'
+import { ServerMeta } from '../model/nebula/ServerMeta.js'
+import { LoggerUtil } from './LoggerUtil.js'
 
 const logger = LoggerUtil.getLogger('SchemaUtil')
 

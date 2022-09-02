@@ -2,9 +2,9 @@ import got from 'got'
 import { createWriteStream, mkdirs, pathExists } from 'fs-extra'
 import { dirname, join, resolve } from 'path'
 import { URL } from 'url'
-import { MavenUtil } from '../../util/maven'
-import { BaseFileStructure } from '../BaseFileStructure'
-import { LoggerUtil } from '../../util/LoggerUtil'
+import { MavenUtil } from '../../util/MavenUtil.js'
+import { BaseFileStructure } from '../BaseFileStructure.js'
+import { LoggerUtil } from '../../util/LoggerUtil.js'
 
 export abstract class BaseMavenRepo extends BaseFileStructure {
 

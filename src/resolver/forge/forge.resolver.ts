@@ -2,11 +2,11 @@ import StreamZip from 'node-stream-zip'
 import { createHash } from 'crypto'
 import { Stats } from 'fs-extra'
 import { Artifact } from 'helios-distribution-types'
-import { RepoStructure } from '../../structure/repo/Repo.struct'
-import { BaseResolver } from '../baseresolver'
-import { MinecraftVersion } from '../../util/MinecraftVersion'
-import { VersionUtil } from '../../util/versionutil'
-import { LoggerUtil } from '../../util/LoggerUtil'
+import { RepoStructure } from '../../structure/repo/Repo.struct.js'
+import { BaseResolver } from '../BaseResolver.js'
+import { MinecraftVersion } from '../../util/MinecraftVersion.js'
+import { VersionUtil } from '../../util/VersionUtil.js'
+import { LoggerUtil } from '../../util/LoggerUtil.js'
 
 export abstract class ForgeResolver extends BaseResolver {
 

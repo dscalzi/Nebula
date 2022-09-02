@@ -1,4 +1,4 @@
-import { BaseMavenRepo } from './BaseMavenRepo'
+import { BaseMavenRepo } from './BaseMavenRepo.js'
 
 export class LibRepoStructure extends BaseMavenRepo {
 

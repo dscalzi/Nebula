@@ -1,11 +1,11 @@
 import { mkdirs, writeFile, readFile, pathExists } from 'fs-extra'
 import { Distribution } from 'helios-distribution-types'
-import { SpecModelStructure } from './SpecModelStructure'
-import { ServerStructure } from './Server.struct'
+import { SpecModelStructure } from './SpecModelStructure.js'
+import { ServerStructure } from './Server.struct.js'
 import { join, resolve } from 'path'
-import { DistroMeta, getDefaultDistroMeta } from '../../model/nebula/distrometa'
-import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil'
-import { LoggerUtil } from '../../util/LoggerUtil'
+import { DistroMeta, getDefaultDistroMeta } from '../../model/nebula/DistroMeta.js'
+import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil.js'
+import { LoggerUtil } from '../../util/LoggerUtil.js'
 
 const logger = LoggerUtil.getLogger('DistributionStructure')
 

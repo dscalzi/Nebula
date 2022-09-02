@@ -1,8 +1,8 @@
 import { mkdirs } from 'fs-extra'
 import { join } from 'path'
-import { BaseFileStructure } from '../BaseFileStructure'
-import { LibRepoStructure } from './LibRepo.struct'
-import { VersionRepoStructure } from './VersionRepo.struct'
+import { BaseFileStructure } from '../BaseFileStructure.js'
+import { LibRepoStructure } from './LibRepo.struct.js'
+import { VersionRepoStructure } from './VersionRepo.struct.js'
 
 export class RepoStructure extends BaseFileStructure {
 

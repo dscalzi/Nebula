@@ -1,12 +1,12 @@
 import StreamZip from 'node-stream-zip'
-import { capitalize } from '../../../../util/stringutils'
-import { VersionUtil } from '../../../../util/versionutil'
-import { McModInfo } from '../../../../model/forge/mcmodinfo'
-import { McModInfoList } from '../../../../model/forge/mcmodinfolist'
-import { BaseForgeModStructure } from '../ForgeMod.struct'
-import { MinecraftVersion } from '../../../../util/MinecraftVersion'
-import { ForgeModType_1_7 } from '../../../../model/claritas/ClaritasResult'
-import { UntrackedFilesOption } from '../../../../model/nebula/servermeta'
+import { capitalize } from '../../../../util/StringUtils.js'
+import { VersionUtil } from '../../../../util/VersionUtil.js'
+import { McModInfo } from '../../../../model/forge/McModInfo.js'
+import { McModInfoList } from '../../../../model/forge/McModInfoList.js'
+import { BaseForgeModStructure } from '../ForgeMod.struct.js'
+import { MinecraftVersion } from '../../../../util/MinecraftVersion.js'
+import { ForgeModType_1_7 } from '../../../../model/claritas/ClaritasResult.js'
+import { UntrackedFilesOption } from '../../../../model/nebula/ServerMeta.js'
 
 export class ForgeModStructure17 extends BaseForgeModStructure {
 

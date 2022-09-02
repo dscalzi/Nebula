@@ -1,5 +1,5 @@
-import { BaseFileStructure } from '../BaseFileStructure'
-import { SpecModelStructure } from './SpecModelStructure'
+import { BaseFileStructure } from '../BaseFileStructure.js'
+import { SpecModelStructure } from './SpecModelStructure.js'
 
 export abstract class BaseModelStructure<T> extends BaseFileStructure implements SpecModelStructure<T[]> {
 

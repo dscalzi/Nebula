@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { JarExecutor } from './JarExecutor'
+import { JarExecutor } from './JarExecutor.js'
 
 export class PackXZExtractWrapper extends JarExecutor<void> {
 
