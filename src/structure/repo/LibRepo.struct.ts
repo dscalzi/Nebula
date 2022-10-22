@@ -10,6 +10,7 @@ export class LibRepoStructure extends BaseMavenRepo {
     public static readonly FMLCORE_ARTIFACT = 'fmlcore'
     public static readonly JAVAFMLLANGUAGE_ARTIFACT = 'javafmllanguage'
     public static readonly MCLANGUAGE_ARTIFACT = 'mclanguage'
+    public static readonly LOWCODELANGUAGE_ARTIFACT = 'lowcodelanguage'
 
     constructor(
         absoluteRoot: string,
