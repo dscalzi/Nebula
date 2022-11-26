@@ -19,6 +19,7 @@ interface GeneratedFile {
     version: string
     classifiers: string[] | [undefined]
     skipIfNotPresent?: boolean
+    classpath?: boolean
 }
 
 export class ForgeGradle3Adapter extends ForgeResolver {
@@ -31,7 +32,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         if(version.getMinor() === 12 && VersionUtil.isOneDotTwelveFG2(libraryVersion)) {
             return false
         }
-        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16, 17, 18])
+        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16, 17, 18, 19])
     }
 
     private generatedFiles: GeneratedFile[] | undefined
@@ -51,8 +52,11 @@ export class ForgeGradle3Adapter extends ForgeResolver {
     }
 
     private configure(): void {
-        // Configure for 13, 14, 15, 16, 17, 18
-        if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16, 17, 18])) {
+
+        const is117OrGreater = this.minecraftVersion.getMinor() >= 17
+
+        // Configure for 13, 14, 15, 16, 17, 18, 19
+        if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16, 17, 18, 19])) {
 
             // https://github.com/MinecraftForge/MinecraftForge/commit/97d4652f5fe15931b980117efabdff332f9f6428
             const mcpUnifiedVersion = `${this.minecraftVersion}-${ForgeGradle3Adapter.WILDCARD_MCP_VERSION}`
@@ -63,14 +67,16 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     group: LibRepoStructure.FORGE_GROUP,
                     artifact: LibRepoStructure.FORGE_ARTIFACT,
                     version: this.artifactVersion,
-                    classifiers: ['universal']
+                    classifiers: ['universal'],
+                    classpath: !is117OrGreater
                 },
                 {
                     name: 'client jar',
                     group: LibRepoStructure.FORGE_GROUP,
                     artifact: LibRepoStructure.FORGE_ARTIFACT,
                     version: this.artifactVersion,
-                    classifiers: ['client']
+                    classifiers: ['client'],
+                    classpath: !is117OrGreater
                 },
                 {
                     name: 'client data',
@@ -78,14 +84,16 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
                     version: this.minecraftVersion.toString(),
                     classifiers: ['data'],
-                    skipIfNotPresent: true
+                    skipIfNotPresent: true,
+                    classpath: !is117OrGreater
                 },
                 {
                     name: 'client srg',
                     group: LibRepoStructure.MINECRAFT_GROUP,
                     artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
                     version: mcpUnifiedVersion,
-                    classifiers: ['srg']
+                    classifiers: ['srg'],
+                    classpath: !is117OrGreater
                 }
             ]
             this.wildcardsInUse = [
@@ -107,7 +115,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 )
             }
 
-            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [17, 18])) {
+            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [17, 18, 19])) {
 
                 // Added in 1.17+
 
@@ -190,7 +198,8 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                         classifiers: [
                             'slim',
                             'slim-stable'
-                        ]
+                        ],
+                        classpath: !is117OrGreater
                     },
                     {
                         name: 'client extra',
@@ -200,7 +209,8 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                         classifiers: [
                             'extra',
                             'extra-stable'
-                        ]
+                        ],
+                        classpath: !is117OrGreater
                     }
                 )
 
@@ -401,6 +411,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                         ),
                         name: `Minecraft Forge (${entry.name})`,
                         type: Type.Library,
+                        classpath: entry.classpath ?? true,
                         artifact: this.generateArtifact(
                             await readFile(targetLocalPath),
                             await lstat(targetLocalPath),
