@@ -144,13 +144,13 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 )
             }
 
-            if (VersionUtil.isVersionAcceptable(this.minecraftVersion, [18])) {
+            if (VersionUtil.isVersionAcceptable(this.minecraftVersion, [18, 19])) {
 
                 // Added in 1.18+
 
                 this.generatedFiles.unshift(
                     {
-                        name: "lowcodelanguage",
+                        name: 'lowcodelanguage',
                         group: LibRepoStructure.FORGE_GROUP,
                         artifact: LibRepoStructure.LOWCODELANGUAGE_ARTIFACT,
                         version: this.artifactVersion,
