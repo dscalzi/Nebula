@@ -1,5 +1,6 @@
 import got from 'got'
-import { createWriteStream, mkdirs, pathExists } from 'fs-extra'
+import { mkdirs, pathExists } from 'fs-extra/esm'
+import { createWriteStream } from 'fs'
 import { dirname, join, resolve } from 'path'
 import { URL } from 'url'
 import { MavenUtil } from '../../util/MavenUtil.js'

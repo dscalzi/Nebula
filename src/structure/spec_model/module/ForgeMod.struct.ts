@@ -1,4 +1,4 @@
-import { Stats } from 'fs-extra'
+import { Stats } from 'fs'
 import { Type, Module } from 'helios-distribution-types'
 import { join } from 'path'
 import { URL } from 'url'

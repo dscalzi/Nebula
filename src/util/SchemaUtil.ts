@@ -1,4 +1,5 @@
-import { mkdirs, pathExists, remove, writeFile } from 'fs-extra'
+import { mkdirs, pathExists, remove } from 'fs-extra/esm'
+import { writeFile } from 'fs/promises'
 import { join, resolve } from 'path'
 import { createGenerator } from 'ts-json-schema-generator'
 import { URL } from 'url'

@@ -1,4 +1,5 @@
-import { mkdirs, writeFile, readFile, pathExists } from 'fs-extra'
+import { mkdirs, pathExists } from 'fs-extra/esm'
+import { readFile, writeFile } from 'fs/promises'
 import { Distribution } from 'helios-distribution-types'
 import { SpecModelStructure } from './SpecModelStructure.js'
 import { ServerStructure } from './Server.struct.js'

@@ -1,5 +1,6 @@
 import { createHash } from 'crypto'
-import { copy, lstat, mkdirs, pathExists, readFile, remove } from 'fs-extra'
+import { copy, mkdirs, pathExists, remove } from 'fs-extra/esm'
+import { lstat, readFile } from 'fs/promises'
 import { Module, Type } from 'helios-distribution-types'
 import { basename, join } from 'path'
 import { VersionManifestFG2 } from '../../../model/forge/VersionManifestFG2.js'

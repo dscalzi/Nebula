@@ -1,4 +1,4 @@
-import { mkdirs } from 'fs-extra'
+import { mkdirs } from 'fs-extra/esm'
 import { join, resolve } from 'path'
 import { FileStructure } from './FileStructure.js'
 import { Logger } from 'winston'

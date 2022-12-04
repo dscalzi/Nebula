@@ -1,6 +1,6 @@
 /* tslint:disable:no-shadowed-variable */
 import dotenv from 'dotenv'
-import { writeFile } from 'fs-extra'
+import { writeFile } from 'fs/promises'
 import { resolve as resolvePath } from 'path'
 import { URL } from 'url'
 import { inspect } from 'util'

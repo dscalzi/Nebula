@@ -1,4 +1,4 @@
-import { mkdirs } from 'fs-extra'
+import { mkdirs } from 'fs-extra/esm'
 import { join } from 'path'
 import { BaseFileStructure } from '../BaseFileStructure.js'
 import { LibRepoStructure } from './LibRepo.struct.js'

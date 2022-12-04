@@ -1,4 +1,5 @@
-import { lstat, mkdirs, pathExists, readdir, readFile, writeFile } from 'fs-extra'
+import { mkdirs, pathExists } from 'fs-extra/esm'
+import { lstat, readdir, readFile, writeFile } from 'fs/promises'
 import { Server, Module } from 'helios-distribution-types'
 import { dirname, join, resolve as resolvePath } from 'path'
 import { URL } from 'url'

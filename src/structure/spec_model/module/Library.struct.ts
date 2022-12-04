@@ -1,6 +1,6 @@
 import { ModuleStructure } from './Module.struct.js'
 import { Type, TypeMetadata } from 'helios-distribution-types'
-import { Stats } from 'fs-extra'
+import { Stats } from 'fs'
 import { join } from 'path'
 import { URL } from 'url'
 import { MinecraftVersion } from '../../../util/MinecraftVersion.js'
