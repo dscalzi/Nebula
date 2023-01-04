@@ -69,6 +69,10 @@ export class VersionUtil {
 
     public static versionGte(version: string, min: string): boolean {
 
+        if(version === min) {
+            return true
+        }
+
         const left = version.split('.').map(x => Number(x))
         const right = min.split('.').map(x => Number(x))
 
@@ -77,12 +81,12 @@ export class VersionUtil {
         }
 
         for(let i=0; i<left.length; i++) {
-            if(left[i] < right[i]) {
-                return false
+            if(left[i] > right[i]) {
+                return true
             }
         }
 
-        return true
+        return false
     }
 
 }
