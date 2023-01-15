@@ -1,4 +1,4 @@
-import minimatch from 'minimatch'
+import { minimatch } from 'minimatch'
 import { createHash } from 'crypto'
 import { pathExists } from 'fs-extra/esm'
 import { Stats } from 'fs'
