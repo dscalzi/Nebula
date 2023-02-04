@@ -52,7 +52,10 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                     storeEntries: true
                 })
 
-                zip.on('error', err => reject(err))
+                zip.on('error', err => {
+                    this.logger.error(`Failure while processing ${path}`)
+                    reject(err)
+                })
                 zip.on('ready', () => {
                     try {
                         const res = this.processZip(zip, name, path)
