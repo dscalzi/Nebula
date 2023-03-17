@@ -4,7 +4,7 @@ import { LoggerUtil } from '../../../util/LoggerUtil.js'
 import { VersionUtil } from '../../../util/VersionUtil.js'
 import { Module, Type } from 'helios-distribution-types'
 import { LibRepoStructure } from '../../../structure/repo/LibRepo.struct.js'
-import { pathExists, remove, mkdirs, copy, writeJson, exists } from 'fs-extra/esm'
+import { pathExists, remove, mkdirs, copy, writeJson } from 'fs-extra/esm'
 import { lstat, readFile, writeFile } from 'fs/promises'
 import { join, basename, dirname } from 'path'
 import { spawn } from 'child_process'
@@ -340,7 +340,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
     private async verifyInstallerRan(installerOutputDir: string): Promise<void> {
         const versionManifestPath = this.getVersionManifestPath(installerOutputDir)
 
-        if(!await exists(versionManifestPath)) {
+        if(!await pathExists(versionManifestPath)) {
             await remove(installerOutputDir)
             throw new Error(`Forge was either not installed or installed to the wrong location. When the forge installer opens, you MUST set the installation directory to ${installerOutputDir}`)
         }
