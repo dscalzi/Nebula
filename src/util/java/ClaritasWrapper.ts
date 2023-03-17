@@ -1,9 +1,10 @@
-import { JarExecutor } from './JarExecutor'
+import { JarExecutor } from './JarExecutor.js'
 import { join, resolve } from 'path'
-import { ClaritasResult } from '../../model/claritas/ClaritasResult'
-import { MinecraftVersion } from '../MinecraftVersion'
-import { LibraryType } from '../../model/claritas/ClaritasLibraryType'
-import { pathExists, remove, readFile, writeFile, mkdirs } from 'fs-extra'
+import { ClaritasResult } from '../../model/claritas/ClaritasResult.js'
+import { MinecraftVersion } from '../MinecraftVersion.js'
+import { LibraryType } from '../../model/claritas/ClaritasLibraryType.js'
+import { pathExists, remove, mkdirs } from 'fs-extra/esm'
+import { readFile, writeFile } from 'fs/promises'
 
 export class ClaritasWrapper extends JarExecutor<ClaritasResult> {
 

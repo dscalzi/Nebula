@@ -1,11 +1,11 @@
-import { ForgeModStructure113 } from '../structure/spec_model/module/forgemod/ForgeMod113.struct'
-import { ForgeModStructure17 } from '../structure/spec_model/module/forgemod/ForgeMod17.struct'
-import { ForgeGradle3Adapter } from '../resolver/forge/adapter/ForgeGradle3.resolver'
-import { ForgeGradle2Adapter } from '../resolver/forge/adapter/ForgeGradle2.resolver'
-import { ForgeResolver } from '../resolver/forge/forge.resolver'
-import { BaseForgeModStructure } from '../structure/spec_model/module/ForgeMod.struct'
-import { MinecraftVersion } from './MinecraftVersion'
-import { UntrackedFilesOption } from '../model/nebula/servermeta'
+import { ForgeModStructure113 } from '../structure/spec_model/module/forgemod/ForgeMod113.struct.js'
+import { ForgeModStructure17 } from '../structure/spec_model/module/forgemod/ForgeMod17.struct.js'
+import { ForgeGradle3Adapter } from '../resolver/forge/adapter/ForgeGradle3.resolver.js'
+import { ForgeGradle2Adapter } from '../resolver/forge/adapter/ForgeGradle2.resolver.js'
+import { ForgeResolver } from '../resolver/forge/Forge.resolver.js'
+import { BaseForgeModStructure } from '../structure/spec_model/module/ForgeMod.struct.js'
+import { MinecraftVersion } from './MinecraftVersion.js'
+import { UntrackedFilesOption } from '../model/nebula/ServerMeta.js'
 
 export class VersionSegmentedRegistry {
 

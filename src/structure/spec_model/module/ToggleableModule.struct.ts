@@ -1,9 +1,10 @@
-import { ModuleStructure, ModuleCandidate } from './Module.struct'
+import { ModuleStructure, ModuleCandidate } from './Module.struct.js'
 import { Type, Module } from 'helios-distribution-types'
-import { Stats, mkdirs } from 'fs-extra'
+import { mkdirs } from 'fs-extra/esm'
+import { Stats } from 'fs'
 import { resolve } from 'path'
-import { MinecraftVersion } from '../../../util/MinecraftVersion'
-import { UntrackedFilesOption } from '../../../model/nebula/servermeta'
+import { MinecraftVersion } from '../../../util/MinecraftVersion.js'
+import { UntrackedFilesOption } from '../../../model/nebula/ServerMeta.js'
 
 export enum ToggleableNamespace {
 

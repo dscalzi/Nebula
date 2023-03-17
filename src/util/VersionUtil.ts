@@ -1,7 +1,7 @@
 import got from 'got'
-import { PromotionsSlim } from '../model/forge/promotionsslim'
-import { MinecraftVersion } from './MinecraftVersion'
-import { LoggerUtil } from './LoggerUtil'
+import { PromotionsSlim } from '../model/forge/PromotionsSlim.js'
+import { MinecraftVersion } from './MinecraftVersion.js'
+import { LoggerUtil } from './LoggerUtil.js'
 
 export class VersionUtil {
 

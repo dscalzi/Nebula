@@ -1,4 +1,4 @@
-import { FileStructure } from '../FileStructure'
+import { FileStructure } from '../FileStructure.js'
 
 export interface SpecModelStructure<T> extends FileStructure {
 

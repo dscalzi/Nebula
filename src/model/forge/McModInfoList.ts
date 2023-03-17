@@ -1,4 +1,4 @@
-import { McModInfo } from './mcmodinfo'
+import { McModInfo } from './McModInfo.js'
 
 export interface McModInfoList {
 
