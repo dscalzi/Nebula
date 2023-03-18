@@ -100,10 +100,21 @@ export class CurseForgeParser {
                 const modInfo = (await CurseForgeParser.cfClient.get<CurseForgeModFileResponse>(`mods/${file.projectID}/files/${file.fileID}`)).body
                 log.debug(`Downloading ${modInfo.data.fileName}`)
                 
-                const isJar = modInfo.data.fileName.toLowerCase().endsWith('jar')
+                let dir: string
+                const fileNameLower = modInfo.data.fileName.toLowerCase()
+                if(fileNameLower.endsWith('jar')) {
+                    dir = file.required ? requiredPath : optionalPath
+                }
+                else if(fileNameLower.endsWith('zip')) {
+                    // Assume it's a resource pack.
+                    dir = join(createServerResult.miscFileContainer, 'resourcepacks')
+                    await mkdirs(dir)
+                }
+                else {
+                    dir = createServerResult.miscFileContainer
+                }
 
                 const downloadStream = got.stream(modInfo.data.downloadUrl)
-                const dir = isJar ? file.required ? requiredPath : optionalPath : createServerResult.miscFileContainer
                 const fileWriterStream = createWriteStream(join(dir, modInfo.data.fileName))
 
                 await pipeline(downloadStream, fileWriterStream)
