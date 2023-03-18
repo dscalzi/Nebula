@@ -61,6 +61,7 @@ export interface ServerMeta {
         discord?: Server['discord']
         mainServer: Server['mainServer']
         autoconnect: Server['autoconnect']
+        javaOptions?: Server['javaOptions']
     }
 
     /**
