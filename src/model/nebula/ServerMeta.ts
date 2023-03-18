@@ -13,6 +13,7 @@ export interface UntrackedFilesOption {
 }
 
 export interface ServerMetaOptions {
+    version?: string
     forgeVersion?: string
 }
 
@@ -20,7 +21,7 @@ export function getDefaultServerMeta(id: string, version: string, options?: Serv
 
     const servMeta: ServerMeta = {
         meta: {
-            version: '1.0.0',
+            version: options?.version ?? '1.0.0',
             name: `${id} (Minecraft ${version})`,
             description: `${id} Running Minecraft ${version}`,
             address: 'localhost:25565',

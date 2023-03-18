@@ -23,6 +23,10 @@ export abstract class BaseFileStructure implements FileStructure {
         mkdirs(this.containerDirectory)
     }
 
+    public getContainerDirectory(): string {
+        return this.containerDirectory
+    }
+
     public abstract getLoggerName(): string
 
 }

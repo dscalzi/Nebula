@@ -122,6 +122,22 @@ Options:
 
 ---
 
+#### Generate Server from CurseForge Modpack
+
+Generate an new server in the root directory, including files and mods from an existing CurseForge modpack.
+
+`generate server-curseforge <id> <zipFile>`
+
+The cursforge modpack must be downloaded as a zip and placed into `${ROOT}/modpacks/curseforge`. Pass the name of the modpack as the `<zipFile>` argument.
+
+>
+> Example Usage
+>
+> `generate server-curseforge WesterosCraft-Prod The+WesterosCraft+Modpack-2.1.6.zip`
+>
+
+---
+
 #### Generate Distribution
 
 Generate a distribution file from the root file structure.

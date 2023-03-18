@@ -14,6 +14,7 @@ import { VersionUtil } from './util/VersionUtil.js'
 import { MinecraftVersion } from './util/MinecraftVersion.js'
 import { LoggerUtil } from './util/LoggerUtil.js'
 import { generateSchemas } from './util/SchemaUtil.js'
+import { CurseForgeParser } from './parser/CurseForgeParser.js'
 
 dotenv.config()
 
@@ -134,6 +135,7 @@ const initRootCommand: CommandModule = {
         try {
             await generateSchemas(argv.root as string)
             await new DistributionStructure(argv.root as string, '', false, false).init()
+            await new CurseForgeParser(argv.root as string, '').init()
             logger.info(`Successfully created new root at ${argv.root}`)
         } catch (error) {
             logger.error(`Failed to init new root at ${argv.root}`, error)
@@ -203,7 +205,53 @@ const generateServerCommand: CommandModule = {
                 forgeVersion: argv.forge as string
             }
         )
+    }
+}
 
+const generateServerCurseForgeCommand: CommandModule = {
+    command: 'server-curseforge <id> <zipName>',
+    describe: 'Generate a new server configuration from a CurseForge modpack.',
+    builder: (yargs) => {
+        // yargs = rootOption(yargs)
+        return yargs
+            .positional('id', {
+                describe: 'Server id.',
+                type: 'string'
+            })
+            .positional('zipName', {
+                describe: 'The name of the modpack zip file.',
+                type: 'string'
+            })
+    },
+    handler: async (argv) => {
+        argv.root = getRoot()
+
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug(`Generating server ${argv.id} using CurseForge modpack ${argv.zipName} as a template.`)
+
+        const parser = new CurseForgeParser(argv.root as string, argv.zipName as string)
+        const modpackManifest = await parser.getModpackManifest()
+
+        const minecraftVersion = new MinecraftVersion(modpackManifest.minecraft.version)
+
+        // Extract forge version
+        const forgeModLoader = modpackManifest.minecraft.modLoaders.find(({ id }) => id.toLowerCase().startsWith('forge-'))
+        const forgeVersion = forgeModLoader != null ? forgeModLoader.id.substring('forge-'.length) : undefined
+        logger.debug(`Forge version set to ${forgeVersion}`)
+
+        const serverStruct = new ServerStructure(argv.root as string, getBaseURL(), false, false)
+        const createServerResult = await serverStruct.createServer(
+            argv.id as string,
+            minecraftVersion,
+            {
+                version: modpackManifest.version,
+                forgeVersion
+            }
+        )
+
+        if(createServerResult) {
+            await parser.enrichServer(createServerResult, modpackManifest)
+        }
     }
 }
 
@@ -286,6 +334,7 @@ const generateCommand: CommandModule = {
     describe: 'Base generate command.',
     builder: (yargs) => {
         return yargs
+            .command(generateServerCurseForgeCommand)
             .command(generateServerCommand)
             .command(generateDistroCommand)
             .command(generateSchemasCommand)

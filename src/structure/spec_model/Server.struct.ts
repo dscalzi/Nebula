@@ -11,6 +11,12 @@ import { LibraryStructure } from './module/Library.struct.js'
 import { MinecraftVersion } from '../../util/MinecraftVersion.js'
 import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil.js'
 
+export interface CreateServerResult {
+    forgeModContainer?: string
+    libraryContainer: string
+    miscFileContainer: string
+}
+
 export class ServerStructure extends BaseModelStructure<Server> {
 
     private readonly ID_REGEX = /(.+-(.+)$)/
@@ -36,25 +42,33 @@ export class ServerStructure extends BaseModelStructure<Server> {
         return this.resolvedModels
     }
 
+    public static getEffectiveId(id: string, minecraftVersion: MinecraftVersion): string {
+        return `${id}-${minecraftVersion}`
+    }
+
     public async createServer(
         id: string,
         minecraftVersion: MinecraftVersion,
         options: {
+            version?: string
             forgeVersion?: string
         }
-    ): Promise<void> {
-        const effectiveId = `${id}-${minecraftVersion}`
+    ): Promise<CreateServerResult | null> {
+        const effectiveId = ServerStructure.getEffectiveId(id, minecraftVersion)
         const absoluteServerRoot = resolvePath(this.containerDirectory, effectiveId)
         const relativeServerRoot = join(this.relativeRoot, effectiveId)
 
         if (await pathExists(absoluteServerRoot)) {
             this.logger.error('Server already exists! Aborting.')
-            return
+            return null
         }
 
         await mkdirs(absoluteServerRoot)
 
-        const serverMetaOpts: ServerMetaOptions = {}
+        const serverMetaOpts: ServerMetaOptions = {
+            version: options.version
+        }
+        let forgeModContainer: string | undefined = undefined
 
         if (options.forgeVersion != null) {
             const fms = VersionSegmentedRegistry.getForgeModStruct(
@@ -66,6 +80,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 []
             )
             await fms.init()
+            forgeModContainer = fms.getContainerDirectory()
             serverMetaOpts.forgeVersion = options.forgeVersion
         }
 
@@ -81,6 +96,12 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
         const mfs = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, [])
         await mfs.init()
+
+        return {
+            forgeModContainer,
+            libraryContainer: libS.getContainerDirectory(),
+            miscFileContainer: mfs.getContainerDirectory()
+        }
 
     }
 

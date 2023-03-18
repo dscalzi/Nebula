@@ -14,7 +14,7 @@ export class VersionSegmentedRegistry {
         ForgeGradle3Adapter
     ]
 
-    public static readonly FORGEMOD_STRUCT_IML = [
+    public static readonly FORGEMOD_STRUCT_IMPL = [
         ForgeModStructure17,
         ForgeModStructure113
     ]
@@ -44,7 +44,7 @@ export class VersionSegmentedRegistry {
         baseUrl: string,
         untrackedFiles: UntrackedFilesOption[]
     ): BaseForgeModStructure {
-        for (const impl of VersionSegmentedRegistry.FORGEMOD_STRUCT_IML) {
+        for (const impl of VersionSegmentedRegistry.FORGEMOD_STRUCT_IMPL) {
             if (impl.isForVersion(minecraftVersion, forgeVersion)) {
                 return new impl(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, untrackedFiles)
             }
