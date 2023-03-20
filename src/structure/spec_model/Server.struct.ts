@@ -192,6 +192,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                     ...(serverMeta.meta.discord ? {discord: serverMeta.meta.discord} : {}),
                     mainServer: serverMeta.meta.mainServer,
                     autoconnect: serverMeta.meta.autoconnect,
+                    javaOptions: serverMeta.meta.javaOptions,
                     modules
                 })
 
