@@ -153,7 +153,7 @@ Options:
 * `--installLocal` Have the application install a copy of the generated distribution to the Helios data folder.
   * OPTIONAL (default: false)
   * This is useful to easily test the new distribution.json in dev mode on Helios.
-  * Tip: Set name to `dev_distribution` when using this option.
+  * Tip: Set name to `distribution_dev` when using this option.
 * `--discardOutput` Delete cached output after it is no longer required. May be useful if disk space is limited.
   * OPTIONAL (default: false)
 * `--invalidateCache` Invalidate and delete existing caches as they are encountered. Requires fresh cache generation.
@@ -168,7 +168,7 @@ As of Forge 1.13, the installer must be run to generate required files. The inst
 >
 > `generate distro`
 >
-> `generate distro dev_distribution --installLocal`
+> `generate distro distribution_dev --installLocal`
 >
 
 ---
