@@ -11,6 +11,7 @@ import { LibraryStructure } from './module/Library.struct.js'
 import { MinecraftVersion } from '../../util/MinecraftVersion.js'
 import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil.js'
 import { isValidUrl } from '../../util/StringUtils.js'
+import { FabricResolver } from '../../resolver/fabric/Fabric.resolver.js'
 
 export interface CreateServerResult {
     forgeModContainer?: string
@@ -53,6 +54,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
         options: {
             version?: string
             forgeVersion?: string
+            fabricVersion?: string
         }
     ): Promise<CreateServerResult | null> {
         const effectiveId = ServerStructure.getEffectiveId(id, minecraftVersion)
@@ -83,6 +85,10 @@ export class ServerStructure extends BaseModelStructure<Server> {
             await fms.init()
             forgeModContainer = fms.getContainerDirectory()
             serverMetaOpts.forgeVersion = options.forgeVersion
+        }
+
+        if (options.fabricVersion != null) {
+            serverMetaOpts.fabricVersion = options.fabricVersion
         }
 
         const serverMeta: ServerMeta = addSchemaToObject(
@@ -182,6 +188,15 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
                     const forgeModModules = await forgeModStruct.getSpecModel()
                     modules.push(...forgeModModules)
+                }
+
+                if(serverMeta.fabric) {
+                    const fabricResolver = new FabricResolver(dirname(this.containerDirectory), '', this.baseUrl, serverMeta.fabric.version, minecraftVersion)
+
+                    const fabricModule = await fabricResolver.getModule()
+                    modules.push(fabricModule)
+
+                    // TODO Fabric Mod structure.
                 }
 
                 const libraryStruct = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, untrackedFiles)

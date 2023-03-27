@@ -1,5 +1,6 @@
 import { mkdirs } from 'fs-extra/esm'
 import { join } from 'path'
+import { MinecraftVersion } from '../../util/MinecraftVersion.js'
 import { BaseFileStructure } from '../BaseFileStructure.js'
 import { LibRepoStructure } from './LibRepo.struct.js'
 import { VersionRepoStructure } from './VersionRepo.struct.js'
@@ -51,6 +52,10 @@ export class RepoStructure extends BaseFileStructure {
 
     public getForgeCacheDirectory(artifactVersion: string): string {
         return join(this.getCacheDirectory(), 'forge', artifactVersion)
+    }
+
+    public getFabricCacheDirectory(loaderVersion: string, mcVersion: MinecraftVersion): string {
+        return join(this.getCacheDirectory(), 'fabric', `fabric-loader-${loaderVersion}-${mcVersion}`)
     }
 
 }
