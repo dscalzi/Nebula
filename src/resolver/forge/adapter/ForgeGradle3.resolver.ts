@@ -33,7 +33,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         if(version.getMinor() === 12 && VersionUtil.isOneDotTwelveFG2(libraryVersion)) {
             return false
         }
-        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16, 17, 18, 19])
+        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16, 17, 18, 19, 20])
     }
 
     private generatedFiles: GeneratedFile[] | undefined
@@ -57,7 +57,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         const is117OrGreater = this.minecraftVersion.getMinor() >= 17
 
         // Configure for 13, 14, 15, 16, 17, 18, 19
-        if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16, 17, 18, 19])) {
+        if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16, 17, 18, 19, 20])) {
 
             // https://github.com/MinecraftForge/MinecraftForge/commit/97d4652f5fe15931b980117efabdff332f9f6428
             const mcpUnifiedVersion = `${this.minecraftVersion}-${ForgeGradle3Adapter.WILDCARD_MCP_VERSION}`
@@ -116,7 +116,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 )
             }
 
-            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [17, 18, 19])) {
+            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [17, 18, 19, 20])) {
 
                 // Added in 1.17+
 
@@ -145,7 +145,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 )
             }
 
-            if (VersionUtil.isVersionAcceptable(this.minecraftVersion, [18, 19])) {
+            if (VersionUtil.isVersionAcceptable(this.minecraftVersion, [18, 19, 20])) {
 
                 // Added in 1.18+
 
@@ -508,7 +508,6 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                         )
                     )
                 })
-
                 const destination = libRepo.getArtifactByComponents(
                     components.group,
                     components.artifact,

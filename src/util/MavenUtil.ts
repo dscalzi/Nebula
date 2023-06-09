@@ -63,7 +63,7 @@ export class MavenUtil {
     public static mavenComponentsToString(
         group: string, artifact: string, version: string, classifier?: string, extension = 'jar'
     ): string {
-        return `${group.replace(/\./g, '/')}/${artifact}/${version}/${artifact}-${version}${classifier != null ? `-${classifier}` : ''}.${extension}`
+        return `${group.replace(/\./g, '/').replace(/:/g, '/')}/${artifact}/${version}/${artifact}-${version}${classifier != null ? `-${classifier}` : ''}.${extension}`
     }
 
     public static mavenIdentifierToUrl(id: string, extension = 'jar'): URL {
