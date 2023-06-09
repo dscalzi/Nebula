@@ -1,6 +1,6 @@
 export class MinecraftVersion {
 
-    private static readonly MINECRAFT_VERSION_REGEX = /(\d+).(\d+).(\d+)/
+    private static readonly MINECRAFT_VERSION_REGEX = /(\d+).(\d+).?(\d+)?/
 
     private readonly major: number
     private readonly minor: number
@@ -11,7 +11,7 @@ export class MinecraftVersion {
         if(res != null) {
             this.major = Number(res[1])
             this.minor = Number(res[2])
-            this.revision = Number(res[3])
+            this.revision = Number(res[3]) ?? undefined
         } else {
             throw new Error(`${version} is not a valid minecraft version!`)
         }
@@ -23,8 +23,8 @@ export class MinecraftVersion {
 
     public getMajor(): number { return this.major }
     public getMinor(): number { return this.minor }
-    public getRevision(): number { return this.revision }
+    public getRevision(): number|undefined { return this.revision }
 
-    public toString(): string { return `${this.major}.${this.minor}.${this.revision}`}
+    public toString(): string { return `${this.major}.${this.minor}${this.revision? '.'+this.revision:''}`}
 
 }
