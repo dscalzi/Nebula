@@ -411,7 +411,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
                 const targetLocalPath = join(
                     libDir,
-                    MavenUtil.mavenComponentsToPath(entry.group, entry.artifact, entry.version, _classifier)
+                    MavenUtil.mavenComponentsAsNormalizedPath(entry.group, entry.artifact, entry.version, _classifier)
                 )
 
                 targetLocations.push(targetLocalPath)

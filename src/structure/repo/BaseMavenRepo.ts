@@ -20,21 +20,21 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
     }
 
     public getArtifactById(mavenIdentifier: string, extension?: string): string {
-        return resolve(this.containerDirectory, MavenUtil.mavenIdentifierToString(mavenIdentifier, extension))
+        return resolve(this.containerDirectory, MavenUtil.mavenIdentifierAsPath(mavenIdentifier, extension))
     }
 
     public getArtifactByComponents(
         group: string, artifact: string, version: string, classifier?: string, extension = 'jar'
     ): string {
         return resolve(this.containerDirectory,
-            MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension))
+            MavenUtil.mavenComponentsAsPath(group, artifact, version, classifier, extension))
     }
 
     public getArtifactUrlByComponents(
         baseURL: string, group: string, artifact: string, version: string, classifier?: string, extension = 'jar'
     ): string {
         return new URL(join(this.relativeRoot,
-            MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension)), baseURL).toString()
+            MavenUtil.mavenComponentsAsPath(group, artifact, version, classifier, extension)), baseURL).toString()
     }
 
     public async artifactExists(path: string): Promise<boolean> {
@@ -42,14 +42,14 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
     }
 
     public async downloadArtifactById(url: string, mavenIdentifier: string, extension?: string): Promise<void> {
-        return this.downloadArtifactBase(url, MavenUtil.mavenIdentifierToString(mavenIdentifier, extension) as string)
+        return this.downloadArtifactBase(url, MavenUtil.mavenIdentifierAsPath(mavenIdentifier, extension) as string)
     }
 
     public async downloadArtifactByComponents(
         url: string, group: string, artifact: string, version: string, classifier?: string, extension?: string
     ): Promise<void> {
         return this.downloadArtifactBase(url,
-            MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension))
+            MavenUtil.mavenComponentsAsPath(group, artifact, version, classifier, extension))
     }
 
     private async downloadArtifactBase(url: string, relative: string): Promise<void> {
@@ -75,14 +75,14 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
     }
 
     public async headArtifactById(url: string, mavenIdentifier: string, extension?: string): Promise<boolean> {
-        return this.headArtifactBase(url, MavenUtil.mavenIdentifierToString(mavenIdentifier, extension) as string)
+        return this.headArtifactBase(url, MavenUtil.mavenIdentifierAsPath(mavenIdentifier, extension) as string)
     }
 
     public async headArtifactByComponents(
         url: string, group: string, artifact: string, version: string, classifier?: string, extension?: string
     ): Promise<boolean> {
         return this.headArtifactBase(url,
-            MavenUtil.mavenComponentsToString(group, artifact, version, classifier, extension))
+            MavenUtil.mavenComponentsAsPath(group, artifact, version, classifier, extension))
     }
 
     private async headArtifactBase(url: string, relative: string): Promise<boolean> {
