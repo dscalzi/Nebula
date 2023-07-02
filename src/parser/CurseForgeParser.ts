@@ -32,6 +32,16 @@ export interface CurseForgeManifest {
     overrides: string
 }
 
+export interface CurseForgeModResponse {
+    data: {
+        id: number
+        gameId: number
+        name: string
+        slug: string
+        // There are more fields that we don't use right now.
+    }
+}
+
 export interface CurseForgeModFileResponse {
     data: {
         id: number
@@ -94,14 +104,16 @@ export class CurseForgeParser {
             const requiredPath = resolve(createServerResult.forgeModContainer, ToggleableNamespace.REQUIRED)
             const optionalPath = resolve(createServerResult.forgeModContainer, ToggleableNamespace.OPTIONAL_ON)
 
+            const disallowedFiles: { name: string, fileName: string, url: string }[] = []
+
             // Download mods
             for(const file of manifest.files) {
                 log.debug(`Processing - Mod: ${file.projectID}, File: ${file.fileID}`)
-                const modInfo = (await CurseForgeParser.cfClient.get<CurseForgeModFileResponse>(`mods/${file.projectID}/files/${file.fileID}`)).body
-                log.debug(`Downloading ${modInfo.data.fileName}`)
+                const fileInfo = (await CurseForgeParser.cfClient.get<CurseForgeModFileResponse>(`mods/${file.projectID}/files/${file.fileID}`)).body
+                log.debug(`Downloading ${fileInfo.data.fileName}`)
                 
                 let dir: string
-                const fileNameLower = modInfo.data.fileName.toLowerCase()
+                const fileNameLower = fileInfo.data.fileName.toLowerCase()
                 if(fileNameLower.endsWith('jar')) {
                     dir = file.required ? requiredPath : optionalPath
                 }
@@ -114,11 +126,45 @@ export class CurseForgeParser {
                     dir = createServerResult.miscFileContainer
                 }
 
-                const downloadStream = got.stream(modInfo.data.downloadUrl)
-                const fileWriterStream = createWriteStream(join(dir, modInfo.data.fileName))
+                const thirdPartyDisallowed = fileInfo.data.downloadUrl == null
+                if(thirdPartyDisallowed) {
 
-                await pipeline(downloadStream, fileWriterStream)
+                    log.warn(`${fileInfo.data.fileName} is not available for 3rd-party download through the curseforge API!`)
+                    const modInfo = (await CurseForgeParser.cfClient.get<CurseForgeModResponse>(`mods/${file.projectID}`)).body
+                    disallowedFiles.push({
+                        name: modInfo.data.name,
+                        fileName: fileInfo.data.fileName,
+                        url: `https://www.curseforge.com/minecraft/mc-mods/${modInfo.data.slug}/download/${file.fileID}`
+                    })
+
+                } else {
+                    const downloadStream = got.stream(fileInfo.data.downloadUrl)
+                    const fileWriterStream = createWriteStream(join(dir, fileInfo.data.fileName))
+
+                    await pipeline(downloadStream, fileWriterStream)
+                }
+                
             }
+
+            if(disallowedFiles.length > 0) {
+
+                log.error('============================================')
+                log.error('\x1b[41mWARNING\x1b[0m')
+                log.error(`${disallowedFiles.length} files declared by this modpack do not permit 3rd-party downloads.`)
+                log.error('They MUST be downloaded manually.')
+                log.error('The mods and their download urls will be listed below.')
+                log.error('============================================')
+
+                for(const file of disallowedFiles) {
+                    log.error(`${file.name} (${file.fileName}) - \x1b[32m${file.url}\x1b[0m`)
+                }
+
+                log.error('============================================')
+                log.error('YOUR MODPACK IS NOT FULLY GENERATED!')
+                log.error('MANUAL ACTION REQUIRED! SCROLL UP AND READ THE WARNING!')
+                log.error('============================================')
+            }
+
         }
     }
 
