@@ -24,6 +24,7 @@ export function getDefaultServerMeta(id: string, version: string, options?: Serv
             version: options?.version ?? '1.0.0',
             name: `${id} (Minecraft ${version})`,
             description: `${id} Running Minecraft ${version}`,
+            icon: 'How to set the server icon: https://github.com/dscalzi/Nebula#setting-the-server-icon',
             address: 'localhost:25565',
             discord: {
                 shortId: '<FILL IN OR REMOVE DISCORD OBJECT>',
@@ -57,6 +58,7 @@ export interface ServerMeta {
         version: Server['version']
         name: Server['name']
         description: Server['description']
+        icon?: Server['icon']
         address: Server['address']
         discord?: Server['discord']
         mainServer: Server['mainServer']

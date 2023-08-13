@@ -10,6 +10,7 @@ import { MiscFileStructure } from './module/File.struct.js'
 import { LibraryStructure } from './module/Library.struct.js'
 import { MinecraftVersion } from '../../util/MinecraftVersion.js'
 import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil.js'
+import { isValidUrl } from '../../util/StringUtils.js'
 
 export interface CreateServerResult {
     forgeModContainer?: string
@@ -123,25 +124,35 @@ export class ServerStructure extends BaseModelStructure<Server> {
                     continue
                 }
 
-                let iconUrl: string = null!
-
-                // Resolve server icon
-                const subFiles = await readdir(absoluteServerRoot)
-                for (const subFile of subFiles) {
-                    const caseInsensitive = subFile.toLowerCase()
-                    if (caseInsensitive.endsWith('.jpg') || caseInsensitive.endsWith('.png')) {
-                        iconUrl = new URL(join(relativeServerRoot, subFile), this.baseUrl).toString()
-                    }
-                }
-
-                if (!iconUrl) {
-                    this.logger.warn(`No icon file found for server ${file}.`)
-                }
-
                 // Read server meta
                 const serverMeta = JSON.parse(await readFile(resolvePath(absoluteServerRoot, this.SERVER_META_FILE), 'utf-8')) as ServerMeta
                 const minecraftVersion = new MinecraftVersion(match[2])
                 const untrackedFiles: UntrackedFilesOption[] = serverMeta.untrackedFiles || []
+
+                let iconUrl: string = null!
+
+                // Resolve server icon
+
+                if(serverMeta.meta.icon && isValidUrl(serverMeta.meta.icon)) {
+                    // Use the url they gave us.
+                    iconUrl = serverMeta.meta.icon
+                } else {
+
+                    this.logger.info('Server icon is either not set or not a valid URL.')
+                    this.logger.info(`Looking for an icon file at ${absoluteServerRoot}`)
+
+                    const subFiles = await readdir(absoluteServerRoot)
+                    for (const subFile of subFiles) {
+                        const caseInsensitive = subFile.toLowerCase()
+                        if (caseInsensitive.endsWith('.jpg') || caseInsensitive.endsWith('.png')) {
+                            iconUrl = new URL(join(relativeServerRoot, subFile), this.baseUrl).toString()
+                        }
+                    }
+
+                    if (!iconUrl) {
+                        this.logger.warn(`No icon file found for server ${file}.`)
+                    }
+                }
 
                 const modules: Module[] = []
 

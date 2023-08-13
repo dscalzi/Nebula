@@ -230,6 +230,15 @@ Ex.
     * This is a directory of toggleable modules. See the note below.
   * `TestServer-1.12.2.png` Server icon file.
 
+#### Setting the Server Icon
+
+You can set the server icon in two ways.
+
+1. __*(Preferred)*__ Place your server icon in the root server directory as shown in the example above. Only jpg and png files will be looked at. The name of the file does not matter.
+2. Paste the **full** URL to your server icon in the servermeta.json for your server. It is highly recommended to only use files that are hosted on your own servers.
+
+The value in servermeta.json will always be used so long as it is not empty and is a [valid url](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL). If it is empty or an [invalid url](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL), then the first method will be used.
+
 #### Toggleable Modules
 
 If a directory represents a toggleable mod, it will have three subdirectories. You must filter your files into these three.
@@ -279,6 +288,7 @@ Sample:
     "version": "1.0.0",
     "name": "Test (Minecraft 1.12.2)",
     "description": "Test Running Minecraft 1.12.2 (Forge v14.23.5.2854)",
+    "icon": "How to set the server icon: https://github.com/dscalzi/Nebula#setting-the-server-icon",
     "address": "localhost:25565",
     "discord": {
       "shortId": "1.12.2 Test Server",
