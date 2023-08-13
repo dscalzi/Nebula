@@ -9,13 +9,13 @@ export interface VersionManifestFG2 {
     inheritsFrom: string
     jar: string
     logging: Record<string, unknown>
-    libraries: Array<{
+    libraries: {
         name: string
         url?: string
         checksums?: string[]
         serverreq?: boolean
         clientreq?: boolean
         comment?: string
-    }>
+    }[]
 
 }

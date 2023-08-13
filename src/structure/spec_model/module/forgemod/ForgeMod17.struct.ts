@@ -70,7 +70,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                 })
 
             } else {
-                resolve(this.forgeModMetadata[name] as McModInfo)
+                resolve(this.forgeModMetadata[name]!)
                 return
             }
 
@@ -104,7 +104,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
                 version,
                 mcversion: version.substring(0, version.indexOf('_'))
             }) as McModInfo
-            return this.forgeModMetadata[name] as McModInfo
+            return this.forgeModMetadata[name]!
         }
 
         let raw: Buffer | undefined
@@ -184,7 +184,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure {
             }) as McModInfo
         }
 
-        return this.forgeModMetadata[name] as McModInfo
+        return this.forgeModMetadata[name]!
     }
 
 }

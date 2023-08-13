@@ -42,7 +42,7 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
     }
 
     public async downloadArtifactById(url: string, mavenIdentifier: string, extension?: string): Promise<void> {
-        return this.downloadArtifactBase(url, MavenUtil.mavenIdentifierAsPath(mavenIdentifier, extension) as string)
+        return this.downloadArtifactBase(url, MavenUtil.mavenIdentifierAsPath(mavenIdentifier, extension))
     }
 
     public async downloadArtifactByComponents(
@@ -59,12 +59,11 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
 
     public async downloadArtifactDirect(url: string, path: string): Promise<void> {
         BaseMavenRepo.logger.debug(`Downloading ${url}..`)
-        const request = await got.stream.get({ url })
+        const request = got.stream.get({ url })
         const localPath = resolve(this.containerDirectory, path)
         await mkdirs(dirname(localPath))
         const writer = createWriteStream(localPath)
         request.pipe(writer)
-        // tslint:disable-next-line: no-shadowed-variable
         return new Promise((resolve, reject) => {
             writer.on('finish', () => {
                 BaseMavenRepo.logger.debug(`Completed download of ${url}.`)
@@ -75,7 +74,7 @@ export abstract class BaseMavenRepo extends BaseFileStructure {
     }
 
     public async headArtifactById(url: string, mavenIdentifier: string, extension?: string): Promise<boolean> {
-        return this.headArtifactBase(url, MavenUtil.mavenIdentifierAsPath(mavenIdentifier, extension) as string)
+        return this.headArtifactBase(url, MavenUtil.mavenIdentifierAsPath(mavenIdentifier, extension))
     }
 
     public async headArtifactByComponents(

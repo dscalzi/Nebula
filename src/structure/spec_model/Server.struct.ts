@@ -139,7 +139,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 }
 
                 // Read server meta
-                const serverMeta: ServerMeta = JSON.parse(await readFile(resolvePath(absoluteServerRoot, this.SERVER_META_FILE), 'utf-8'))
+                const serverMeta = JSON.parse(await readFile(resolvePath(absoluteServerRoot, this.SERVER_META_FILE), 'utf-8')) as ServerMeta
                 const minecraftVersion = new MinecraftVersion(match[2])
                 const untrackedFiles: UntrackedFilesOption[] = serverMeta.untrackedFiles || []
 

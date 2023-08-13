@@ -25,7 +25,7 @@ export class ClaritasWrapper extends JarExecutor<ClaritasResult> {
                 this.lastExecutionResult = undefined!
             } else {
                 if(await pathExists(this.OUTPUT_FILE)) {
-                    this.lastExecutionResult = JSON.parse((await readFile(this.OUTPUT_FILE)).toString('utf8'))
+                    this.lastExecutionResult = JSON.parse((await readFile(this.OUTPUT_FILE)).toString('utf8')) as ClaritasResult
                 } else {
                     this.logger.error('Claritas output file not found when exit code is 0, is this a bug?')
                     this.lastExecutionResult = undefined!
@@ -63,7 +63,7 @@ export class ClaritasWrapper extends JarExecutor<ClaritasResult> {
 
     private async cleanOutput(): Promise<void> {
         if(await pathExists(this.WORK_DIR)) {
-            remove(this.WORK_DIR)
+            await remove(this.WORK_DIR)
         }
     }
 

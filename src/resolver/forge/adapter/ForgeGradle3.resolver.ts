@@ -308,13 +308,13 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
         ForgeGradle3Adapter.logger.debug('Processing Version Manifest')
         const versionManifestTuple = await this.processVersionManifest(installerOutputDir)
-        const versionManifest = versionManifestTuple[0] as VersionManifestFG3
+        const versionManifest = versionManifestTuple[0]
 
         ForgeGradle3Adapter.logger.debug('Processing generated forge files.')
         const forgeModule = await this.processForgeModule(versionManifest, installerOutputDir)
 
         // Attach version.json module.
-        forgeModule.subModules?.unshift(versionManifestTuple[1] as Module)
+        forgeModule.subModules?.unshift(versionManifestTuple[1])
 
         ForgeGradle3Adapter.logger.debug('Processing Libraries')
         const libs = await this.processLibraries(versionManifest, installerOutputDir)
@@ -465,7 +465,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
         }
 
-        const forgeModule = mdls.shift() as Module
+        const forgeModule = mdls.shift()!
         forgeModule.type = Type.ForgeHosted
         forgeModule.subModules = mdls
 
@@ -696,7 +696,8 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 name: `Minecraft Forge (${mavenComponents?.artifact})`,
                 type: Type.Library,
                 artifact: this.generateArtifact(
-                    libBuf as Buffer,
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                    libBuf!,
                     stats,
                     libRepo.getArtifactUrlByComponents(
                         this.baseUrl,

@@ -23,7 +23,7 @@ export class RepoStructure extends BaseFileStructure {
     }
 
     public async init(): Promise<void> {
-        super.init()
+        await super.init()
         await this.libRepoStruct.init()
         await this.versionRepoStruct.init()
         await mkdirs(this.getCacheDirectory())

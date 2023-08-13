@@ -1,4 +1,3 @@
-/* tslint:disable:no-shadowed-variable */
 import dotenv from 'dotenv'
 import { writeFile } from 'fs/promises'
 import { resolve as resolvePath } from 'path'
@@ -21,18 +20,18 @@ dotenv.config()
 const logger = LoggerUtil.getLogger('Index')
 
 function getRoot(): string {
-    return resolvePath(process.env.ROOT as string)
+    return resolvePath(process.env.ROOT!)
 }
 
 function getHeliosDataFolder(): string | null {
     if(process.env.HELIOS_DATA_FOLDER) {
-        return resolvePath(process.env.HELIOS_DATA_FOLDER as string)
+        return resolvePath(process.env.HELIOS_DATA_FOLDER)
     }
     return null
 }
 
 function getBaseURL(): string {
-    let baseUrl = process.env.BASE_URL as string
+    let baseUrl = process.env.BASE_URL!
     // Users must provide protocol in all other instances.
     if (baseUrl.indexOf('//') === -1) {
         if (baseUrl.toLowerCase().startsWith('localhost')) {
@@ -190,7 +189,7 @@ const generateServerCommand: CommandModule = {
 
         if(argv.forge != null) {
             if (VersionUtil.isPromotionVersion(argv.forge as string)) {
-                logger.debug(`Resolving ${argv.forge} Forge Version..`)
+                logger.debug(`Resolving ${argv.forge as string} Forge Version..`)
                 const version = await VersionUtil.getPromotedForgeVersion(minecraftVersion, argv.forge as string)
                 logger.debug(`Forge version set to ${version}`)
                 argv.forge = version
@@ -198,7 +197,7 @@ const generateServerCommand: CommandModule = {
         }
 
         const serverStruct = new ServerStructure(argv.root as string, getBaseURL(), false, false)
-        serverStruct.createServer(
+        await serverStruct.createServer(
             argv.id as string,
             minecraftVersion,
             {
@@ -292,14 +291,14 @@ const generateDistroCommand: CommandModule = {
             const distro = await distributionStruct.getSpecModel()
             const distroOut = JSON.stringify(distro, null, 2)
             const distroPath = resolvePath(argv.root as string, finalName)
-            writeFile(distroPath, distroOut)
+            await writeFile(distroPath, distroOut)
             logger.info(`Successfully generated ${finalName}`)
             logger.info(`Saved to ${distroPath}`)
             logger.debug('Preview:\n', distro)
             if(doLocalInstall) {
                 const finalDestination = resolvePath(heliosDataFolder!, finalName)
                 logger.info(`Installing distribution to ${finalDestination}`)
-                writeFile(finalDestination, distroOut)
+                await writeFile(finalDestination, distroOut)
                 logger.info('Success!')
             }
             
@@ -412,8 +411,7 @@ const testCommand: CommandModule = {
 }
 
 // Registering yargs configuration.
-// tslint:disable-next-line:no-unused-expression
-yargs(hideBin(process.argv))
+await yargs(hideBin(process.argv))
     .version(false)
     .scriptName('')
     .command(initCommand)

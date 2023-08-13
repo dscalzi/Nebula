@@ -36,6 +36,7 @@ export abstract class JarExecutor<T> {
             child.stderr.on('data', (data) => this.logger.error(data.toString('utf8').trim()))
             this.stderrListeners.forEach(l => child.stderr.on('data', l))
 
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             child.on('close', async code => {
                 this.logger.info('Exited with code', code)
                 for(const l of this.onCloseListeners) {

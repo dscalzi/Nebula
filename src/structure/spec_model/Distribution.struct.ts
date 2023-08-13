@@ -49,7 +49,7 @@ export class DistributionStructure implements SpecModelStructure<Distribution> {
 
     public async getSpecModel(): Promise<Distribution> {
 
-        const distroMeta: DistroMeta = JSON.parse(await readFile(resolve(this.metaPath, this.DISTRO_META_FILE), 'utf-8'))
+        const distroMeta = JSON.parse(await readFile(resolve(this.metaPath, this.DISTRO_META_FILE), 'utf-8')) as DistroMeta
 
         return {
             version: '1.0.0',

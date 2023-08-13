@@ -10,7 +10,7 @@ export interface VersionManifestFG3 {
     arguments: {
         game: string[]
     }
-    libraries: Array<{
+    libraries: {
         name: string
         downloads: {
             artifact: {
@@ -20,6 +20,6 @@ export interface VersionManifestFG3 {
                 size: number
             }
         }
-    }>
+    }[]
 
 }

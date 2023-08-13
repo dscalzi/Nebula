@@ -6,7 +6,7 @@ export interface ModsToml {
     loaderVersion: string
     issueTrackerURL?: string
 
-    mods: Array<{
+    mods: {
         modId: string
         version: string
         displayName: string
@@ -16,7 +16,7 @@ export interface ModsToml {
         credits?: string
         authors?: string
         description: string
-    }>
+    }[]
 
     dependencies?: {[modId: string]: {
         modId: string

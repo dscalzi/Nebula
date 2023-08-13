@@ -145,7 +145,8 @@ export class ForgeGradle2Adapter extends ForgeResolver {
                 name: `Minecraft Forge (${mavenComponents?.artifact})`,
                 type: Type.Library,
                 artifact: this.generateArtifact(
-                    libBuf as Buffer,
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                    libBuf!,
                     stats,
                     libRepo.getArtifactUrlByComponents(
                         this.baseUrl,
@@ -205,8 +206,8 @@ export class ForgeGradle2Adapter extends ForgeResolver {
     }
 
     private async processPackXZFiles(
-        processingQueue: Array<{id: string, localPath: string}>
-    ): Promise<Array<{id: string, MD5: string}>> {
+        processingQueue: {id: string, localPath: string}[]
+    ): Promise<{id: string, MD5: string}[]> {
 
         if(processingQueue.length == 0) {
             return []

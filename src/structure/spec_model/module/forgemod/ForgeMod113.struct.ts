@@ -71,7 +71,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                 })
 
             } else {
-                resolve(this.forgeModMetadata[name] as ModsToml)
+                resolve(this.forgeModMetadata[name]!)
                 return
             }
 
@@ -108,7 +108,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                 }]
             })
 
-            return this.forgeModMetadata[name] as ModsToml
+            return this.forgeModMetadata[name]!
         }
 
         let raw: Buffer | undefined
@@ -183,7 +183,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
             })
         }
 
-        return this.forgeModMetadata[name] as ModsToml
+        return this.forgeModMetadata[name]!
     }
 
 }

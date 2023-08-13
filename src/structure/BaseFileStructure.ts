@@ -20,7 +20,7 @@ export abstract class BaseFileStructure implements FileStructure {
     }
 
     public async init(): Promise<void> {
-        mkdirs(this.containerDirectory)
+        await mkdirs(this.containerDirectory)
     }
 
     public getContainerDirectory(): string {

@@ -106,29 +106,24 @@ export abstract class ForgeResolver extends BaseResolver {
                 if (minor === 13 && revision >= 2 && extra >= 1300) {
                     return `${version}-1.7.10`
                 }
-            } else
-            if (major === 11) {
+            }
+            else if (major === 11) {
                 if (minor === 15) {
                     if (revision === 1 && extra >= 1890) {
                         return `${version}-1.8.9`
-                    } else
-                    if (revision === 0 && extra <= 1654) {
+                    } else if (revision === 0 && extra <= 1654) {
                         return `${version}-1.8.8`
                     }
-                } else
-                if (minor === 14 && revision === 0 && extra <= 1295) {
+                } else if (minor === 14 && revision === 0 && extra <= 1295) {
                     return `${version}-1.8`
                 }
-            } else
-            if (major === 12) {
+            } else if (major === 12) {
                 if (minor === 17 && revision === 0 && extra <= 1936) {
                     return `${version}-1.9.4`
-                } else
-                if (minor === 16) {
+                } else if (minor === 16) {
                     if (revision === 0 && extra <= 1885) {
                         return `${version}-1.9`
-                    } else
-                    if (revision === 1 && extra === 1938) {
+                    } else if (revision === 1 && extra === 1938) {
                         return `${version}-1.9.0`
                     }
                 }

@@ -83,7 +83,7 @@ export class CurseForgeParser {
     public async getModpackManifest(): Promise<CurseForgeManifest> {
 
         const zip = new StreamZip.async({ file: this.zipPath })
-        return JSON.parse((await zip.entryData('manifest.json')).toString('utf8'))
+        return JSON.parse((await zip.entryData('manifest.json')).toString('utf8')) as CurseForgeManifest
     }
 
     public async enrichServer(createServerResult: CreateServerResult, manifest: CurseForgeManifest): Promise<void> {
