@@ -200,7 +200,7 @@ const generateServerCommand: CommandModule = {
 
         if(argv.fabric != null) {
             if (VersionUtil.isPromotionVersion(argv.fabric as string)) {
-                logger.debug(`Resolving ${argv.fabric} Fabric Version..`)
+                logger.debug(`Resolving ${argv.fabric as string} Fabric Version..`)
                 const version = await VersionUtil.getPromotedFabricVersion(argv.fabric as string)
                 logger.debug(`Fabric version set to ${version}`)
                 argv.fabric = version
