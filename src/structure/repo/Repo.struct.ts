@@ -54,8 +54,4 @@ export class RepoStructure extends BaseFileStructure {
         return join(this.getCacheDirectory(), 'forge', artifactVersion)
     }
 
-    public getFabricCacheDirectory(loaderVersion: string, mcVersion: MinecraftVersion): string {
-        return join(this.getCacheDirectory(), 'fabric', `fabric-loader-${loaderVersion}-${mcVersion}`)
-    }
-
 }
