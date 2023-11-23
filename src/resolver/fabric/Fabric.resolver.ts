@@ -30,7 +30,7 @@ export class FabricResolver extends BaseResolver {
         protected minecraftVersion: MinecraftVersion
     ) {
         super(absoluteRoot, relativeRoot, baseUrl)
-        this.repoStructure = new RepoStructure(absoluteRoot, relativeRoot)
+        this.repoStructure = new RepoStructure(absoluteRoot, relativeRoot, 'fabric')
     }
 
     public async getModule(): Promise<Module> {

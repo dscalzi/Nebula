@@ -23,7 +23,7 @@ export abstract class ForgeResolver extends BaseResolver {
         protected invalidateCache: boolean
     ) {
         super(absoluteRoot, relativeRoot, baseUrl)
-        this.repoStructure = new RepoStructure(absoluteRoot, relativeRoot)
+        this.repoStructure = new RepoStructure(absoluteRoot, relativeRoot, 'forge')
         this.artifactVersion = this.inferArtifactVersion()
         this.checkSecurity()
     }
