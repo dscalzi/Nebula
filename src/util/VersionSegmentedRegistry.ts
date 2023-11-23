@@ -43,7 +43,8 @@ export class VersionSegmentedRegistry {
         relativeRoot: string,
         baseUrl: string,
         untrackedFiles: UntrackedFilesOption[]
-    ): BaseForgeModStructure {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ): BaseForgeModStructure<any> {
         for (const impl of VersionSegmentedRegistry.FORGEMOD_STRUCT_IMPL) {
             if (impl.isForVersion(minecraftVersion, forgeVersion)) {
                 return new impl(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, untrackedFiles)
