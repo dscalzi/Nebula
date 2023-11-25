@@ -24,7 +24,7 @@
             "name": "Install Dev Distribution",
             "program": "${workspaceFolder}\\src\\index.ts",
             "args": [
-                "g", "distro", "dev_distribution", "--installLocal"
+                "g", "distro", "distribution_dev", "--installLocal"
             ],
             "preLaunchTask": "build",
             "outFiles": [
