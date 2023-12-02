@@ -14,6 +14,22 @@ export interface FabricInstallerMeta extends FabricVersionMeta {
     maven: string
 }
 
+export interface Rule {
+    action: string
+    os?: {
+        name: string
+        version?: string
+    }
+    features?: {
+        [key: string]: boolean
+    }
+}
+
+export interface RuleBasedArgument {
+    rules: Rule[]
+    value: string | string[]
+}
+
 // This is really a mojang format, but it's currently only used here for Fabric.
 export interface FabricProfileJson {
     id: string
@@ -23,8 +39,8 @@ export interface FabricProfileJson {
     type: string
     mainClass: string
     arguments: {
-        game: string[]
-        jvm: string[]
+        game: (string | RuleBasedArgument)[]
+        jvm: (string | RuleBasedArgument)[]
     }
     libraries: {
         name: string // Maven identifier

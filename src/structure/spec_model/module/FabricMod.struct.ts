@@ -7,6 +7,7 @@ import { BaseModStructure } from './Mod.struct.js'
 import { UntrackedFilesOption } from '../../../model/nebula/ServerMeta.js'
 
 export class FabricModStructure extends BaseModStructure<FabricModJson> {
+
     constructor(
         absoluteRoot: string,
         relativeRoot: string,
@@ -35,7 +36,8 @@ export class FabricModStructure extends BaseModStructure<FabricModJson> {
             // adapted from https://github.com/dscalzi/Claritas/blob/master/src/main/java/com/dscalzi/claritas/util/DataUtil.java
             if (group != null) {
                 const packageBits = group.split('.')
-                const blacklist = ['common', 'util', 'internal', 'tweaker', 'tweak', ...['forge', 'fabric', 'bukkit', 'sponge'].filter(t => t !== fmData.id)]
+                const blacklist = ['common', 'util', 'internal', 'tweaker', 'tweak', 'client', ...['forge', 'fabric', 'bukkit', 'sponge'].filter(t => t !== fmData.id)]
+                // Note: Entry point is a fully qualified class name, hence why this adaptation pops immediately (drop class name).
                 while (packageBits.length > 0) {
                     packageBits.pop()
                     const term = packageBits[packageBits.length - 1]
@@ -80,7 +82,7 @@ export class FabricModStructure extends BaseModStructure<FabricModJson> {
             this.modMetadata[name] = ({
                 id: crudeInference.name.toLowerCase(),
                 name: crudeInference.name,
-                version: crudeInference.version,
+                version: crudeInference.version
             })
         }
 

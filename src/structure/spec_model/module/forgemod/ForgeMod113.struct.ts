@@ -97,7 +97,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure<ModsToml> {
 
         if(cRes == null) {
             this.logger.error(`Claritas failed to yield metadata for ForgeMod ${name}!`)
-            this.logger.error('Is this mod malformated or does Claritas need an update?')
+            this.logger.error('Is this mod malformatted or does Claritas need an update?')
         }
 
         const claritasId = cRes?.id

@@ -174,9 +174,13 @@ const generateServerCommand: CommandModule = {
             })
             .option('forge', {
                 describe: 'Forge version.',
-                type: 'string',
-                default: null
+                type: 'string'
             })
+            .option('fabric', {
+                describe: 'Fabric version.',
+                type: 'string'
+            })
+            .conflicts('forge', 'fabric')
     },
     handler: async (argv) => {
         argv.root = getRoot()
