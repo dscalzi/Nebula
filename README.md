@@ -118,6 +118,9 @@ Options:
   * If not provided fabric will not be enabled.
   * You can provide either `latest` or `recommended` to use the latest/recommended version of fabric.
 
+> [!NOTE]  
+> Forge and fabric cannot be used together on the same server. This command will fail if both are provided.
+
 >
 > Example Usage
 >
