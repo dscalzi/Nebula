@@ -1,7 +1,4 @@
 import StreamZip from 'node-stream-zip'
-import { createHash } from 'crypto'
-import { Stats } from 'fs'
-import { Artifact } from 'helios-distribution-types'
 import { RepoStructure } from '../../structure/repo/Repo.struct.js'
 import { BaseResolver } from '../BaseResolver.js'
 import { MinecraftVersion } from '../../util/MinecraftVersion.js'
@@ -26,7 +23,7 @@ export abstract class ForgeResolver extends BaseResolver {
         protected invalidateCache: boolean
     ) {
         super(absoluteRoot, relativeRoot, baseUrl)
-        this.repoStructure = new RepoStructure(absoluteRoot, relativeRoot)
+        this.repoStructure = new RepoStructure(absoluteRoot, relativeRoot, 'forge')
         this.artifactVersion = this.inferArtifactVersion()
         this.checkSecurity()
     }
@@ -131,14 +128,6 @@ export abstract class ForgeResolver extends BaseResolver {
 
         }
         return version
-    }
-
-    protected generateArtifact(buf: Buffer, stats: Stats, url: string): Artifact {
-        return {
-            size: stats.size,
-            MD5: createHash('md5').update(buf).digest('hex'),
-            url
-        }
     }
 
     protected async getVersionManifestFromJar(jarPath: string): Promise<Buffer>{

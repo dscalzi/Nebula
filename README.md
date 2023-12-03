@@ -113,6 +113,13 @@ Options:
   * OPTIONAL (default: null)
   * If not provided forge will not be enabled.
   * You can provide either `latest` or `recommended` to use the latest/recommended version of forge.
+* `--fabric <string>` Specify fabric loader version
+  * OPTIONAL (default: null)
+  * If not provided fabric will not be enabled.
+  * You can provide either `latest` or `recommended` to use the latest/recommended version of fabric.
+
+> [!NOTE]  
+> Forge and fabric cannot be used together on the same server. This command will fail if both are provided.
 
 >
 > Example Usage
@@ -227,6 +234,7 @@ Ex.
   * `files` All modules of type `File`.
   * `libraries` All modules of type `Library`
   * `forgemods` All modules of type `ForgeMod`.
+  * `fabricmods` All modules of type `FabricMod`.
     * This is a directory of toggleable modules. See the note below.
   * `TestServer-1.12.2.png` Server icon file.
 

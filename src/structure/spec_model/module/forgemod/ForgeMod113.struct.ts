@@ -7,7 +7,7 @@ import { BaseForgeModStructure } from '../ForgeMod.struct.js'
 import { MinecraftVersion } from '../../../../util/MinecraftVersion.js'
 import { UntrackedFilesOption } from '../../../../model/nebula/ServerMeta.js'
 
-export class ForgeModStructure113 extends BaseForgeModStructure {
+export class ForgeModStructure113 extends BaseForgeModStructure<ModsToml> {
 
     public static readonly IMPLEMENTATION_VERSION_REGEX = /^Implementation-Version: (.+)[\r\n]/
 
@@ -15,8 +15,6 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
     public static isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {
         return VersionUtil.isVersionAcceptable(version, [13, 14, 15, 16, 17, 18, 19, 20])
     }
-
-    private forgeModMetadata: {[property: string]: ModsToml | undefined} = {}
 
     constructor(
         absoluteRoot: string,
@@ -37,48 +35,14 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
     }
 
     protected async getModuleId(name: string, path: string): Promise<string> {
-        const fmData = await this.getForgeModMetadata(name, path)
+        const fmData = await this.getModMetadata(name, path)
         return this.generateMavenIdentifier(this.getClaritasGroup(path), fmData.mods[0].modId, fmData.mods[0].version)
     }
     protected async getModuleName(name: string, path: string): Promise<string> {
-        return capitalize((await this.getForgeModMetadata(name, path)).mods[0].displayName)
+        return capitalize((await this.getModMetadata(name, path)).mods[0].displayName)
     }
 
-    private getForgeModMetadata(name: string, path: string): Promise<ModsToml> {
-        return new Promise((resolve, reject) => {
-            if (!Object.prototype.hasOwnProperty.call(this.forgeModMetadata, name)) {
-
-                const zip = new StreamZip({
-                    file: path,
-                    storeEntries: true
-                })
-
-                zip.on('error', err => {
-                    this.logger.error(`Failure while processing ${path}`)
-                    reject(err)
-                })
-                zip.on('ready', () => {
-                    try {
-                        const res = this.processZip(zip, name, path)
-                        zip.close()
-                        resolve(res)
-                        return
-                    } catch(err) {
-                        zip.close()
-                        reject(err)
-                        return
-                    }
-                })
-
-            } else {
-                resolve(this.forgeModMetadata[name]!)
-                return
-            }
-
-        })
-    }
-
-    private processZip(zip: StreamZip, name: string, path: string): ModsToml {
+    protected processZip(zip: StreamZip, name: string, path: string): ModsToml {
 
         // Optifine is a tweak that can be loaded as a forge mod. It does not
         // appear to contain a mcmod.info class. This a special case we will
@@ -96,7 +60,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
             const info = changelogBuf.toString().split('\n')[0].trim()
             const version = info.split(' ')[1]
 
-            this.forgeModMetadata[name] = ({
+            this.modMetadata[name] = ({
                 modLoader: 'javafml',
                 loaderVersion: '',
                 mods: [{
@@ -108,7 +72,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
                 }]
             })
 
-            return this.forgeModMetadata[name]!
+            return this.modMetadata[name]!
         }
 
         let raw: Buffer | undefined
@@ -121,7 +85,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
         if (raw) {
             try {
                 const parsed = toml.parse(raw.toString()) as ModsToml
-                this.forgeModMetadata[name] = parsed
+                this.modMetadata[name] = parsed
             } catch (err) {
                 this.logger.error(`ForgeMod ${name} contains an invalid mods.toml file.`)
             }
@@ -133,16 +97,16 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
 
         if(cRes == null) {
             this.logger.error(`Claritas failed to yield metadata for ForgeMod ${name}!`)
-            this.logger.error('Is this mod malformated or does Claritas need an update?')
+            this.logger.error('Is this mod malformatted or does Claritas need an update?')
         }
 
         const claritasId = cRes?.id
 
         const crudeInference = this.attemptCrudeInference(name)
 
-        if(this.forgeModMetadata[name] != null) {
+        if(this.modMetadata[name] != null) {
 
-            const x = this.forgeModMetadata[name]!
+            const x = this.modMetadata[name]!
             for(const entry of x.mods) {
 
                 if(entry.modId === this.EXAMPLE_MOD_ID) {
@@ -171,7 +135,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
             }
 
         } else {
-            this.forgeModMetadata[name] = ({
+            this.modMetadata[name] = ({
                 modLoader: 'javafml',
                 loaderVersion: '',
                 mods: [{
@@ -183,7 +147,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure {
             })
         }
 
-        return this.forgeModMetadata[name]!
+        return this.modMetadata[name]!
     }
 
 }

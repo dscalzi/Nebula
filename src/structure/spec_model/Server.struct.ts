@@ -6,14 +6,16 @@ import { URL } from 'url'
 import { VersionSegmentedRegistry } from '../../util/VersionSegmentedRegistry.js'
 import { ServerMeta, getDefaultServerMeta, ServerMetaOptions, UntrackedFilesOption } from '../../model/nebula/ServerMeta.js'
 import { BaseModelStructure } from './BaseModel.struct.js'
+import { FabricModStructure } from './module/FabricMod.struct.js'
 import { MiscFileStructure } from './module/File.struct.js'
 import { LibraryStructure } from './module/Library.struct.js'
 import { MinecraftVersion } from '../../util/MinecraftVersion.js'
 import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil.js'
 import { isValidUrl } from '../../util/StringUtils.js'
+import { FabricResolver } from '../../resolver/fabric/Fabric.resolver.js'
 
 export interface CreateServerResult {
-    forgeModContainer?: string
+    modContainer?: string
     libraryContainer: string
     miscFileContainer: string
 }
@@ -53,6 +55,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
         options: {
             version?: string
             forgeVersion?: string
+            fabricVersion?: string
         }
     ): Promise<CreateServerResult | null> {
         const effectiveId = ServerStructure.getEffectiveId(id, minecraftVersion)
@@ -69,7 +72,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
         const serverMetaOpts: ServerMetaOptions = {
             version: options.version
         }
-        let forgeModContainer: string | undefined = undefined
+        let modContainer: string | undefined = undefined
 
         if (options.forgeVersion != null) {
             const fms = VersionSegmentedRegistry.getForgeModStruct(
@@ -81,8 +84,21 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 []
             )
             await fms.init()
-            forgeModContainer = fms.getContainerDirectory()
+            modContainer = fms.getContainerDirectory()
             serverMetaOpts.forgeVersion = options.forgeVersion
+        }
+
+        if (options.fabricVersion != null) {
+            const fms = new FabricModStructure(
+                absoluteServerRoot,
+                relativeServerRoot,
+                this.baseUrl,
+                minecraftVersion,
+                []
+            )
+            await fms.init()
+            modContainer = fms.getContainerDirectory()
+            serverMetaOpts.fabricVersion = options.fabricVersion
         }
 
         const serverMeta: ServerMeta = addSchemaToObject(
@@ -99,7 +115,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
         await mfs.init()
 
         return {
-            forgeModContainer,
+            modContainer,
             libraryContainer: libS.getContainerDirectory(),
             miscFileContainer: mfs.getContainerDirectory()
         }
@@ -182,6 +198,27 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
                     const forgeModModules = await forgeModStruct.getSpecModel()
                     modules.push(...forgeModModules)
+                }
+
+                if(serverMeta.fabric) {
+                    const fabricResolver = new FabricResolver(dirname(this.containerDirectory), '', this.baseUrl, serverMeta.fabric.version, minecraftVersion)
+                    if (!fabricResolver.isForVersion(minecraftVersion, serverMeta.fabric.version)) {
+                        throw new Error(`Fabric resolver does not support Fabric ${serverMeta.fabric.version}!`)
+                    }
+
+                    const fabricModule = await fabricResolver.getModule()
+                    modules.push(fabricModule)
+
+                    const fabricModStruct = new FabricModStructure(
+                        absoluteServerRoot,
+                        relativeServerRoot,
+                        this.baseUrl,
+                        minecraftVersion,
+                        untrackedFiles
+                    )
+
+                    const fabricModModules = await fabricModStruct.getSpecModel()
+                    modules.push(...fabricModModules)
                 }
 
                 const libraryStruct = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, untrackedFiles)

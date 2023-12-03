@@ -11,11 +11,12 @@ export class RepoStructure extends BaseFileStructure {
 
     constructor(
         absoluteRoot: string,
-        relativeRoot: string
+        relativeRoot: string,
+        name: string
     ) {
         super(absoluteRoot, relativeRoot, 'repo')
         this.libRepoStruct = new LibRepoStructure(this.containerDirectory, this.relativeRoot)
-        this.versionRepoStruct = new VersionRepoStructure(this.containerDirectory, this.relativeRoot)
+        this.versionRepoStruct = new VersionRepoStructure(this.containerDirectory, this.relativeRoot, name)
     }
 
     public getLoggerName(): string {

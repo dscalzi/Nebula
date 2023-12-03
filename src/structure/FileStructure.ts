@@ -1,5 +1,5 @@
 export interface FileStructure {
 
-    init(): void
+    init(): Promise<void>
 
 }

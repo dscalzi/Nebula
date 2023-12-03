@@ -43,7 +43,7 @@ export class VersionSegmentedRegistry {
         relativeRoot: string,
         baseUrl: string,
         untrackedFiles: UntrackedFilesOption[]
-    ): BaseForgeModStructure {
+    ): BaseForgeModStructure<unknown> {
         for (const impl of VersionSegmentedRegistry.FORGEMOD_STRUCT_IMPL) {
             if (impl.isForVersion(minecraftVersion, forgeVersion)) {
                 return new impl(absoluteRoot, relativeRoot, baseUrl, minecraftVersion, untrackedFiles)

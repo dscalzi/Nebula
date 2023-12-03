@@ -100,9 +100,9 @@ export class CurseForgeParser {
             await zip.close()
         }
 
-        if(createServerResult.forgeModContainer) {
-            const requiredPath = resolve(createServerResult.forgeModContainer, ToggleableNamespace.REQUIRED)
-            const optionalPath = resolve(createServerResult.forgeModContainer, ToggleableNamespace.OPTIONAL_ON)
+        if(createServerResult.modContainer) {
+            const requiredPath = resolve(createServerResult.modContainer, ToggleableNamespace.REQUIRED)
+            const optionalPath = resolve(createServerResult.modContainer, ToggleableNamespace.OPTIONAL_ON)
 
             const disallowedFiles: { name: string, fileName: string, url: string }[] = []
 
