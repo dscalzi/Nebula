@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "Node16",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
     "sourceMap": true,
     "outDir": "dist",
     "strict": true,

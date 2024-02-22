@@ -4,16 +4,10 @@ Generate a distribution.json for Helios. Documentation on this format can be fou
 
 ## Requirements
 
-* Node.js 18
-* Java 8+ (https://adoptopenjdk.net/)
+* Node.js 20
+* Java 8+ (https://adoptium.net/)
   * This is required to run the forge installer, process [XZ](https://tukaani.org/xz/format.html) files, and run bytecode analysis on mod files.
   * Although 1.17 requires Java 16, the forge installer works with Java 8.
-
-
-### Notes
-
-* Nebula is not 100% complete. Unfinished items are listed on the [TODO list](https://github.com/dscalzi/Nebula/issues/2).
-* Currently only supports creating Forge based servers. Vanilla support will be added when Helios v2 is complete.
 
 ## Setup
 
@@ -23,7 +17,7 @@ Generate a distribution.json for Helios. Documentation on this format can be fou
 
 Example
 ```properties
-JAVA_EXECUTABLE=C:\Program Files\Eclipse Foundation\jdk-17.0.0.35-hotspot\bin\java.exe
+JAVA_EXECUTABLE=C:\Program Files\Eclipse Adoptium\jdk-17.0.9.9-hotspot\bin\java.exe
 ROOT=D:\TestRoot2
 BASE_URL=http://localhost:8080/
 HELIOS_DATA_FOLDER=C:\Users\user\AppData\Roaming\Helios Launcher
