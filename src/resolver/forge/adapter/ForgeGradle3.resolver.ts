@@ -4,30 +4,16 @@ import { LoggerUtil } from '../../../util/LoggerUtil.js'
 import { VersionUtil } from '../../../util/VersionUtil.js'
 import { Module, Type } from 'helios-distribution-types'
 import { LibRepoStructure } from '../../../structure/repo/LibRepo.struct.js'
-import { pathExists, remove, mkdirs, copy, writeJson } from 'fs-extra/esm'
-import { lstat, readFile, writeFile } from 'fs/promises'
-import { join, basename, dirname } from 'path'
-import { spawn } from 'child_process'
-import { JavaUtil } from '../../../util/java/JavaUtil.js'
+import { mkdirs, writeJson } from 'fs-extra/esm'
+import { lstat, readFile } from 'fs/promises'
+import { dirname } from 'path'
 import { VersionManifestFG3 } from '../../../model/forge/VersionManifestFG3.js'
 import { MavenUtil } from '../../../util/MavenUtil.js'
 import { createHash } from 'crypto'
 
-interface GeneratedFile {
-    name: string
-    group: string
-    artifact: string
-    version: string
-    classifiers: string[] | [undefined]
-    skipIfNotPresent?: boolean
-    classpath?: boolean
-}
-
 export class ForgeGradle3Adapter extends ForgeResolver {
 
     private static readonly logger = LoggerUtil.getLogger('FG3 Adapter')
-
-    private static readonly WILDCARD_MCP_VERSION = '${mcpVersion}'
 
     public static isForVersion(version: MinecraftVersion, libraryVersion: string): boolean {
         if(version.getMinor() === 12 && VersionUtil.isOneDotTwelveFG2(libraryVersion)) {
@@ -36,8 +22,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16, 17, 18, 19, 20])
     }
 
-    private generatedFiles: GeneratedFile[] | undefined
-    private wildcardsInUse: string[] | undefined
+    private needsInstaller = false
 
     constructor(
         absoluteRoot: string,
@@ -54,170 +39,9 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
     private configure(): void {
 
-        const is117OrGreater = this.minecraftVersion.getMinor() >= 17
-
         // Configure for 13, 14, 15, 16, 17, 18, 19
         if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16, 17, 18, 19, 20])) {
-
-            // https://github.com/MinecraftForge/MinecraftForge/commit/97d4652f5fe15931b980117efabdff332f9f6428
-            const mcpUnifiedVersion = `${this.minecraftVersion}-${ForgeGradle3Adapter.WILDCARD_MCP_VERSION}`
-
-            this.generatedFiles = [
-                {
-                    name: 'universal jar',
-                    group: LibRepoStructure.FORGE_GROUP,
-                    artifact: LibRepoStructure.FORGE_ARTIFACT,
-                    version: this.artifactVersion,
-                    classifiers: ['universal'],
-                    classpath: !is117OrGreater
-                },
-                {
-                    name: 'client jar',
-                    group: LibRepoStructure.FORGE_GROUP,
-                    artifact: LibRepoStructure.FORGE_ARTIFACT,
-                    version: this.artifactVersion,
-                    classifiers: ['client'],
-                    classpath: !is117OrGreater
-                },
-                {
-                    name: 'client data',
-                    group: LibRepoStructure.MINECRAFT_GROUP,
-                    artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                    version: this.minecraftVersion.toString(),
-                    classifiers: ['data'],
-                    skipIfNotPresent: true,
-                    classpath: !is117OrGreater
-                },
-                {
-                    name: 'client srg',
-                    group: LibRepoStructure.MINECRAFT_GROUP,
-                    artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                    version: mcpUnifiedVersion,
-                    classifiers: ['srg'],
-                    classpath: !is117OrGreater
-                }
-            ]
-            this.wildcardsInUse = [
-                ForgeGradle3Adapter.WILDCARD_MCP_VERSION
-            ]
-
-            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16])) {
-
-                // Base jar present for 1.13-1.16
-
-                this.generatedFiles.unshift(
-                    {
-                        name: 'base jar',
-                        group: LibRepoStructure.FORGE_GROUP,
-                        artifact: LibRepoStructure.FORGE_ARTIFACT,
-                        version: this.artifactVersion,
-                        classifiers: [undefined]
-                    }
-                )
-            }
-
-            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [17, 18, 19, 20])) {
-
-                // Added in 1.17+
-
-                this.generatedFiles.unshift(
-                    {
-                        name: 'fmlcore',
-                        group: LibRepoStructure.FORGE_GROUP,
-                        artifact: LibRepoStructure.FMLCORE_ARTIFACT,
-                        version: this.artifactVersion,
-                        classifiers: [undefined]
-                    },
-                    {
-                        name: 'javafmllanguage',
-                        group: LibRepoStructure.FORGE_GROUP,
-                        artifact: LibRepoStructure.JAVAFMLLANGUAGE_ARTIFACT,
-                        version: this.artifactVersion,
-                        classifiers: [undefined]
-                    },
-                    {
-                        name: 'mclanguage',
-                        group: LibRepoStructure.FORGE_GROUP,
-                        artifact: LibRepoStructure.MCLANGUAGE_ARTIFACT,
-                        version: this.artifactVersion,
-                        classifiers: [undefined]
-                    }
-                )
-            }
-
-            if (VersionUtil.isVersionAcceptable(this.minecraftVersion, [18, 19, 20])) {
-
-                // Added in 1.18+
-
-                this.generatedFiles.unshift(
-                    {
-                        name: 'lowcodelanguage',
-                        group: LibRepoStructure.FORGE_GROUP,
-                        artifact: LibRepoStructure.LOWCODELANGUAGE_ARTIFACT,
-                        version: this.artifactVersion,
-                        classifiers: [undefined]
-                    }
-                )
-            }
-
-            if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15])) {
-
-                // 13, 14, 15 use just the MC version.
-
-                this.generatedFiles.push(
-                    {
-                        name: 'client slim',
-                        group: LibRepoStructure.MINECRAFT_GROUP,
-                        artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                        version: this.minecraftVersion.toString(),
-                        classifiers: [
-                            'slim',
-                            'slim-stable'
-                        ]
-                    },
-                    {
-                        name: 'client extra',
-                        group: LibRepoStructure.MINECRAFT_GROUP,
-                        artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                        version: this.minecraftVersion.toString(),
-                        classifiers: [
-                            'extra',
-                            'extra-stable'
-                        ]
-                    }
-                )
-            } else {
-
-                // 16+ uses the mcp unified version.
-
-                this.generatedFiles.push(
-                    {
-                        name: 'client slim',
-                        group: LibRepoStructure.MINECRAFT_GROUP,
-                        artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                        version: mcpUnifiedVersion,
-                        classifiers: [
-                            'slim',
-                            'slim-stable'
-                        ],
-                        classpath: !is117OrGreater
-                    },
-                    {
-                        name: 'client extra',
-                        group: LibRepoStructure.MINECRAFT_GROUP,
-                        artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
-                        version: mcpUnifiedVersion,
-                        classifiers: [
-                            'extra',
-                            'extra-stable'
-                        ],
-                        classpath: !is117OrGreater
-                    }
-                )
-
-            }
-
-
+            this.needsInstaller = true
             return
         }
 
@@ -255,9 +79,9 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         }
         ForgeGradle3Adapter.logger.debug(`Beginning processing of Forge v${this.forgeVersion} (Minecraft ${this.minecraftVersion})`)
 
-        if(this.generatedFiles != null && this.generatedFiles.length > 0) {
+        if(this.needsInstaller) {
             // Run installer
-            return this.processWithInstaller(installerPath)
+            return this.processIncludeInstaller(installerPath)
         } else {
             // Installer not required
             return this.processWithoutInstaller(installerPath)
@@ -265,298 +89,33 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
     }
 
-    private async processWithInstaller(installerPath: string): Promise<Module> {
-
-        let doInstall = true
-        // Check cache.
-        const cacheDir = this.repoStructure.getForgeCacheDirectory(this.artifactVersion)
-        if (await pathExists(cacheDir)) {
-            if(this.invalidateCache) {
-                ForgeGradle3Adapter.logger.info(`Removing existing cache ${cacheDir}..`)
-                await remove(cacheDir)
-            } else {
-                // Use cache.
-                doInstall = false
-                ForgeGradle3Adapter.logger.info(`Using cached results at ${cacheDir}.`)
-            }
-        } else {
-            await mkdirs(cacheDir)
-        }
-        const installerOutputDir = cacheDir
-
-        if(doInstall) {
-            const workingInstaller = join(installerOutputDir, basename(installerPath))
-
-            await copy(installerPath, workingInstaller)
-    
-            // Required for the installer to function.
-            await writeFile(join(installerOutputDir, 'launcher_profiles.json'), JSON.stringify({}))
-    
-            ForgeGradle3Adapter.logger.debug('Spawning forge installer')
-    
-            ForgeGradle3Adapter.logger.info('============== [ IMPORTANT ] ==============')
-            ForgeGradle3Adapter.logger.info('When the installer opens please set the client installation directory to:')
-            ForgeGradle3Adapter.logger.info(installerOutputDir)
-            ForgeGradle3Adapter.logger.info('===========================================')
-    
-            await this.executeInstaller(workingInstaller)
-    
-            ForgeGradle3Adapter.logger.debug('Installer finished, beginning processing..')
-        }
-
-        await this.verifyInstallerRan(installerOutputDir)
-
-        ForgeGradle3Adapter.logger.debug('Processing Version Manifest')
-        const versionManifestTuple = await this.processVersionManifest(installerOutputDir)
-        const versionManifest = versionManifestTuple[0]
-
-        ForgeGradle3Adapter.logger.debug('Processing generated forge files.')
-        const forgeModule = await this.processForgeModule(versionManifest, installerOutputDir)
-
-        // Attach version.json module.
-        forgeModule.subModules?.unshift(versionManifestTuple[1])
-
-        ForgeGradle3Adapter.logger.debug('Processing Libraries')
-        const libs = await this.processLibraries(versionManifest, installerOutputDir)
-
-        forgeModule.subModules = forgeModule.subModules?.concat(libs)
-
-        if(this.discardOutput) {
-            ForgeGradle3Adapter.logger.info(`Removing installer output at ${installerOutputDir}..`)
-            await remove(installerOutputDir)
-            ForgeGradle3Adapter.logger.info('Removed successfully.')
-        }
-
-        return forgeModule
-
-    }
-
-    private getVersionManifestPath(installerOutputDir: string): string {
-        const versionRepo = this.repoStructure.getVersionRepoStruct()
-        const versionName = versionRepo.getFileName(this.minecraftVersion, this.forgeVersion)
-        return join(installerOutputDir, 'versions', versionName, `${versionName}.json`)
-    }
-
-    private async verifyInstallerRan(installerOutputDir: string): Promise<void> {
-        const versionManifestPath = this.getVersionManifestPath(installerOutputDir)
-
-        if(!await pathExists(versionManifestPath)) {
-            await remove(installerOutputDir)
-            throw new Error(`Forge was either not installed or installed to the wrong location. When the forge installer opens, you MUST set the installation directory to ${installerOutputDir}`)
-        }
-    }
-
-    private async processVersionManifest(installerOutputDir: string): Promise<[VersionManifestFG3, Module]> {
-        const versionRepo = this.repoStructure.getVersionRepoStruct()
-        const versionManifestPath = this.getVersionManifestPath(installerOutputDir)
-
-        const versionManifestBuf = await readFile(versionManifestPath)
-        const versionManifest = JSON.parse(versionManifestBuf.toString()) as VersionManifestFG3
-
-        const versionManifestModule: Module = {
-            id: this.artifactVersion,
-            name: 'Minecraft Forge (version.json)',
-            type: Type.VersionManifest,
-            artifact: this.generateArtifact(
-                versionManifestBuf,
-                await lstat(versionManifestPath),
-                versionRepo.getVersionManifestURL(this.baseUrl, this.minecraftVersion, this.forgeVersion)
-            )
-        }
-
-        const destination = versionRepo.getVersionManifest(
-            this.minecraftVersion,
-            this.forgeVersion
-        )
-
-        await copy(versionManifestPath, destination, {overwrite: true})
-
-        return [versionManifest, versionManifestModule]
-    }
-
-    private async processForgeModule(versionManifest: VersionManifestFG3, installerOutputDir: string): Promise<Module> {
-
-        const libDir = join(installerOutputDir, 'libraries')
-        
-        if(this.wildcardsInUse) {
-            if(this.wildcardsInUse.indexOf(ForgeGradle3Adapter.WILDCARD_MCP_VERSION) > -1) {
-
-                const mcpVersion = this.getMCPVersion(versionManifest.arguments.game)
-                if(mcpVersion == null) {
-                    throw new Error('MCP Version not found.. did forge change their format?')
-                }
-
-                this.generatedFiles = this.generatedFiles!.map(f => {
-                    if(f.version.indexOf(ForgeGradle3Adapter.WILDCARD_MCP_VERSION) > -1) {
-                        return {
-                            ...f,
-                            version: f.version.replace(ForgeGradle3Adapter.WILDCARD_MCP_VERSION, mcpVersion)
-                        }
-                    }
-                    return f
-                })
-
-            }
-        }
-
-        const mdls: Module[] = []
-
-        for (const entry of this.generatedFiles!) {
-
-            const targetLocations: string[] = []
-            let located = false
-
-            classifierLoop:
-            for (const _classifier of entry.classifiers) {
-
-                const targetLocalPath = join(
-                    libDir,
-                    MavenUtil.mavenComponentsAsNormalizedPath(entry.group, entry.artifact, entry.version, _classifier)
-                )
-
-                targetLocations.push(targetLocalPath)
-
-                const exists = await pathExists(targetLocalPath)
-                if (exists) {
-
-                    mdls.push({
-                        id: MavenUtil.mavenComponentsToIdentifier(
-                            entry.group,
-                            entry.artifact,
-                            entry.version,
-                            _classifier
-                        ),
-                        name: `Minecraft Forge (${entry.name})`,
-                        type: Type.Library,
-                        classpath: entry.classpath ?? true,
-                        artifact: this.generateArtifact(
-                            await readFile(targetLocalPath),
-                            await lstat(targetLocalPath),
-                            this.repoStructure.getLibRepoStruct().getArtifactUrlByComponents(
-                                this.baseUrl,
-                                entry.group,
-                                entry.artifact,
-                                entry.version,
-                                _classifier
-                            )
-                        ),
-                        subModules: []
-                    })
-
-                    const destination = this.repoStructure.getLibRepoStruct().getArtifactByComponents(
-                        entry.group,
-                        entry.artifact,
-                        entry.version,
-                        _classifier
-                    )
-
-                    await copy(targetLocalPath, destination, {overwrite: true})
-
-                    located = true
-                    break classifierLoop
-
-                }
-
-            }
-
-            if (!entry.skipIfNotPresent && !located) {
-                throw new Error(`Required file ${entry.name} not found at any expected location:\n\t${targetLocations.join('\n\t')}`)
-            }
-
-        }
-
-        const forgeModule = mdls.shift()!
-        forgeModule.type = Type.ForgeHosted
-        forgeModule.subModules = mdls
-
-        return forgeModule
-    }
-
-    private async processLibraries(manifest: VersionManifestFG3, installerOutputDir: string): Promise<Module[]> {
-
-        const libDir = join(installerOutputDir, 'libraries')
+    private async processIncludeInstaller(installerPath: string): Promise<Module> {
         const libRepo = this.repoStructure.getLibRepoStruct()
-
-        const mdls: Module[] = []
-
-        for (const entry of manifest.libraries) {
-            const artifact = entry.downloads.artifact
-            if (artifact.url) {
-
-                const targetLocalPath = join(libDir, artifact.path)
-
-                if (!await pathExists(targetLocalPath)) {
-                    throw new Error(`Expected library ${entry.name} not found!`)
-                }
-
-                const components = MavenUtil.getMavenComponents(entry.name)
-
-                mdls.push({
-                    id: entry.name,
-                    name: `Minecraft Forge (${components.artifact})`,
-                    type: Type.Library,
-                    artifact: this.generateArtifact(
-                        await readFile(targetLocalPath),
-                        await lstat(targetLocalPath),
-                        libRepo.getArtifactUrlByComponents(
-                            this.baseUrl,
-                            components.group,
-                            components.artifact,
-                            components.version,
-                            components.classifier,
-                            components.extension
-                        )
-                    )
-                })
-                const destination = libRepo.getArtifactByComponents(
-                    components.group,
-                    components.artifact,
-                    components.version,
-                    components.classifier,
-                    components.extension
+        const forgeInstallerBuffer = await readFile(installerPath)
+        const forgeModule: Module = {
+            id: MavenUtil.mavenComponentsToIdentifier(
+                LibRepoStructure.FORGE_GROUP,
+                LibRepoStructure.FORGE_ARTIFACT,
+                this.artifactVersion, 'installer'
+            ),
+            name: 'Minecraft Forge (installer)',
+            type: Type.Forge,
+            artifact: this.generateArtifact(
+                forgeInstallerBuffer,
+                await lstat(installerPath),
+                libRepo.getArtifactUrlByComponents(
+                    this.baseUrl,
+                    LibRepoStructure.FORGE_GROUP,
+                    LibRepoStructure.FORGE_ARTIFACT,
+                    this.artifactVersion, 'installer'
                 )
-
-                await copy(targetLocalPath, destination, {overwrite: true})
-
-            }
+            ),
+            subModules: []
         }
 
-        return mdls
-
+        return forgeModule
     }
 
-    private executeInstaller(installerExec: string): Promise<void> {
-        return new Promise(resolve => {
-            const fiLogger = LoggerUtil.getLogger('Forge Installer')
-            const child = spawn(JavaUtil.getJavaExecutable(), [
-                '-jar',
-                installerExec
-            ], {
-                cwd: dirname(installerExec)
-            })
-            child.stdout.on('data', (data) => fiLogger.info(data.toString('utf8').trim()))
-            child.stderr.on('data', (data) => fiLogger.error(data.toString('utf8').trim()))
-            child.on('close', code => {
-                if(code === 0) {
-                    fiLogger.info('Exited with code', code)
-                } else {
-                    fiLogger.error('Exited with code', code)
-                }
-                
-                resolve()
-            })
-        })
-    }
-
-    private getMCPVersion(args: string[]): string | null {
-        for (let i = 0; i < args.length; i++) {
-            if (args[i] === '--fml.mcpVersion') {
-                return args[i + 1]
-            }
-        }
-        return null
-    }
-    
     private async processWithoutInstaller(installerPath: string): Promise<Module> {
 
         // Extract version.json from installer.
