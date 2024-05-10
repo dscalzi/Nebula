@@ -4,7 +4,7 @@ import { resolve as resolvePath } from 'path'
 import { URL } from 'url'
 import { inspect } from 'util'
 import yargs from 'yargs/yargs'
-import { Argv, CommandModule } from 'yargs'
+import {Argv, CommandModule, exit, string} from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { DistributionStructure } from './structure/spec_model/Distribution.struct.js'
 import { ServerStructure } from './structure/spec_model/Server.struct.js'
@@ -13,7 +13,7 @@ import { VersionUtil } from './util/VersionUtil.js'
 import { MinecraftVersion } from './util/MinecraftVersion.js'
 import { LoggerUtil } from './util/LoggerUtil.js'
 import { generateSchemas } from './util/SchemaUtil.js'
-import { CurseForgeParser } from './parser/CurseForgeParser.js'
+import {CurseForgeModLoader, CurseForgeParser} from './parser/CurseForgeParser.js'
 
 dotenv.config()
 
@@ -249,11 +249,22 @@ const generateServerCurseForgeCommand: CommandModule = {
 
         const minecraftVersion = new MinecraftVersion(modpackManifest.minecraft.version)
 
-        // Extract forge version
-        // TODO Support fabric
-        const forgeModLoader = modpackManifest.minecraft.modLoaders.find(({ id }) => id.toLowerCase().startsWith('forge-'))
-        const forgeVersion = forgeModLoader != null ? forgeModLoader.id.substring('forge-'.length) : undefined
-        logger.debug(`Forge version set to ${forgeVersion}`)
+        // Extract forge or fabric version
+        const primaryModLoader = modpackManifest.minecraft.modLoaders.find(({ primary }) => primary)
+        let forgeVersion;
+        let fabricVersion;
+        if (primaryModLoader != null) {
+            if (primaryModLoader.id.includes("forge")) {
+                forgeVersion = primaryModLoader.id.substring('forge-'.length)
+                logger.debug(`Forge version set to ${forgeVersion}`)
+            } else if (primaryModLoader.id.includes("fabric")) {
+                fabricVersion = primaryModLoader.id.substring('fabric-'.length)
+                logger.debug(`Fabric version set to ${fabricVersion}`)
+            } else {
+                logger.debug(`Unknown loader kind: ${primaryModLoader.id}`)
+                process.exit(1)
+            }
+        }
 
         const serverStruct = new ServerStructure(argv.root as string, getBaseURL(), false, false)
         const createServerResult = await serverStruct.createServer(
@@ -261,7 +272,8 @@ const generateServerCurseForgeCommand: CommandModule = {
             minecraftVersion,
             {
                 version: modpackManifest.version,
-                forgeVersion
+                forgeVersion,
+                fabricVersion
             }
         )
 
