@@ -91,3 +91,4 @@ typings/
 .dynamodb/
 /.idea
 /root
+/html
