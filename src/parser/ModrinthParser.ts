@@ -83,7 +83,7 @@ export class ModrinthParser {
         log.debug('Resolving modpack zip.')
 
         // check if join(this.modpackDir, modpack) exists
-        if(existsSync(join(this.modpackDir, modpack))) {
+        if(existsSync(join(this.modpackDir, modpack)) && lstatSync(join(this.modpackDir, modpack)).isFile()) {
             this.zipPath = join(this.modpackDir, modpack)
         } else {
             log.debug('Unable to find the modpack zip.')
@@ -185,7 +185,7 @@ export class ModrinthParser {
 
 
             // move overrided mods to the required folder
-            if(lstatSync(join(createServerResult.miscFileContainer, 'mods')).isDirectory()) {
+            if(existsSync(join(createServerResult.miscFileContainer, 'mods')) && lstatSync(join(createServerResult.miscFileContainer, 'mods')).isDirectory()) {
 
                 // move every override mod to the required folder
                 const overrideMods = await opendir(join(createServerResult.miscFileContainer, 'mods'))
