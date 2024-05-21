@@ -136,7 +136,7 @@ const initRootCommand: CommandModule = {
             await generateSchemas(argv.root as string)
             await new DistributionStructure(argv.root as string, '', false, false).init()
             await new CurseForgeParser(argv.root as string, '').init()
-            await new ModrinthParser(argv.root as string, '').init()
+            await new ModrinthParser(argv.root as string).init()
             logger.info(`Successfully created new root at ${argv.root}`)
         } catch (error) {
             logger.error(`Failed to init new root at ${argv.root}`, error)

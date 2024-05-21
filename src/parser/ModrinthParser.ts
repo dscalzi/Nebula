@@ -4,6 +4,7 @@ import { createWriteStream, lstatSync, existsSync } from 'fs'
 import { opendir, rmdir } from 'fs/promises'
 import { mkdirs, move } from 'fs-extra/esm'
 import got from 'got'
+import { HTTPError } from 'got'
 import StreamZip from 'node-stream-zip'
 import { join, resolve } from 'path'
 import { pipeline } from 'stream/promises'
@@ -91,10 +92,9 @@ export class ModrinthParser {
             if(modpack.match(/https?:\/\/.*\.mrpack/)) {
                 log.debug('Downloading modpack from URL.')
 
-                const downloadStream = got.stream(modpack)
-
                 this.zipPath = join(this.modpackDir, modpack.split("/").pop()!)
 
+                const downloadStream = got.stream(modpack)
                 const fileWriterStream = createWriteStream(this.zipPath)
                 await pipeline(downloadStream, fileWriterStream)
 
@@ -112,7 +112,7 @@ export class ModrinthParser {
                     log.debug('Project found! Downloading the latest version.')
 
                     // get the latest version of the modpack
-                    const latestVersion = (await ModrinthParser.mClient.get<ModrinthVersionResponse>(`version/${data.versions[0]}`)).body
+                    const latestVersion = (await ModrinthParser.mClient.get<ModrinthVersionResponse>(`version/${data.versions.pop()}`)).body
                     let modpackFile = latestVersion.files.find(file => file.primary)
                     
                     // ensure that the downloadUrl is a .mrpack file
@@ -120,15 +120,27 @@ export class ModrinthParser {
                         modpackFile = latestVersion.files.find(file => file.url.endsWith('.mrpack'))
                     }
 
+                    this.zipPath = join(this.modpackDir, modpackFile!.filename)
+                    
+                    // check if the file has already been downloaded before
+                    if(existsSync(this.zipPath) && lstatSync(this.zipPath).isFile()) {
+                        log.debug('The modpack has already been downloaded. Using the local file instead.')
+                        return
+                    }
+
                     // download the modpack
                     const downloadStream = got.stream(modpackFile!.url)
-                    this.zipPath = join(this.modpackDir, modpackFile!.filename)
                     const fileWriterStream = createWriteStream(this.zipPath)
                     await pipeline(downloadStream, fileWriterStream)
 
                     log.debug('Downloaded.')
                 } catch (error) {
-                    log.error(`Failed to resolve modpack: ${modpack}`)
+                    // check if the error is a 404 error
+                    if(error instanceof HTTPError) {
+                        log.error(`${error.response.statusCode} - Failed to resolve modpack: ${modpack}`)
+                    } else {
+                        throw error
+                    }
                 }
             }
         }
@@ -159,7 +171,7 @@ export class ModrinthParser {
             // Download mods
             for(const file of manifest.files) {
                 // if client is unsupported, skip
-                if(file.env.client === 'unsupported') {
+                if(file.env?.client === 'unsupported') {
                     log.warn(`Skipping unsupported mod: ${file.path.split("/").pop()}`)
                     continue
                 }
@@ -168,7 +180,7 @@ export class ModrinthParser {
                 let ressource_path: string
                 if (file.path.startsWith("mods/")) {
                     log.debug(`Processing - Mod: ${file.path.split("/").pop()}`)
-                    ressource_path = join(file.env.client == "required" ? requiredPath : optionalPath, file.path.split("/").pop()!)
+                    ressource_path = join(file.env?.client == "required" ? requiredPath : optionalPath, file.path.split("/").pop()!)
                 } else {
                     log.debug(`Processing - Resource: ${file.path.split("/").pop()}`)
                     ressource_path = join(createServerResult.miscFileContainer, file.path)
