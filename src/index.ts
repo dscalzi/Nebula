@@ -306,7 +306,9 @@ const generateServerModrinthCommand: CommandModule = {
         logger.debug(`Root set to ${argv.root}`)
         logger.debug(`Generating server ${argv.id} using Modrinth modpack ${argv.modpack} as a template.`)
 
-        const parser = new ModrinthParser(argv.root as string, argv.modpack as string)
+        const parser = new ModrinthParser(argv.root as string)
+        await parser.resolveModpackZip(argv.modpack as string)
+
         const modpackManifest = await parser.getModpackManifest()
 
         const minecraftVersion = new MinecraftVersion(modpackManifest.dependencies.minecraft)

@@ -1,6 +1,6 @@
 // Based on CurseForgeParser.ts
 
-import { createWriteStream, lstatSync } from 'fs'
+import { createWriteStream, lstatSync, existsSync } from 'fs'
 import { opendir, rmdir } from 'fs/promises'
 import { mkdirs, move } from 'fs-extra/esm'
 import got from 'got'
@@ -42,20 +42,97 @@ export interface ModrinthManifest {
     }
 }
 
+export interface ModrinthProjectResponse {
+    project_type: string
+    versions: string[]
+    // There are more fields that we don't use right now. See https://docs.modrinth.com/#tag/projects/operation/getProject
+}
+
+export interface ModrinthVersionResponse {
+    files: [
+        {
+            url: string
+            primary: boolean
+            filename: string
+        }
+    ]
+    // There are more fields that we don't use right now. See https://docs.modrinth.com/#tag/versions/operation/getVersion
+}
+
 export class ModrinthParser {
     private modpackDir: string
     private zipPath: string
 
+    private static mClient = got.extend({
+        prefixUrl: 'https://api.modrinth.com/v2/',
+        responseType: 'json'
+    })
+
     constructor(
         private absoluteRoot: string,
-        private modpack: string
     ) {
         this.modpackDir = join(absoluteRoot, 'modpacks', 'modrinth')
-        this.zipPath = join(this.modpackDir, modpack) //TODO: add autodownload capabilities
+        this.zipPath = ''
     }
 
     public async init(): Promise<void> {
         await mkdirs(this.modpackDir)
+    }
+
+    public async resolveModpackZip(modpack: string): Promise<void> {
+        log.debug('Resolving modpack zip.')
+
+        // check if join(this.modpackDir, modpack) exists
+        if(existsSync(join(this.modpackDir, modpack))) {
+            this.zipPath = join(this.modpackDir, modpack)
+        } else {
+            log.debug('Unable to find the modpack zip.')
+            // check if the modpack is an url to a mrpack file
+            if(modpack.match(/https?:\/\/.*\.mrpack/)) {
+                log.debug('Downloading modpack from URL.')
+
+                const downloadStream = got.stream(modpack)
+
+                this.zipPath = join(this.modpackDir, modpack.split("/").pop()!)
+
+                const fileWriterStream = createWriteStream(this.zipPath)
+                await pipeline(downloadStream, fileWriterStream)
+
+                log.debug('Downloaded.')
+            } else {
+                log.debug('Attempting to resolve the modpack on modrinth...')
+                try {
+                    // check if the modpack is a modrinth slug leading to a modpack
+                    const data = (await ModrinthParser.mClient.get<ModrinthProjectResponse>(`project/${modpack}`)).body
+                    if(data.project_type !== 'modpack') {
+                        log.error('This project isn\'t a modpack.')
+                        return
+                    }
+
+                    log.debug('Project found! Downloading the latest version.')
+
+                    // get the latest version of the modpack
+                    const latestVersion = (await ModrinthParser.mClient.get<ModrinthVersionResponse>(`version/${data.versions[0]}`)).body
+                    let modpackFile = latestVersion.files.find(file => file.primary)
+                    
+                    // ensure that the downloadUrl is a .mrpack file
+                    if (!modpackFile || !modpackFile.url.endsWith('.mrpack')) {
+                        modpackFile = latestVersion.files.find(file => file.url.endsWith('.mrpack'))
+                    }
+
+                    // download the modpack
+                    const downloadStream = got.stream(modpackFile!.url)
+                    this.zipPath = join(this.modpackDir, modpackFile!.filename)
+                    const fileWriterStream = createWriteStream(this.zipPath)
+                    await pipeline(downloadStream, fileWriterStream)
+
+                    log.debug('Downloaded.')
+                } catch (error) {
+                    log.error(`Failed to resolve modpack: ${modpack}`)
+                }
+            }
+        }
+
     }
 
     public async getModpackManifest(): Promise<ModrinthManifest> {
