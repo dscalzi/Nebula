@@ -9,7 +9,7 @@ import { CreateServerResult } from '../structure/spec_model/Server.struct.js'
 import { LoggerUtil } from '../util/LoggerUtil.js'
 import { Logger } from 'winston'
 
-const log: Logger = LoggerUtil.getLogger('CurseForgeParser')
+const log = LoggerUtil.getLogger('CurseForgeParser') as Logger
 
 // No idea if this is right
 export interface CurseForgeManifest {

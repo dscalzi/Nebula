@@ -13,7 +13,7 @@ import { CreateServerResult } from '../structure/spec_model/Server.struct.js'
 import { LoggerUtil } from '../util/LoggerUtil.js'
 import { Logger } from 'winston'
 
-const log: Logger = LoggerUtil.getLogger('ModrinthParser')
+const log = LoggerUtil.getLogger('ModrinthParser') as Logger
 
 // No idea if this is right
 export interface ModrinthManifest {
