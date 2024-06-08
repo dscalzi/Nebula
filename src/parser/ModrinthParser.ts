@@ -11,8 +11,9 @@ import { pipeline } from 'stream/promises'
 import { ToggleableNamespace } from '../structure/spec_model/module/ToggleableModule.struct.js'
 import { CreateServerResult } from '../structure/spec_model/Server.struct.js'
 import { LoggerUtil } from '../util/LoggerUtil.js'
+import { Logger } from 'winston'
 
-const log = LoggerUtil.getLogger('ModrinthParser')
+const log: Logger = LoggerUtil.getLogger('ModrinthParser')
 
 // No idea if this is right
 export interface ModrinthManifest {
@@ -116,7 +117,7 @@ export class ModrinthParser {
                     let modpackFile = latestVersion.files.find(file => file.primary)
                     
                     // ensure that the downloadUrl is a .mrpack file
-                    if (!modpackFile || !modpackFile.url.endsWith('.mrpack')) {
+                    if (!modpackFile?.url.endsWith('.mrpack')) {
                         modpackFile = latestVersion.files.find(file => file.url.endsWith('.mrpack'))
                     }
 
