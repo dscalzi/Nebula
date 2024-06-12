@@ -256,10 +256,10 @@ const generateServerCurseForgeCommand: CommandModule = {
         let forgeVersion;
         let fabricVersion;
         if (primaryModLoader != null) {
-            if (primaryModLoader.id.includes("forge")) {
+            if (primaryModLoader.id.startsWith("forge")) {
                 forgeVersion = primaryModLoader.id.substring('forge-'.length)
                 logger.debug(`Forge version set to ${forgeVersion}`)
-            } else if (primaryModLoader.id.includes("fabric")) {
+            } else if (primaryModLoader.id.startsWith("fabric")) {
                 fabricVersion = primaryModLoader.id.substring('fabric-'.length)
                 logger.debug(`Fabric version set to ${fabricVersion}`)
             } else {
