@@ -43,14 +43,14 @@ export class ForgeModStructure17 extends BaseForgeModStructure<McModInfo> {
 
     private isMalformedVersion(version: string): boolean {
         // Ex. empty, @VERSION@, ${version}
-        return version.trim().length === 0 || version.indexOf('@') > -1 || version.indexOf('$') > -1
+        return version.trim().length === 0 || version.includes('@') || version.includes('$')
     }
 
     protected processZip(zip: StreamZip, name: string, path: string): McModInfo {
         // Optifine is a tweak that can be loaded as a forge mod. It does not
         // appear to contain a mcmod.info class. This a special case we will
         // account for.
-        if (name.toLowerCase().indexOf('optifine') > -1) {
+        if (name.toLowerCase().includes('optifine')) {
 
             // Read zip for changelog.txt
             let changelogBuf: Buffer
@@ -68,7 +68,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure<McModInfo> {
                 version,
                 mcversion: version.substring(0, version.indexOf('_'))
             }) as McModInfo
-            return this.modMetadata[name]!
+            return this.modMetadata[name]
         }
 
         let raw: Buffer | undefined
@@ -124,14 +124,14 @@ export class ForgeModStructure17 extends BaseForgeModStructure<McModInfo> {
         const crudeInference = this.attemptCrudeInference(name)
         if(this.modMetadata[name] != null) {
             
-            const x = this.modMetadata[name]!
+            const x = this.modMetadata[name]
             if(x.modid == null || x.modid === '' || x.modid === this.EXAMPLE_MOD_ID) {
                 x.modid = this.discernResult(claritasId, crudeInference.name.toLowerCase())
                 x.name = this.discernResult(claritasName, crudeInference.name)
             }
 
-            if(this.modMetadata[name]!.version != null) {
-                const isMalformedVersion = this.isMalformedVersion(this.modMetadata[name]!.version)
+            if(this.modMetadata[name].version != null) {
+                const isMalformedVersion = this.isMalformedVersion(this.modMetadata[name].version)
                 if(isMalformedVersion) {
                     x.version = this.discernResult(claritasVersion, crudeInference.version)
                 }
@@ -148,7 +148,7 @@ export class ForgeModStructure17 extends BaseForgeModStructure<McModInfo> {
             }) as McModInfo
         }
 
-        return this.modMetadata[name]!
+        return this.modMetadata[name]
     }
 
 }

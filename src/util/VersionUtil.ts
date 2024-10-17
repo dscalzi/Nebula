@@ -45,7 +45,7 @@ export class VersionUtil {
     }
 
     public static isPromotionVersion(version: string): boolean {
-        return VersionUtil.PROMOTION_TYPE.indexOf(version.toLowerCase()) > -1
+        return VersionUtil.PROMOTION_TYPE.includes(version.toLowerCase())
     }
 
     // -------------------------------

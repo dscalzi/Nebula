@@ -94,7 +94,7 @@ export abstract class ForgeResolver extends BaseResolver {
 
         const ver = this.forgeVersion.split('.')
         const major = Number(ver[0])
-        if ([12, 11, 10].indexOf(major) > -1) {
+        if ([12, 11, 10].includes(major)) {
             const minor = Number(ver[1])
             const revision = Number(ver[2])
             const extra = Number(ver[3])

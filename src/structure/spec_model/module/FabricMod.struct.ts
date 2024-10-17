@@ -86,6 +86,6 @@ export class FabricModStructure extends BaseModStructure<FabricModJson> {
             })
         }
 
-        return this.modMetadata[name]!
+        return this.modMetadata[name]
     }
 }

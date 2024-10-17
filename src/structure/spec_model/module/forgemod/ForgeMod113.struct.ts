@@ -47,7 +47,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure<ModsToml> {
         // Optifine is a tweak that can be loaded as a forge mod. It does not
         // appear to contain a mcmod.info class. This a special case we will
         // account for.
-        if (name.toLowerCase().indexOf('optifine') > -1) {
+        if (name.toLowerCase().includes('optifine')) {
 
             // Read zip for changelog.txt
             let changelogBuf: Buffer
@@ -72,7 +72,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure<ModsToml> {
                 }]
             })
 
-            return this.modMetadata[name]!
+            return this.modMetadata[name]
         }
 
         let raw: Buffer | undefined
@@ -106,7 +106,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure<ModsToml> {
 
         if(this.modMetadata[name] != null) {
 
-            const x = this.modMetadata[name]!
+            const x = this.modMetadata[name]
             for(const entry of x.mods) {
 
                 if(entry.modId === this.EXAMPLE_MOD_ID) {
@@ -147,7 +147,7 @@ export class ForgeModStructure113 extends BaseForgeModStructure<ModsToml> {
             })
         }
 
-        return this.modMetadata[name]!
+        return this.modMetadata[name]
     }
 
 }

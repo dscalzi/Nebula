@@ -33,7 +33,7 @@ function getHeliosDataFolder(): string | null {
 function getBaseURL(): string {
     let baseUrl = process.env.BASE_URL!
     // Users must provide protocol in all other instances.
-    if (baseUrl.indexOf('//') === -1) {
+    if (!baseUrl.includes('//')) {
         if (baseUrl.toLowerCase().startsWith('localhost')) {
             baseUrl = 'http://' + baseUrl
         } else {

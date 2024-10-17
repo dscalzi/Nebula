@@ -379,7 +379,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         const libDir = join(installerOutputDir, 'libraries')
         
         if(this.wildcardsInUse) {
-            if(this.wildcardsInUse.indexOf(ForgeGradle3Adapter.WILDCARD_MCP_VERSION) > -1) {
+            if(this.wildcardsInUse.includes(ForgeGradle3Adapter.WILDCARD_MCP_VERSION)) {
 
                 const mcpVersion = this.getMCPVersion(versionManifest.arguments.game)
                 if(mcpVersion == null) {
@@ -387,7 +387,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 }
 
                 this.generatedFiles = this.generatedFiles!.map(f => {
-                    if(f.version.indexOf(ForgeGradle3Adapter.WILDCARD_MCP_VERSION) > -1) {
+                    if(f.version.includes(ForgeGradle3Adapter.WILDCARD_MCP_VERSION)) {
                         return {
                             ...f,
                             version: f.version.replace(ForgeGradle3Adapter.WILDCARD_MCP_VERSION, mcpVersion)

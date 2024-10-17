@@ -16,7 +16,6 @@ export class FabricResolver extends BaseResolver {
 
     protected repoStructure: RepoStructure
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public static isForVersion(_version: MinecraftVersion, _libraryVersion: string): boolean {
         // --fabric.addMods support was added in https://github.com/FabricMC/fabric-loader/commit/ce8405c22166ef850ae73c09ab513c17d121df5a
         return VersionUtil.versionGte(_libraryVersion, '0.12.3')
