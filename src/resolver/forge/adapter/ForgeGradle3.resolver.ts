@@ -53,9 +53,6 @@ export class ForgeGradle3Adapter extends ForgeResolver {
     }
 
     private configure(): void {
-
-        const is117OrGreater = this.minecraftVersion.getMinor() >= 17
-
         // Configure for 13, 14, 15, 16, 17, 18, 19
         if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16, 17, 18, 19, 20])) {
 
@@ -69,7 +66,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     artifact: LibRepoStructure.FORGE_ARTIFACT,
                     version: this.artifactVersion,
                     classifiers: ['universal'],
-                    classpath: !is117OrGreater
+                    classpath: false
                 },
                 {
                     name: 'client jar',
@@ -77,7 +74,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     artifact: LibRepoStructure.FORGE_ARTIFACT,
                     version: this.artifactVersion,
                     classifiers: ['client'],
-                    classpath: !is117OrGreater
+                    classpath: false
                 },
                 {
                     name: 'client data',
@@ -86,7 +83,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     version: this.minecraftVersion.toString(),
                     classifiers: ['data'],
                     skipIfNotPresent: true,
-                    classpath: !is117OrGreater
+                    classpath: false
                 },
                 {
                     name: 'client srg',
@@ -94,7 +91,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     artifact: LibRepoStructure.MINECRAFT_CLIENT_ARTIFACT,
                     version: mcpUnifiedVersion,
                     classifiers: ['srg'],
-                    classpath: !is117OrGreater
+                    classpath: false
                 }
             ]
             this.wildcardsInUse = [
@@ -200,7 +197,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                             'slim',
                             'slim-stable'
                         ],
-                        classpath: !is117OrGreater
+                        classpath: false
                     },
                     {
                         name: 'client extra',
@@ -211,7 +208,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                             'extra',
                             'extra-stable'
                         ],
-                        classpath: !is117OrGreater
+                        classpath: false
                     }
                 )
 
