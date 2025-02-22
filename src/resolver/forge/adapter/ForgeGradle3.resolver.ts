@@ -33,11 +33,11 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         if(version.getMinor() === 12 && VersionUtil.isOneDotTwelveFG2(libraryVersion)) {
             return false
         }
-        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16, 17, 18, 19, 20])
+        return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16, 17, 18, 19, 20, 21])
     }
 
     public static isExecutableJar(version: MinecraftVersion): boolean {
-        return version.isGreaterThanOrEqualTo(new MinecraftVersion('1.20.4'))
+        return version.isGreaterThanOrEqualTo(new MinecraftVersion('1.20.3'))
     }
 
     private generatedFiles: GeneratedFile[] | undefined

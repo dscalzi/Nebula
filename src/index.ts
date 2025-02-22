@@ -200,6 +200,17 @@ const generateServerCommand: CommandModule = {
                 logger.debug(`Forge version set to ${version}`)
                 argv.forge = version
             }
+            if(minecraftVersion.isGreaterThanOrEqualTo(new MinecraftVersion('1.20.3'))) {
+                logger.error('┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓')
+                logger.error('┃                     !!  WARNING !!                      ┃')
+                logger.error('┃                                                         ┃')
+                logger.error('┃    Forge 1.20.3+ removed support for --fml.modLists.    ┃')
+                logger.error('┃  Helios Launcher can no longer load mods through Forge. ┃')
+                logger.error('┃      Please use Fabric or await NeoForged Support.      ┃')
+                logger.error('┃                                                         ┃')
+                logger.error('┃                     !!  WARNING !!                      ┃')
+                logger.error('┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛')
+            }
         }
 
         if(argv.fabric != null) {
