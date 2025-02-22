@@ -14,6 +14,7 @@ import { MinecraftVersion } from './util/MinecraftVersion.js'
 import { LoggerUtil } from './util/LoggerUtil.js'
 import { generateSchemas } from './util/SchemaUtil.js'
 import { CurseForgeParser } from './parser/CurseForgeParser.js'
+import { ModrinthParser } from './parser/ModrinthParser.js'
 
 dotenv.config()
 
@@ -135,6 +136,7 @@ const initRootCommand: CommandModule = {
             await generateSchemas(argv.root as string)
             await new DistributionStructure(argv.root as string, '', false, false).init()
             await new CurseForgeParser(argv.root as string, '').init()
+            await new ModrinthParser(argv.root as string).init()
             logger.info(`Successfully created new root at ${argv.root}`)
         } catch (error) {
             logger.error(`Failed to init new root at ${argv.root}`, error)
@@ -260,11 +262,22 @@ const generateServerCurseForgeCommand: CommandModule = {
 
         const minecraftVersion = new MinecraftVersion(modpackManifest.minecraft.version)
 
-        // Extract forge version
-        // TODO Support fabric
-        const forgeModLoader = modpackManifest.minecraft.modLoaders.find(({ id }) => id.toLowerCase().startsWith('forge-'))
-        const forgeVersion = forgeModLoader != null ? forgeModLoader.id.substring('forge-'.length) : undefined
-        logger.debug(`Forge version set to ${forgeVersion}`)
+        // Extract forge or fabric version
+        const primaryModLoader = modpackManifest.minecraft.modLoaders.find(({ primary }) => primary)
+        let forgeVersion;
+        let fabricVersion;
+        if (primaryModLoader != null) {
+            if (primaryModLoader.id.startsWith("forge")) {
+                forgeVersion = primaryModLoader.id.substring('forge-'.length)
+                logger.debug(`Forge version set to ${forgeVersion}`)
+            } else if (primaryModLoader.id.startsWith("fabric")) {
+                fabricVersion = primaryModLoader.id.substring('fabric-'.length)
+                logger.debug(`Fabric version set to ${fabricVersion}`)
+            } else {
+                logger.debug(`Unknown loader kind: ${primaryModLoader.id}`)
+                process.exit(1)
+            }
+        }
 
         const serverStruct = new ServerStructure(argv.root as string, getBaseURL(), false, false)
         const createServerResult = await serverStruct.createServer(
@@ -272,7 +285,64 @@ const generateServerCurseForgeCommand: CommandModule = {
             minecraftVersion,
             {
                 version: modpackManifest.version,
-                forgeVersion
+                forgeVersion,
+                fabricVersion
+            }
+        )
+
+        if(createServerResult) {
+            await parser.enrichServer(createServerResult, modpackManifest)
+        }
+    }
+}
+
+const generateServerModrinthCommand: CommandModule = {
+    command: 'server-modrinth <id> <modpack>',
+    describe: 'Generate a new server configuration from a Modrinth modpack.',
+    builder: (yargs) => {
+        // yargs = rootOption(yargs)
+        return yargs
+            .positional('id', {
+                describe: 'Server id.',
+                type: 'string'
+            })
+            .positional('modpack', {
+                describe: 'The name of the mrpack file, an hosted url or the modrinth slug.',
+                type: 'string'
+            })
+    },
+    handler: async (argv) => {
+        argv.root = getRoot()
+
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug(`Generating server ${argv.id} using Modrinth modpack ${argv.modpack} as a template.`)
+
+        const parser = new ModrinthParser(argv.root as string)
+        await parser.resolveModpackZip(argv.modpack as string)
+
+        const modpackManifest = await parser.getModpackManifest()
+
+        const minecraftVersion = new MinecraftVersion(modpackManifest.dependencies.minecraft)
+
+        // Extract forge or fabric version
+        let forgeVersion;
+        let fabricVersion;
+        if (modpackManifest.dependencies.forge) {
+            forgeVersion = modpackManifest.dependencies.forge
+            logger.debug(`Forge version set to ${forgeVersion}`)
+        } else if (modpackManifest.dependencies["fabric-loader"]) {
+            fabricVersion = modpackManifest.dependencies["fabric-loader"]
+            logger.debug(`Fabric version set to ${fabricVersion}`)
+        }
+
+        const serverStruct = new ServerStructure(argv.root as string, getBaseURL(), false, false)
+        const createServerResult = await serverStruct.createServer(
+            argv.id as string,
+            minecraftVersion,
+            {
+                version: modpackManifest.versionId,
+                forgeVersion,
+                fabricVersion
             }
         )
 
@@ -362,6 +432,7 @@ const generateCommand: CommandModule = {
     builder: (yargs) => {
         return yargs
             .command(generateServerCurseForgeCommand)
+            .command(generateServerModrinthCommand)
             .command(generateServerCommand)
             .command(generateDistroCommand)
             .command(generateSchemasCommand)
