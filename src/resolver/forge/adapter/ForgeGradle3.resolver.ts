@@ -36,6 +36,10 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         return VersionUtil.isVersionAcceptable(version, [12, 13, 14, 15, 16, 17, 18, 19, 20])
     }
 
+    public static isExecutableJar(version: MinecraftVersion): boolean {
+        return version.isGreaterThanOrEqualTo(new MinecraftVersion('1.20.4'))
+    }
+
     private generatedFiles: GeneratedFile[] | undefined
     private wildcardsInUse: string[] | undefined
 
@@ -53,6 +57,67 @@ export class ForgeGradle3Adapter extends ForgeResolver {
     }
 
     private configure(): void {
+
+        if(ForgeGradle3Adapter.isExecutableJar(this.minecraftVersion)) {
+            
+            // Separate block for 1.20.4+
+
+            this.generatedFiles = [
+                {
+                    name: 'universal jar',
+                    group: LibRepoStructure.FORGE_GROUP,
+                    artifact: LibRepoStructure.FORGE_ARTIFACT,
+                    version: this.artifactVersion,
+                    classifiers: ['universal'],
+                },
+                {
+                    name: 'client jar',
+                    group: LibRepoStructure.FORGE_GROUP,
+                    artifact: LibRepoStructure.FORGE_ARTIFACT,
+                    version: this.artifactVersion,
+                    classifiers: ['client']
+                },
+                {
+                    name: 'client shim',
+                    group: LibRepoStructure.FORGE_GROUP,
+                    artifact: LibRepoStructure.FORGE_ARTIFACT,
+                    version: this.artifactVersion,
+                    classifiers: ['shim'],
+                    classpath: false
+                },
+                {
+                    name: 'fmlcore',
+                    group: LibRepoStructure.FORGE_GROUP,
+                    artifact: LibRepoStructure.FMLCORE_ARTIFACT,
+                    version: this.artifactVersion,
+                    classifiers: [undefined]
+                },
+                {
+                    name: 'javafmllanguage',
+                    group: LibRepoStructure.FORGE_GROUP,
+                    artifact: LibRepoStructure.JAVAFMLLANGUAGE_ARTIFACT,
+                    version: this.artifactVersion,
+                    classifiers: [undefined]
+                },
+                {
+                    name: 'mclanguage',
+                    group: LibRepoStructure.FORGE_GROUP,
+                    artifact: LibRepoStructure.MCLANGUAGE_ARTIFACT,
+                    version: this.artifactVersion,
+                    classifiers: [undefined]
+                },
+                {
+                    name: 'lowcodelanguage',
+                    group: LibRepoStructure.FORGE_GROUP,
+                    artifact: LibRepoStructure.LOWCODELANGUAGE_ARTIFACT,
+                    version: this.artifactVersion,
+                    classifiers: [undefined]
+                }
+            ]
+
+            return
+        }
+
         // Configure for 13, 14, 15, 16, 17, 18, 19
         if(VersionUtil.isVersionAcceptable(this.minecraftVersion, [13, 14, 15, 16, 17, 18, 19, 20])) {
 

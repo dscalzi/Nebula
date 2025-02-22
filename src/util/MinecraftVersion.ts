@@ -27,4 +27,25 @@ export class MinecraftVersion {
 
     public toString(): string { return `${this.major}.${this.minor}${this.revision != null ? '.' + this.revision : ''}`}
 
+    public compareTo(other: MinecraftVersion): number {
+        // Compare major
+        if (this.major !== other.major) {
+            return this.major - other.major
+        }
+
+        // Compare minor
+        if (this.minor !== other.minor) {
+            return this.minor - other.minor
+        }
+
+        // Compare revision (null as 0)
+        const thisRevision = this.revision ?? 0
+        const otherRevision = other.revision ?? 0
+        return thisRevision - otherRevision
+    }
+
+    public isGreaterThanOrEqualTo(other: MinecraftVersion): boolean {
+        return this.compareTo(other) >= 0
+    }
+
 }
