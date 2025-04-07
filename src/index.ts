@@ -14,6 +14,7 @@ import { MinecraftVersion } from './util/MinecraftVersion.js'
 import { LoggerUtil } from './util/LoggerUtil.js'
 import { generateSchemas } from './util/SchemaUtil.js'
 import { CurseForgeParser } from './parser/CurseForgeParser.js'
+import { ModrinthParser } from './parser/ModrinthParser.js'
 
 dotenv.config()
 
@@ -282,6 +283,69 @@ const generateServerCurseForgeCommand: CommandModule = {
     }
 }
 
+const generateServerModrinthCommand: CommandModule = {
+    command: 'server-modrinth <id> <mrpackName>',
+    describe: 'Generate a new server configuration from a Modrinth modpack.',
+    builder: (yargs) => {
+        return yargs
+            .positional('id', {
+                describe: 'Server id.',
+                type: 'string'
+            })
+            .positional('mrpackName', {
+                describe: 'The name of the modpack .mrpack file.',
+                type: 'string'
+            })
+    },
+    handler: async (argv) => {
+        argv.root = getRoot()
+
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug(`Generating server ${argv.id} using Modrinth modpack ${argv.mrpackName} as a template.`)
+
+        const parser = new ModrinthParser(argv.root as string, argv.mrpackName as string)
+        await parser.init()
+        const modpackIndex = await parser.getModpackIndex()
+
+        const minecraftVersion = new MinecraftVersion(modpackIndex.dependencies.minecraft)
+
+        // Determine mod loader
+        let forgeVersion: string | undefined
+        let fabricVersion: string | undefined
+
+        if (modpackIndex.dependencies.forge) {
+            forgeVersion = modpackIndex.dependencies.forge
+            logger.debug(`Forge version set to ${forgeVersion}`)
+        } else if (modpackIndex.dependencies['fabric-loader']) {
+            fabricVersion = modpackIndex.dependencies['fabric-loader']
+            logger.debug(`Fabric loader version set to ${fabricVersion}`)
+        } else if (modpackIndex.dependencies.neoforge) {
+            logger.warn('NeoForge is not supported yet. Using Forge instead.')
+            forgeVersion = modpackIndex.dependencies.neoforge
+            logger.debug(`Using Forge version ${forgeVersion} as a substitute for NeoForge`)
+        } else if (modpackIndex.dependencies['quilt-loader']) {
+            logger.warn('Quilt is not supported yet. Using Fabric instead.')
+            fabricVersion = modpackIndex.dependencies['quilt-loader']
+            logger.debug(`Using Fabric version ${fabricVersion} as a substitute for Quilt`)
+        }
+
+        const serverStruct = new ServerStructure(argv.root as string, getBaseURL(), false, false)
+        const createServerResult = await serverStruct.createServer(
+            argv.id as string,
+            minecraftVersion,
+            {
+                version: modpackIndex.versionId,
+                forgeVersion,
+                fabricVersion
+            }
+        )
+
+        if (createServerResult) {
+            await parser.enrichServer(createServerResult, modpackIndex)
+        }
+    }
+}
+
 const generateDistroCommand: CommandModule = {
     command: 'distro [name]',
     describe: 'Generate a distribution index from the root file structure.',
@@ -362,6 +426,7 @@ const generateCommand: CommandModule = {
     builder: (yargs) => {
         return yargs
             .command(generateServerCurseForgeCommand)
+            .command(generateServerModrinthCommand) // Add this line
             .command(generateServerCommand)
             .command(generateDistroCommand)
             .command(generateSchemasCommand)

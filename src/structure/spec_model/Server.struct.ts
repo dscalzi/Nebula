@@ -13,6 +13,8 @@ import { MinecraftVersion } from '../../util/MinecraftVersion.js'
 import { addSchemaToObject, SchemaTypes } from '../../util/SchemaUtil.js'
 import { isValidUrl } from '../../util/StringUtils.js'
 import { FabricResolver } from '../../resolver/fabric/Fabric.resolver.js'
+import { ModrinthIndex, ServerModrinthMapping } from '../../model/modrinth/ModrinthIndex.js'
+
 
 export interface CreateServerResult {
     modContainer?: string
@@ -24,6 +26,7 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
     private readonly ID_REGEX = /(.+-(.+)$)/
     private readonly SERVER_META_FILE = 'servermeta.json'
+    private modrinthIndexMap: Map<string, ServerModrinthMapping> = new Map()
 
     constructor(
         absoluteRoot: string,
