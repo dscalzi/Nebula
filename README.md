@@ -180,27 +180,6 @@ The `modrinth.index.json` file contains information about all files in a modpack
 - Files not tracked by Modrinth still use your hosted URLs
 - Untracked files (as specified in `servermeta.json`) remain untracked
 
-## Best Practices
-
-1. **Always use the modpack integration when possible**:
-   - This ensures correct configuration and file organization
-   - It automatically includes the `modrinth.index.json` file
-
-2. **Keep original `modrinth.index.json` files**:
-   - Even if adding custom content, preserve the original file
-   - This allows my fork to use Modrinth CDN for as many files as possible
-
-3. **Test your distribution**:
-   - Use the `--installLocal` flag to test with your local Helios installation
-   - Verify that all files download correctly and the modpack functions as expected
-
-4. **Clean up after generation**:
-   - After successful generation, delete the mod files to save space
-   - You only need to host the configuration files, not the mods themselves
-
-5. **Consider bandwidth limitations**:
-   - Files not tracked by Modrinth will use your hosting
-   - Large custom content may still require significant bandwidth
 
 ## Reference
 
