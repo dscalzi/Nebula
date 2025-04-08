@@ -84,11 +84,6 @@ npm run start -- generate server-modrinth WynnCraft-Prod world-of-wynncraft.mrpa
 npm run start -- generate modrinth-distro [name]
 ```
 
-Example:
-```bash
-npm run start -- generate modrinth-distro distribution_modrinth
-```
-
 Options:
 * `--installLocal` Install the generated distribution to your Helios data folder
 * `--discardOutput` Delete cached output after it is no longer required
