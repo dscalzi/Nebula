@@ -400,6 +400,62 @@ const generateDistroCommand: CommandModule = {
     }
 }
 
+const generateModrinthDistroCommand: CommandModule = {
+    command: 'modrinth-distro [name]',
+    describe: 'Generate a distribution index from the root file structure using Modrinth CDN links when available.',
+    builder: (yargs) => {
+        yargs = installLocalOption(yargs)
+        yargs = discardOutputOption(yargs)
+        yargs = invalidateCacheOption(yargs)
+        yargs = namePositional(yargs)
+        return yargs
+    },
+    handler: async (argv) => {
+        argv.root = getRoot()
+        argv.baseUrl = getBaseURL()
+
+        const finalName = `${argv.name}.json`
+
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug(`Base Url set to ${argv.baseUrl}`)
+        logger.debug(`Install option set to ${argv.installLocal}`)
+        logger.debug(`Discard Output option set to ${argv.discardOutput}`)
+        logger.debug(`Invalidate Cache option set to ${argv.invalidateCache}`)
+        logger.debug(`Invoked generate modrinth-distro name ${finalName}.`)
+
+        const doLocalInstall = argv.installLocal as boolean
+        const discardOutput = argv.discardOutput as boolean ?? false
+        const invalidateCache = argv.invalidateCache as boolean ?? false
+        const heliosDataFolder = getHeliosDataFolder()
+        if(doLocalInstall && heliosDataFolder == null) {
+            logger.error('You MUST specify HELIOS_DATA_FOLDER in your .env when using the --installLocal option.')
+            return
+        }
+
+        try {
+            logger.info('Generating distribution with Modrinth CDN integration...')
+            const distributionStruct = new DistributionStructure(argv.root as string, argv.baseUrl as string, discardOutput, invalidateCache)
+            const distro = await distributionStruct.getSpecModel()
+            const distroOut = JSON.stringify(distro, null, 2)
+            const distroPath = resolvePath(argv.root as string, finalName)
+            await writeFile(distroPath, distroOut)
+            logger.info(`Successfully generated ${finalName} with Modrinth CDN integration`)
+            logger.info(`Saved to ${distroPath}`)
+            logger.debug('Preview:\n', distro)
+            if(doLocalInstall) {
+                const finalDestination = resolvePath(heliosDataFolder!, finalName)
+                logger.info(`Installing distribution to ${finalDestination}`)
+                await writeFile(finalDestination, distroOut)
+                logger.info('Success!')
+            }
+            
+        } catch (error) {
+            logger.error(`Failed to generate distribution with root ${argv.root}.`, error)
+        }
+    }
+}
+
+
 const generateSchemasCommand: CommandModule = {
     command: 'schemas',
     describe: 'Generate json schemas.',
@@ -428,6 +484,7 @@ const generateCommand: CommandModule = {
             .command(generateServerCurseForgeCommand)
             .command(generateServerModrinthCommand) // Add this line
             .command(generateServerCommand)
+            .command(generateModrinthDistroCommand)
             .command(generateDistroCommand)
             .command(generateSchemasCommand)
     },

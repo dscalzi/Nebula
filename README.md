@@ -1,21 +1,28 @@
-# Nebula
+# Modrinth Integration for Nebula
 
-Generate a distribution.json for Helios. Documentation on this format can be found [here][distro.md].
+I've added Modrinth integration features to my fork of Nebula. These features allow you to leverage Modrinth's content delivery network (CDN) and modpack format to simplify server creation and distribution.
+
+## Overview
+
+My fork adds two powerful Modrinth integration features:
+
+1. **Server Creation from Modrinth Modpacks**: Generate server configurations directly from `.mrpack` files
+2. **Distribution Generation with Modrinth CDN Links**: Create distribution files that use Modrinth's CDN links instead of hosting the files yourself
 
 ## Requirements
 
+* All [standard Nebula requirements][readme] apply
 * Node.js 20
 * Java 8+ (https://adoptium.net/)
-  * This is required to run the forge installer, process [XZ](https://tukaani.org/xz/format.html) files, and run bytecode analysis on mod files.
-  * Although 1.17 requires Java 16, the forge installer works with Java 8.
+* For modpack integration, you'll need valid `.mrpack` files downloaded from [Modrinth][modrinth]
 
 ## Setup
 
-1. Clone the repository
+1. Clone this fork of the repository
 2. Install the dependencies (`npm i`)
 3. Create a file called [`.env`][dotenvnpm] at the root directory of the cloned folder and set the required values.
 
-Example
+Example `.env` file:
 ```properties
 JAVA_EXECUTABLE=C:\Program Files\Eclipse Adoptium\jdk-17.0.12.7-hotspot\bin\java.exe
 ROOT=D:\TestRoot2
@@ -23,339 +30,187 @@ BASE_URL=http://localhost:8080/
 HELIOS_DATA_FOLDER=C:\Users\user\AppData\Roaming\Helios Launcher
 ```
 
-## Usage
+## Server Creation from Modrinth Modpacks
 
-Nebula is still being developed. Usage may change, but it has remained stable for some time now.
+### Setup
 
-#### TL;DR (Too Long; Didn't Read) Usage
+1. Create a directory at `${ROOT}/modpacks/modrinth/`
+2. Place your `.mrpack` file in this directory
 
-This is the barebones overall usage. Please read the rest of this document.
+### Usage
 
-* Follow the setup instructions above.
-* Run the `init root` command.
-* Generate servers using the `g server` command.
-* Put all files in their respective folders (documented below).
-* Generate the distribution using the `g distro` command.
-* When in doubt, reread this document and then ask on Discord.
+```bash
+npm run start -- generate server-modrinth <id> <mrpackName>
+```
 
-## Commands
+Example:
+```bash
+npm run start -- generate server-modrinth WynnCraft-Prod world-of-wynncraft.mrpack
+```
 
-Commands will be documented here. You can run any command with the `--help` option to view more information.
+### How It Works
 
-### Command Usage
+1. The command extracts the `.mrpack` file and reads the `modrinth.index.json` inside
+2. It creates a new server structure with the specified ID and Minecraft version from the modpack
+3. Mods are categorized based on their environment settings:
+   - Required mods go to `required/`
+   - Optional mods (enabled by default) go to `optionalon/`
+   - Optional mods (disabled by default) go to `optionaloff/`
+4. All override files from the modpack are extracted to the appropriate directories:
+   - `overrides/` contents go to the server's `files/` directory
+   - `client-overrides/` contents go to client-specific locations
+   - `server-overrides/` contents go to server-specific locations
+5. The original `modrinth.index.json` file is saved in the server directory for reference
 
-This explains how to run the commands listed below. There are a few ways to run commands, pick your preferred method.
+### Benefits
 
-Example: To run `init root`, you would do `npm run start -- init root`.
+- Eliminates manual download and organization of mods
+- Ensures correct mod loader configuration (Forge/Fabric)
+- Preserves all modpack settings and configurations
+- Simplifies setup of complex modpacks
 
-*Recommended*
+## Distribution Generation with Modrinth CDN
 
-* Run **`npm run start -- <COMMAND>`**
-  * *Why is this recommended? This command will compile the source code first.*
+### Setup
 
-*Other*
+1. Make sure you have created server configurations using standard Nebula methods or the modpack integration above
+2. Each server directory that should use Modrinth CDN links must contain a valid `modrinth.index.json` file
+   - This file is automatically included when using `generate server-modrinth`
+   - For manually created servers, you can copy this file from a downloaded modpack
 
-* Build the project using **`npm run build`**
-* Run **`node dist/index.js <COMMAND>`** OR **`npm run faststart -- <COMMAND>`**
-  * `faststart` is an alias to run the main file without building.
+### Usage
 
-> ***Note:***
-> - ***If you modify any files, you will have to rebuild the project.***
-> - ***After pulling from git, you will have to rebuild the project.***
->
-> ***npm start does this automatically.***
+```bash
+npm run start -- generate modrinth-distro [name]
+```
 
----
-
-### Init
-
-Init commands are used for initializing empty file structures.
-
-Aliases: [`init`, `i`]
-
-__*Subcommands*__
-
----
-
-#### Init Root
-
-Generate an empty standard file structure. JSON schemas will also be generated.
-
-`init root`
-
----
-
-### Generate
-
-Generate commands are used for generation.
-
-Aliases: [`generate`, `g`]
-
-__*SubCommands*__
-
----
-
-#### Generate Server
-
-Generate an new server in the root directory. Options are provided to include forge in the generated server.
-
-`generate server <id> <version> <options>`
+Example:
+```bash
+npm run start -- generate modrinth-distro distribution_modrinth
+```
 
 Options:
+* `--installLocal` Install the generated distribution to your Helios data folder
+* `--discardOutput` Delete cached output after it is no longer required
+* `--invalidateCache` Invalidate and delete existing caches as they are encountered
 
-* `--forge <string>` Specify forge version. This is WITHOUT the minecraft version (ex. 14.23.5.2847)
-  * OPTIONAL (default: null)
-  * If not provided forge will not be enabled.
-  * You can provide either `latest` or `recommended` to use the latest/recommended version of forge.
-* `--fabric <string>` Specify fabric loader version
-  * OPTIONAL (default: null)
-  * If not provided fabric will not be enabled.
-  * You can provide either `latest` or `recommended` to use the latest/recommended version of fabric.
+### How It Works
 
-> [!NOTE]  
-> Forge and fabric cannot be used together on the same server. This command will fail if both are provided.
+1. The command analyzes all server directories in your root structure
+2. For each server with a `modrinth.index.json` file:
+   - It maps file paths to their corresponding Modrinth CDN links
+   - It generates MD5 hashes for all tracked files (even those using Modrinth CDN)
+   - For any file not found in the Modrinth index, it falls back to your hosted URL
+3. The final distribution.json contains a mix of your hosted URLs and Modrinth CDN links
 
->
-> Example Usage
->
-> `generate server Test1 1.12.2 --forge 14.23.5.2847`
->
+### Benefits
 
----
+- Dramatically reduces your bandwidth and storage requirements
+- Improves download speeds for users (Modrinth's CDN is globally distributed)
+- Still allows custom content not available on Modrinth
+- Maintains full compatibility with the [Helios Launcher][helios]
+- Preserves MD5 hash verification for security
 
-#### Generate Server from CurseForge Modpack
+## Deployment Recommendations
 
-Generate an new server in the root directory, including files and mods from an existing CurseForge modpack.
+### Minimizing Storage Requirements
 
-`generate server-curseforge <id> <zipFile>`
+Once you've generated your distribution with Modrinth CDN links, you can significantly reduce your storage footprint:
 
-The cursforge modpack must be downloaded as a zip and placed into `${ROOT}/modpacks/curseforge`. Pass the name of the modpack as the `<zipFile>` argument.
+1. **Delete Mod Files**: After generating MD5 hashes, you can safely delete the mod files in:
+   - `forgemods/` directories
+   - `fabricmods/` directories
+   
+   The distribution.json will reference Modrinth's CDN for these files, not your hosting.
 
->
-> Example Usage
->
-> `generate server-curseforge WesterosCraft-Prod The+WesterosCraft+Modpack-2.1.6.zip`
->
+2. **Keep Only Overrides**: You only need to retain:
+   - The `files/` directory (containing configs and other overrides)
+   - Your `modrinth.index.json` files
+   - Your `servermeta.json` files
 
----
+3. **Host on GitHub Pages**: You can host your final distribution for free:
+   - Push the cleaned directory structure to a GitHub repository
+   - Enable GitHub Pages in your repository settings
+   - Set your `BASE_URL` to the GitHub Pages URL when generating the distribution
+   - Commit and push only the `distribution.json` and minimal required files
 
-#### Generate Distribution
+This approach allows you to distribute modpacks of any size while minimizing your hosting costs. Modrinth's CDN handles all the heavy lifting of distributing mods, while you only need to host a small amount of custom configuration files.
 
-Generate a distribution file from the root file structure.
+## Technical Details
 
-`generate distro [name]`
+### Modrinth Index Format
 
-Arguments:
-* `name` The name of the distribution file.
-  * OPTIONAL (default: `distribution`)
-
-Options:
-
-* `--installLocal` Have the application install a copy of the generated distribution to the Helios data folder.
-  * OPTIONAL (default: false)
-  * This is useful to easily test the new distribution.json in dev mode on Helios.
-  * Tip: Set name to `distribution_dev` when using this option.
-* `--discardOutput` Delete cached output after it is no longer required. May be useful if disk space is limited.
-  * OPTIONAL (default: false)
-* `--invalidateCache` Invalidate and delete existing caches as they are encountered. Requires fresh cache generation.
-  * OPTIONAL (default: false)
-
-#### Notes
-
-As of Forge 1.13, the installer must be run to generate required files. The installer output is cached by default. This is done to speed up subsequent builds and allow Nebula to be run as a CI job. Options are provided to discard installer output (no caching) and invalidate caches (delete cached output and require fresh generation). To invalidate only a single version cache, manually delete the cached folder.
-
->
-> Example Usage
->
-> `generate distro`
->
-> `generate distro distribution_dev --installLocal`
->
-
----
-
-#### Generate Schemas
-
-Generate the JSON schemas used by Nebula's internal types (ex. Distro Meta and Server Meta schemas). This command should be used to update the schemas when a change to Nebula requires it. You may need to reopen your editor for the new JSON schemas to take effect.
-
-`generate schemas`
-
----
-
-### Latest Forge
-
-Get the latest version of Forge.
-
-`latest-forge <version>`
-
----
-
-### Recommended Forge
-
-Get the recommended version of Forge. If no recommended build is available, it will pull the latest version.
-
-`recommended-forge <version>`
-
----
-
-## File Structure Setup (Tentative)
-
-Nebula aims to provide users with an information preserving structure for storing files. The application will use this structure to generate a full distribution.json for HeliosLauncher. For coherency, the distribution structure is modularized and encapsulated by a directory pattern. These encapsulations will be explained below. They can be generated manually or by using the commands documented above.
-
-### Distribution Encapsulation
-
-The distribution object is represented by the main root. All command output will be stored in this directory. The structure is documented below.
-
-Ex.
-
-* `TestRoot` The root directory which encapsulates the distribution.
-  * `servers` All server files are stored in this directory.
-
-### Server Encapsulation
-
-Server objects are encapsulated in their own folders. The name of the server's folder contains both its id and version.
-
-Ex.
-
-* `servers`
-  * `TestServer-1.12.2` A server with id TestServer set to version 1.12.2.
-
-The server directory will contain files pertaining to that server.
-
-Ex.
-
-* `TestServer-1.12.2`
-  * `files` All modules of type `File`.
-  * `libraries` All modules of type `Library`
-  * `forgemods` All modules of type `ForgeMod`.
-  * `fabricmods` All modules of type `FabricMod`.
-    * This is a directory of toggleable modules. See the note below.
-  * `TestServer-1.12.2.png` Server icon file.
-
-#### Setting the Server Icon
-
-You can set the server icon in two ways.
-
-1. __*(Preferred)*__ Place your server icon in the root server directory as shown in the example above. Only jpg and png files will be looked at. The name of the file does not matter.
-2. Paste the **full** URL to your server icon in the servermeta.json for your server. It is highly recommended to only use files that are hosted on your own servers.
-
-The value in servermeta.json will always be used so long as it is not empty and is a [valid url](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL). If it is empty or an [invalid url](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL), then the first method will be used.
-
-#### Toggleable Modules
-
-If a directory represents a toggleable mod, it will have three subdirectories. You must filter your files into these three.
-
-* `required` Modules that are required.
-* `optionalon` Modules that are optional and enabled by default.
-* `optionaloff` Modules that are optional and disabled by default.
-
-### Additional Metadata
-
-To preserve metadata that cannot be inferred via file structure, two files exist. Default values will be generated when applicable. Customize to fit your needs. These values should be self explanatory. If further details are required, see the [distribution.json specification document][distro.md].
-
-#### ${ROOT}/meta/distrometa.json
-
-Represents the additiona metadata on the distribution object.
-
-A JSON schema is provided to assist editing this file. It should automatically be referenced when the default file is generated.
-
-Sample:
+The `modrinth.index.json` file contains information about all files in a modpack:
 
 ```json
 {
-  "$schema": "file:///${ROOT}/schemas/DistroMetaSchema.schema.json",
-  "meta": {
-      "rss": "<LINK TO RSS FEED>",
-      "discord": {
-          "clientId": "<FILL IN OR REMOVE DISCORD OBJECT>",
-          "smallImageText": "<FILL IN OR REMOVE DISCORD OBJECT>",
-          "smallImageKey": "<FILL IN OR REMOVE DISCORD OBJECT>"
-      }
+  "game": "minecraft",
+  "formatVersion": 1,
+  "versionId": "1.0.0",
+  "name": "Example Modpack",
+  "files": [
+    {
+      "path": "mods/example.jar",
+      "hashes": {
+        "sha1": "hash-value",
+        "sha512": "hash-value"
+      },
+      "env": {
+        "client": "required",
+        "server": "required"
+      },
+      "downloads": [
+        "https://cdn.modrinth.com/data/..."
+      ],
+      "fileSize": 123456
+    }
+  ],
+  "dependencies": {
+    "minecraft": "1.21.4",
+    "fabric-loader": "0.16.12"
   }
 }
 ```
 
-#### servers/${YOUR_SERVER}/servermeta.json
+### Implementation Notes
 
-Represents the additional metadata on the server object (for a YOUR_SERVER).
+- The implementation automatically handles files with normalized paths
+- It respects environment settings (client/server required/optional)
+- It preserves MD5 hash verification even when using Modrinth CDN links
+- Files not tracked by Modrinth still use your hosted URLs
+- Untracked files (as specified in `servermeta.json`) remain untracked
 
-A JSON schema is provided to assist editing this file. It should automatically be referenced when the default file is generated.
+## Best Practices
 
-Sample:
+1. **Always use the modpack integration when possible**:
+   - This ensures correct configuration and file organization
+   - It automatically includes the `modrinth.index.json` file
 
-```json
-{
-  "$schema": "file:///${ROOT}/schemas/ServerMetaSchema.schema.json",
-  "meta": {
-    "version": "1.0.0",
-    "name": "Test (Minecraft 1.12.2)",
-    "description": "Test Running Minecraft 1.12.2 (Forge v14.23.5.2854)",
-    "icon": "How to set the server icon: https://github.com/dscalzi/Nebula#setting-the-server-icon",
-    "address": "localhost:25565",
-    "discord": {
-      "shortId": "1.12.2 Test Server",
-      "largeImageText": "1.12.2 Test Server",
-      "largeImageKey": "seal-circle"
-    },
-    "mainServer": false,
-    "autoconnect": true
-  },
-  "forge": {
-    "version": "14.23.5.2854"
-  },
-  "untrackedFiles": []
-}
-```
+2. **Keep original `modrinth.index.json` files**:
+   - Even if adding custom content, preserve the original file
+   - This allows my fork to use Modrinth CDN for as many files as possible
 
-#### Untracked Files
+3. **Test your distribution**:
+   - Use the `--installLocal` flag to test with your local Helios installation
+   - Verify that all files download correctly and the modpack functions as expected
 
-Untracked files is optional. MD5 hashes will not be generated for files matching the provided glob patterns. The launcher will not validate/update files without MD5 hashes.
+4. **Clean up after generation**:
+   - After successful generation, delete the mod files to save space
+   - You only need to host the configuration files, not the mods themselves
 
-```json
-{
-  "untrackedFiles": [
-    {
-      "appliesTo": ["files"],
-      "patterns": [
-        "config/*.cfg",
-        "config/**/*.yml"
-      ]
-    }
-  ]
-}
-```
+5. **Consider bandwidth limitations**:
+   - Files not tracked by Modrinth will use your hosting
+   - Large custom content may still require significant bandwidth
 
-In the above example, all files of type `cfg` in the config directory will be untracked. Additionally, all files of type `yml` in the config directory and its subdirectories will be untracked. You can tweak these patterns to fit your needs, this is purely an example. The patterns will only be applied to the folders specified in `appliesTo`. As an example, valid values include `files`, `forgemods`, `libraries`, etc.
+## Reference
 
-```json
-{
-  "untrackedFiles": [
-    {
-      "appliesTo": ["files"],
-      "patterns": [
-        "config/*.cfg",
-        "config/**/*.yml"
-      ]
-    },
-    {
-      "appliesTo": ["forgemods"],
-      "patterns": [
-        "optionalon/*.jar"
-      ]
-    }
-  ]
-}
-```
+- [Nebula Documentation][readme]
+- [Helios Launcher][helios]
+- [Modrinth][modrinth]
+- [Distribution Format Specification][distro.md]
 
-Another example where all `optionalon` forgemods are untracked. **Untracking mods is NOT recommended. This is an example ONLY.**
-
-### Note on JSON Schemas
-
-The `$schema` property in a JSON file is a URL to a JSON schema file. This property is optional. Nebula provides schemas for internal types to make editing the JSON easier. Editors, such as Visual Studio Code, will use this schema file to validate the data and show useful information, like property descriptions. Valid properties will also be autocompleted. For detailed information, you may view the [JSON Schema Website][jsonschemawebsite].
-
-Nebula will store JSON schemas in `${ROOT}/schemas`. This is so that they will always be in sync with your local version of Nebula. They will initially be generated by the `init root` command. To update the schemas, you can run the `generate schemas` command.
-
-
-[dotenvnpm]: https://www.npmjs.com/package/dotenv
+[readme]: https://github.com/dscalzi/Nebula#readme
+[helios]: https://github.com/dscalzi/HeliosLauncher
+[modrinth]: https://modrinth.com
 [distro.md]: https://github.com/dscalzi/HeliosLauncher/blob/master/docs/distro.md
-[jsonschemawebsite]: https://json-schema.org/
+[dotenvnpm]: https://www.npmjs.com/package/dotenv

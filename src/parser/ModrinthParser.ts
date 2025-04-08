@@ -1,9 +1,10 @@
 import { createWriteStream } from 'fs'
-import { mkdirs, ensureDir } from 'fs-extra/esm'
+import { mkdirs, ensureDir, copy, writeJson, remove } from 'fs-extra/esm'
 import got from 'got'
 import StreamZip from 'node-stream-zip'
 import { join, resolve, dirname } from 'path'
 import { pipeline } from 'stream/promises'
+import { writeFile } from 'fs/promises'
 import { ToggleableNamespace } from '../structure/spec_model/module/ToggleableModule.struct.js'
 import { CreateServerResult } from '../structure/spec_model/Server.struct.js'
 import { LoggerUtil } from '../util/LoggerUtil.js'
@@ -65,31 +66,93 @@ export class ModrinthParser {
         }
     }
 
+    private async extractAllFiles(zip: InstanceType<typeof StreamZip.async>, destDir: string): Promise<void> {
+        const entries = await zip.entries()
+        
+        // Log all entries for debugging
+        log.debug(`Found ${Object.keys(entries).length} total entries in zip file`)
+        
+        for (const [name, entry] of Object.entries(entries)) {
+            // Skip the modrinth.index.json file and other metadata files at the root
+            if (name === 'modrinth.index.json' || 
+                name === 'modrinth.index.json.bak' || 
+                name === 'manifest.json' ||
+                name === 'META-INF/') {
+                continue
+            }
+            
+            // Check if this is an overrides or related directory
+            if (name.startsWith('overrides/') || 
+                name.startsWith('client-overrides/') || 
+                name.startsWith('server-overrides/')) {
+                
+                let relativePath: string
+                let targetPath: string
+                
+                if (name.startsWith('overrides/')) {
+                    relativePath = name.substring('overrides/'.length)
+                } else if (name.startsWith('client-overrides/')) {
+                    relativePath = name.substring('client-overrides/'.length)
+                } else if (name.startsWith('server-overrides/')) {
+                    relativePath = name.substring('server-overrides/'.length)
+                } else {
+                    continue // Should never happen due to if conditions above
+                }
+                
+                // Skip the root entries like "overrides/"
+                if (relativePath.length === 0) {
+                    continue
+                }
+                
+                targetPath = join(destDir, relativePath)
+                
+                if (entry.isDirectory) {
+                    log.debug(`Creating directory: ${targetPath}`)
+                    await ensureDir(targetPath)
+                } else {
+                    log.debug(`Extracting file: ${name} to ${targetPath}`)
+                    await ensureDir(dirname(targetPath))
+                    try {
+                        const buffer = await zip.entryData(name)
+                        await writeFile(targetPath, buffer)
+                    } catch (error: unknown) {
+                        // Fix the TypeScript error by properly handling unknown type
+                        if (error instanceof Error) {
+                            log.error(`Error extracting ${name}: ${error.message}`)
+                        } else {
+                            log.error(`Error extracting ${name}: ${String(error)}`)
+                        }
+                    }
+                }
+            }
+        }
+        
+        log.debug(`Finished extracting all override files to ${destDir}`)
+    }
+
     public async enrichServer(createServerResult: CreateServerResult, index: ModrinthIndex): Promise<void> {
         log.debug('Enriching server.')
 
         // Extract overrides
         const zip = new StreamZip.async({ file: this.mrpackPath })
+        
         try {
-            const entries = await zip.entries()
+            // Save original modrinth.index.json directly from the zip file
+            const serverDir = dirname(createServerResult.miscFileContainer)
+            const indexPath = join(serverDir, 'modrinth.index.json')
             
-            // Extract overrides folder if it exists
-            if ('overrides/' in entries) {
-                log.debug('Extracting overrides...')
-                await zip.extract('overrides/', createServerResult.miscFileContainer)
+            try {
+                const originalIndexData = await zip.entryData('modrinth.index.json')
+                await writeFile(indexPath, originalIndexData)
+                log.debug(`Copied original modrinth.index.json to ${indexPath}`)
+            } catch (error: unknown) {
+                // If we can't get the original file for some reason, fall back to the parsed data
+                await writeJson(indexPath, index, { spaces: 2 })
+                log.debug(`Saved generated modrinth.index.json to ${indexPath}`)
             }
             
-            // Extract client overrides if present
-            if ('client-overrides/' in entries) {
-                log.debug('Extracting client overrides...')
-                await zip.extract('client-overrides/', createServerResult.miscFileContainer)
-            }
-            
-            // Extract server overrides if present
-            if ('server-overrides/' in entries) {
-                log.debug('Extracting server overrides...')
-                await zip.extract('server-overrides/', createServerResult.miscFileContainer)
-            }
+            // Extract all override files in one pass
+            await this.extractAllFiles(zip, createServerResult.miscFileContainer)
         } finally {
             await zip.close()
         }
@@ -159,8 +222,13 @@ export class ModrinthParser {
                     const fileWriterStream = createWriteStream(targetPath)
                     
                     await pipeline(downloadStream, fileWriterStream)
-                } catch (error) {
-                    log.error(`Failed to download ${file.path}`, error)
+                } catch (error: unknown) {
+                    // Fix TypeScript error here too
+                    if (error instanceof Error) {
+                        log.error(`Failed to download ${file.path}: ${error.message}`)
+                    } else {
+                        log.error(`Failed to download ${file.path}: ${String(error)}`)
+                    }
                 }
             }
         }

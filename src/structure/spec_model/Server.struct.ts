@@ -15,7 +15,6 @@ import { isValidUrl } from '../../util/StringUtils.js'
 import { FabricResolver } from '../../resolver/fabric/Fabric.resolver.js'
 import { ModrinthIndex, ServerModrinthMapping } from '../../model/modrinth/ModrinthIndex.js'
 
-
 export interface CreateServerResult {
     modContainer?: string
     libraryContainer: string
@@ -50,6 +49,36 @@ export class ServerStructure extends BaseModelStructure<Server> {
 
     public static getEffectiveId(id: string, minecraftVersion: MinecraftVersion): string {
         return `${id}-${minecraftVersion}`
+    }
+
+    private async loadModrinthIndex(serverId: string, serverDir: string): Promise<ServerModrinthMapping | null> {
+        const modrinthIndexPath = resolvePath(serverDir, 'modrinth.index.json')
+        
+        if(await pathExists(modrinthIndexPath)) {
+            try {
+                this.logger.info(`Found modrinth.index.json for server ${serverId}, loading...`)
+                const modrinthIndexJson = await readFile(modrinthIndexPath, 'utf-8')
+                const modrinthIndex = JSON.parse(modrinthIndexJson) as ModrinthIndex
+                
+                // Create a mapping from file paths to their ModrinthIndexFile
+                const pathMap: ServerModrinthMapping = {}
+                
+                for(const file of modrinthIndex.files) {
+                    // Normalize paths to use forward slashes
+                    const normalizedPath = file.path.replace(/\\/g, '/')
+                    pathMap[normalizedPath] = file
+                }
+                
+                this.logger.info(`Loaded ${Object.keys(pathMap).length} files from modrinth.index.json for server ${serverId}`)
+                this.modrinthIndexMap.set(serverId, pathMap)
+                return pathMap
+            } catch(error) {
+                this.logger.error(`Failed to parse modrinth.index.json for server ${serverId}`, error)
+                return null
+            }
+        }
+        
+        return null
     }
 
     public async createServer(
@@ -148,6 +177,9 @@ export class ServerStructure extends BaseModelStructure<Server> {
                 const minecraftVersion = new MinecraftVersion(match[2])
                 const untrackedFiles: UntrackedFilesOption[] = serverMeta.untrackedFiles || []
 
+                // Load Modrinth index if available
+                const modrinthMapping = await this.loadModrinthIndex(match[1], absoluteServerRoot)
+
                 let iconUrl: string = null!
 
                 // Resolve server icon
@@ -198,6 +230,9 @@ export class ServerStructure extends BaseModelStructure<Server> {
                         this.baseUrl,
                         untrackedFiles
                     )
+                    
+                    // Set modrinth mapping
+                    forgeModStruct.setModrinthMapping(modrinthMapping)
 
                     const forgeModModules = await forgeModStruct.getSpecModel()
                     modules.push(...forgeModModules)
@@ -219,16 +254,25 @@ export class ServerStructure extends BaseModelStructure<Server> {
                         minecraftVersion,
                         untrackedFiles
                     )
+                    
+                    // Set modrinth mapping
+                    fabricModStruct.setModrinthMapping(modrinthMapping)
 
                     const fabricModModules = await fabricModStruct.getSpecModel()
                     modules.push(...fabricModModules)
                 }
 
                 const libraryStruct = new LibraryStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, untrackedFiles)
+                // Set modrinth mapping
+                libraryStruct.setModrinthMapping(modrinthMapping)
+                
                 const libraryModules = await libraryStruct.getSpecModel()
                 modules.push(...libraryModules)
 
                 const fileStruct = new MiscFileStructure(absoluteServerRoot, relativeServerRoot, this.baseUrl, minecraftVersion, untrackedFiles)
+                // Set modrinth mapping
+                fileStruct.setModrinthMapping(modrinthMapping)
+                
                 const fileModules = await fileStruct.getSpecModel()
                 modules.push(...fileModules)
 
