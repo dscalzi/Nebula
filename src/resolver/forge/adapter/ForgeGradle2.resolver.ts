@@ -112,7 +112,7 @@ export class ForgeGradle2Adapter extends ForgeResolver {
                 libBuf = await readFile(localPath)
                 // VERIFY HASH
                 if (!postProcess) { // Checksums for .pack.xz in the version.json are completely useless.
-                    if (lib.checksums != null && lib.checksums.length == 1) {
+                    if (lib.checksums?.length == 1) {
                         const sha1 = createHash('sha1').update(libBuf).digest('hex')
                         if (sha1 !== lib.checksums[0]) {
                             ForgeGradle2Adapter.logger.debug('Hashes do not match, redownloading..')
