@@ -14,6 +14,7 @@ import { MinecraftVersion } from './util/MinecraftVersion.js'
 import { LoggerUtil } from './util/LoggerUtil.js'
 import { generateSchemas } from './util/SchemaUtil.js'
 import { CurseForgeParser } from './parser/CurseForgeParser.js'
+import { ModrinthParser } from './parser/ModrinthParser.js'
 
 dotenv.config()
 
@@ -282,6 +283,69 @@ const generateServerCurseForgeCommand: CommandModule = {
     }
 }
 
+const generateServerModrinthCommand: CommandModule = {
+    command: 'server-modrinth <id> <mrpackName>',
+    describe: 'Generate a new server configuration from a Modrinth modpack.',
+    builder: (yargs) => {
+        return yargs
+            .positional('id', {
+                describe: 'Server id.',
+                type: 'string'
+            })
+            .positional('mrpackName', {
+                describe: 'The name of the modpack .mrpack file.',
+                type: 'string'
+            })
+    },
+    handler: async (argv) => {
+        argv.root = getRoot()
+
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug(`Generating server ${argv.id} using Modrinth modpack ${argv.mrpackName} as a template.`)
+
+        const parser = new ModrinthParser(argv.root as string, argv.mrpackName as string)
+        await parser.init()
+        const modpackIndex = await parser.getModpackIndex()
+
+        const minecraftVersion = new MinecraftVersion(modpackIndex.dependencies.minecraft)
+
+        // Determine mod loader
+        let forgeVersion: string | undefined
+        let fabricVersion: string | undefined
+
+        if (modpackIndex.dependencies.forge) {
+            forgeVersion = modpackIndex.dependencies.forge
+            logger.debug(`Forge version set to ${forgeVersion}`)
+        } else if (modpackIndex.dependencies['fabric-loader']) {
+            fabricVersion = modpackIndex.dependencies['fabric-loader']
+            logger.debug(`Fabric loader version set to ${fabricVersion}`)
+        } else if (modpackIndex.dependencies.neoforge) {
+            logger.warn('NeoForge is not supported yet. Using Forge instead.')
+            forgeVersion = modpackIndex.dependencies.neoforge
+            logger.debug(`Using Forge version ${forgeVersion} as a substitute for NeoForge`)
+        } else if (modpackIndex.dependencies['quilt-loader']) {
+            logger.warn('Quilt is not supported yet. Using Fabric instead.')
+            fabricVersion = modpackIndex.dependencies['quilt-loader']
+            logger.debug(`Using Fabric version ${fabricVersion} as a substitute for Quilt`)
+        }
+
+        const serverStruct = new ServerStructure(argv.root as string, getBaseURL(), false, false)
+        const createServerResult = await serverStruct.createServer(
+            argv.id as string,
+            minecraftVersion,
+            {
+                version: modpackIndex.versionId,
+                forgeVersion,
+                fabricVersion
+            }
+        )
+
+        if (createServerResult) {
+            await parser.enrichServer(createServerResult, modpackIndex)
+        }
+    }
+}
+
 const generateDistroCommand: CommandModule = {
     command: 'distro [name]',
     describe: 'Generate a distribution index from the root file structure.',
@@ -336,6 +400,62 @@ const generateDistroCommand: CommandModule = {
     }
 }
 
+const generateModrinthDistroCommand: CommandModule = {
+    command: 'modrinth-distro [name]',
+    describe: 'Generate a distribution index from the root file structure using Modrinth CDN links when available.',
+    builder: (yargs) => {
+        yargs = installLocalOption(yargs)
+        yargs = discardOutputOption(yargs)
+        yargs = invalidateCacheOption(yargs)
+        yargs = namePositional(yargs)
+        return yargs
+    },
+    handler: async (argv) => {
+        argv.root = getRoot()
+        argv.baseUrl = getBaseURL()
+
+        const finalName = `${argv.name}.json`
+
+        logger.debug(`Root set to ${argv.root}`)
+        logger.debug(`Base Url set to ${argv.baseUrl}`)
+        logger.debug(`Install option set to ${argv.installLocal}`)
+        logger.debug(`Discard Output option set to ${argv.discardOutput}`)
+        logger.debug(`Invalidate Cache option set to ${argv.invalidateCache}`)
+        logger.debug(`Invoked generate modrinth-distro name ${finalName}.`)
+
+        const doLocalInstall = argv.installLocal as boolean
+        const discardOutput = argv.discardOutput as boolean ?? false
+        const invalidateCache = argv.invalidateCache as boolean ?? false
+        const heliosDataFolder = getHeliosDataFolder()
+        if(doLocalInstall && heliosDataFolder == null) {
+            logger.error('You MUST specify HELIOS_DATA_FOLDER in your .env when using the --installLocal option.')
+            return
+        }
+
+        try {
+            logger.info('Generating distribution with Modrinth CDN integration...')
+            const distributionStruct = new DistributionStructure(argv.root as string, argv.baseUrl as string, discardOutput, invalidateCache)
+            const distro = await distributionStruct.getSpecModel()
+            const distroOut = JSON.stringify(distro, null, 2)
+            const distroPath = resolvePath(argv.root as string, finalName)
+            await writeFile(distroPath, distroOut)
+            logger.info(`Successfully generated ${finalName} with Modrinth CDN integration`)
+            logger.info(`Saved to ${distroPath}`)
+            logger.debug('Preview:\n', distro)
+            if(doLocalInstall) {
+                const finalDestination = resolvePath(heliosDataFolder!, finalName)
+                logger.info(`Installing distribution to ${finalDestination}`)
+                await writeFile(finalDestination, distroOut)
+                logger.info('Success!')
+            }
+            
+        } catch (error) {
+            logger.error(`Failed to generate distribution with root ${argv.root}.`, error)
+        }
+    }
+}
+
+
 const generateSchemasCommand: CommandModule = {
     command: 'schemas',
     describe: 'Generate json schemas.',
@@ -362,7 +482,9 @@ const generateCommand: CommandModule = {
     builder: (yargs) => {
         return yargs
             .command(generateServerCurseForgeCommand)
+            .command(generateServerModrinthCommand) // Add this line
             .command(generateServerCommand)
+            .command(generateModrinthDistroCommand)
             .command(generateDistroCommand)
             .command(generateSchemasCommand)
     },

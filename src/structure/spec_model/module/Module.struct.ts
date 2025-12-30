@@ -11,6 +11,7 @@ import { ClaritasResult, ClaritasModuleMetadata } from '../../../model/claritas/
 import { ClaritasWrapper } from '../../../util/java/ClaritasWrapper.js'
 import { MinecraftVersion } from '../../../util/MinecraftVersion.js'
 import { UntrackedFilesOption } from '../../../model/nebula/ServerMeta.js'
+import { ServerModrinthMapping } from '../../../model/modrinth/ModrinthIndex.js'
 
 export interface ModuleCandidate {
     file: string
@@ -33,6 +34,7 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
 
     protected untrackedFilePatterns: string[]          // List of glob patterns. 
     protected claritasResult!: ClaritasResult
+    protected modrinthMapping: ServerModrinthMapping | null = null
 
     constructor(
         absoluteRoot: string,
@@ -54,6 +56,10 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
         }
 
         return this.resolvedModels
+    }
+
+    public setModrinthMapping(mapping: ServerModrinthMapping | null): void {
+        this.modrinthMapping = mapping
     }
 
     protected getDefaultGroup(): string {
@@ -97,17 +103,49 @@ export abstract class ModuleStructure extends BaseModelStructure<Module> {
     protected abstract getModulePath(name: string, path: string, stats: Stats): Promise<string | null>
 
     protected async parseModule(file: string, filePath: string, stats: Stats): Promise<Module> {
-
+        const relativeToContainer = filePath.substr(this.containerDirectory.length+1).replace(/\\/g, '/')
+        
+        // Check for Modrinth URL first
+        let modrinthUrl: string | null = null
+        
+        if (this.modrinthMapping) {
+            // For files, we need to check the full path, for other modules just the filename
+            const modrinthPaths = [relativeToContainer]
+            
+            // For mods and resource packs, also check just the filename in various common folders
+            if (this.type === Type.ForgeMod || this.type === Type.FabricMod || this.type === Type.File) {
+                modrinthPaths.push(`mods/${file}`)
+                modrinthPaths.push(`resourcepacks/${file}`)
+                modrinthPaths.push(`shaderpacks/${file}`)
+            }
+            
+            for (const path of modrinthPaths) {
+                const modrinthFile = this.modrinthMapping[path]
+                if (modrinthFile && modrinthFile.downloads && modrinthFile.downloads.length > 0) {
+                    modrinthUrl = modrinthFile.downloads[0]
+                    // Also check if SHA1 is available for verification
+                    if (modrinthFile.hashes && modrinthFile.hashes.sha1) {
+                        this.logger.debug(`Found Modrinth CDN link for ${path}: ${modrinthUrl}`)
+                        break
+                    }
+                }
+            }
+        }
+    
         const artifact: Artifact = {
             size: stats.size,
-            url: await this.getModuleUrl(file, filePath, stats)
+            url: modrinthUrl || await this.getModuleUrl(file, filePath, stats)
         }
         
-        const relativeToContainer = filePath.substr(this.containerDirectory.length+1)
         const untrackedByPattern = this.isFileUntracked(relativeToContainer)
         if(!untrackedByPattern) {
+            // Always calculate MD5 if not untracked, regardless of URL source
             const buf = await readFile(filePath)
             artifact.MD5 = createHash('md5').update(buf).digest('hex')
+            
+            if (modrinthUrl) {
+                this.logger.debug(`Using Modrinth CDN for ${relativeToContainer} with local MD5 hash`)
+            }
         } else {
             this.logger.debug(`File ${relativeToContainer} is untracked. Matching pattern: ${untrackedByPattern}`)
         }
