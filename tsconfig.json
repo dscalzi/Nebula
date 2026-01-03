@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2024",
     "module": "Node16",
-    "lib": ["ES2022", "DOM"],
+    "lib": ["ES2024", "DOM"],
     "sourceMap": true,
     "outDir": "dist",
     "strict": true,
