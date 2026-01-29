@@ -346,7 +346,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             const versionJson = JSON.parse(versionManifest.toString()) as VersionManifestFG3
 
             const forgeModule = {
-                type: Type.ForgeHosted,
+                type: Type.Forge,
                 name: `Minecraft Forge (${this.forgeVersion})`,
                 id: 'net.minecraftforge',
                 artifact: {
@@ -365,14 +365,9 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
             console.log(forgeModule.installerModules)
 
-            process.exit()
+            //process.exit()
 
-            return {
-                id: 'foobar', name: 'test', type: Type.Forge, artifact: {
-                    size: 69420,
-                    url: 'https://google.com'
-                }
-            } satisfies Module
+            return forgeModule
         } else {
             // Installer not required
             return this.processWithoutInstaller(installerPath)
