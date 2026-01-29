@@ -348,8 +348,12 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             const forgeModule = {
                 type: Type.ForgeHosted,
                 name: `Minecraft Forge (${this.forgeVersion})`,
-                id: `net.minecraftforge`
-            } satisfies Module;
+                id: 'net.minecraftforge',
+                artifact: {
+                    size: 0,
+                    url: '',
+                }
+            } satisfies Module as Module
             forgeModule.installerModules = installerJson.libraries.map(l => ({
                 id: l.name,
                 type: Type.Library,
