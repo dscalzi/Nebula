@@ -350,6 +350,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 type: Type.Forge,
                 name: `Minecraft Forge (${this.forgeVersion})`,
                 id: 'net.minecraftforge',
+                subModules: [],
                 artifact: {
                     size: 0,
                     url: '',
@@ -398,13 +399,46 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
             const patchLocation = join(this.absoluteRoot, 'repo', 'lib', MavenUtil.mavenComponentsAsPath("net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"));
 
-            // Finally, inject the client.lzma patch
+            // Inject the client.lzma patch
             await move(join(this.repoStructure.getForgeCacheDirectory(this.artifactVersion), "data", "client.lzma"), patchLocation, { overwrite: true });
             forgeModule.clientPatch = {
                 id: MavenUtil.mavenComponentsToIdentifier("net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"),
                 type: Type.ForgeHosted,
                 name: "Minecraf Forge (client patch)",
                 artifact: this.generateArtifact(await readFile(patchLocation), await lstat(patchLocation), libRepo.getArtifactUrlByComponents(this.baseUrl, "net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"))
+            }
+
+            for (const lib of versionJson.libraries) {
+                ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
+
+                const localPath = libRepo.getArtifactById(lib.name)
+
+                if (!await libRepo.artifactExists(localPath)) {
+                    ForgeGradle3Adapter.logger.debug('Not found locally, downloading..')
+                    await libRepo.downloadArtifactDirect(lib.downloads.artifact.url, lib.downloads.artifact.path)
+                } else {
+                    ForgeGradle3Adapter.logger.debug('Using local copy.')
+                }
+
+                const libBuf = await readFile(localPath)
+                const stats = await lstat(localPath)
+
+                const mavenComponents = MavenUtil.getMavenComponents(lib.name)
+
+                forgeModule.subModules?.push({
+                    id: lib.name,
+                    type: Type.Library,
+                    artifact: this.generateArtifact(
+                        libBuf,
+                        stats,
+                        libRepo.getArtifactUrlByComponents(
+                            this.baseUrl,
+                            mavenComponents.group, mavenComponents.artifact,
+                            mavenComponents.version, mavenComponents.classifier
+                        )
+                    ),
+                    name: lib.name
+                } satisfies Module);
             }
 
             return forgeModule
