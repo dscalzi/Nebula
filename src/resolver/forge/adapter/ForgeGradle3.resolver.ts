@@ -389,10 +389,11 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 } satisfies Module);
             }
 
-
-            console.log(forgeModule.installerModules)
-
-            //process.exit()
+            // Processors are the steps used by the forge installer to actually patch the Minecraft JAR
+            // A processor declaration might include either a client side, a server side or both. It might also declare no side.
+            // Since Helios is a client launcher, we don't need the server side processors
+            const relevantProcessors = installerJson.processors.filter((p) => !("sides" in p) || p.sides?.includes("client"));
+            forgeModule.processors = relevantProcessors
 
             return forgeModule
         } else {

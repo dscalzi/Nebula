@@ -1,3 +1,5 @@
+import { ForgeProcessor } from "helios-distribution-types"
+
 export interface InstallerManifestFG3 {
     id: number
     version: string
@@ -15,12 +17,7 @@ export interface InstallerManifestFG3 {
         | 'PATCHED'
         | 'PATCHED_SHA'
         | 'MCP_VERSION', { client: string, server: string }>
-    processors: {
-        sides?: ('client' | 'server')[]
-        jar: string
-        classpath: string[]
-        args: string[]
-    }[]
+    processors: ForgeProcessor[],
     libraries: {
         name: string
         downloads: {
