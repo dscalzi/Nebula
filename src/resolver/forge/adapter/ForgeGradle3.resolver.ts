@@ -4,8 +4,8 @@ import { LoggerUtil } from '../../../util/LoggerUtil.js'
 import { VersionUtil } from '../../../util/VersionUtil.js'
 import { Module, Type } from 'helios-distribution-types'
 import { LibRepoStructure } from '../../../structure/repo/LibRepo.struct.js'
-import { pathExists, remove, mkdirs, copy, writeJson } from 'fs-extra/esm'
-import { lstat, readFile, writeFile } from 'fs/promises'
+import { pathExists, remove, mkdirs, copy, writeJson, move } from 'fs-extra/esm'
+import { copyFile, lstat, readFile, writeFile } from 'fs/promises'
 import { join, basename, dirname } from 'path'
 import { spawn } from 'child_process'
 import { JavaUtil } from '../../../util/java/JavaUtil.js'
@@ -14,6 +14,7 @@ import { MavenUtil } from '../../../util/MavenUtil.js'
 import { createHash } from 'crypto'
 import AdmZip from 'adm-zip'
 import { InstallerManifestFG3 } from '../../../model/forge/InstallerManifestFG3.js'
+import { copyFileSync } from 'fs'
 
 interface GeneratedFile {
     name: string
@@ -394,6 +395,17 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             // Since Helios is a client launcher, we don't need the server side processors
             const relevantProcessors = installerJson.processors.filter((p) => !("sides" in p) || p.sides?.includes("client"));
             forgeModule.processors = relevantProcessors
+
+            const patchLocation = join(this.absoluteRoot, 'repo', 'lib', MavenUtil.mavenComponentsAsPath("net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"));
+
+            // Finally, inject the client.lzma patch
+            await move(join(this.repoStructure.getForgeCacheDirectory(this.artifactVersion), "data", "client.lzma"), patchLocation, { overwrite: true });
+            forgeModule.clientPatch = {
+                id: MavenUtil.mavenComponentsToIdentifier("net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"),
+                type: Type.ForgeHosted,
+                name: "Minecraf Forge (client patch)",
+                artifact: this.generateArtifact(await readFile(patchLocation), await lstat(patchLocation), libRepo.getArtifactUrlByComponents(this.baseUrl, "net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"))
+            }
 
             return forgeModule
         } else {
