@@ -352,15 +352,42 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 artifact: {
                     size: 0,
                     url: '',
-                }
+                },
+                installerModules: []
             } satisfies Module as Module
-            forgeModule.installerModules = installerJson.libraries.map(l => ({
-                id: l.name,
-                type: Type.Library,
-                artifact: l.downloads.artifact,
-                name: l.name
-            } satisfies Module))
 
+            for (const lib of installerJson.libraries) {
+                ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
+
+                const localPath = libRepo.getArtifactById(lib.name)
+
+                if (!await libRepo.artifactExists(localPath)) {
+                    ForgeGradle3Adapter.logger.debug('Not found locally, downloading..')
+                    await libRepo.downloadArtifactDirect(lib.downloads.artifact.url, lib.downloads.artifact.path)
+                } else {
+                    ForgeGradle3Adapter.logger.debug('Using local copy.')
+                }
+
+                const libBuf = await readFile(localPath)
+                const stats = await lstat(localPath)
+
+                const mavenComponents = MavenUtil.getMavenComponents(lib.name)
+
+                forgeModule.installerModules?.push({
+                    id: lib.name,
+                    type: Type.Library,
+                    artifact: this.generateArtifact(
+                        libBuf,
+                        stats,
+                        libRepo.getArtifactUrlByComponents(
+                            this.baseUrl,
+                            mavenComponents.group, mavenComponents.artifact,
+                            mavenComponents.version, mavenComponents.classifier
+                        )
+                    ),
+                    name: lib.name
+                } satisfies Module);
+            }
 
 
             console.log(forgeModule.installerModules)
