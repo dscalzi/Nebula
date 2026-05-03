@@ -322,25 +322,31 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         ForgeGradle3Adapter.logger.debug(`Beginning processing of Forge v${this.forgeVersion} (Minecraft ${this.minecraftVersion})`)
 
         if (this.generatedFiles != null && this.generatedFiles.length > 0) {
-            // Extract the required data from the installer
-            this.extractInstaller(installerPath, cacheDir)
-            // Then download the dependencies used by the installer to patch the Minecraft JAR
-            const installerManifest = await readFile(join(cacheDir, 'install_profile.json'))
-            const installerJson = JSON.parse(installerManifest.toString()) as InstallerManifestFG3
-            await this.extractInstallerLibraries(installerJson)
+            let shouldExtractInstaller: boolean = false;
 
             // Check cache.
             if (await pathExists(cacheDir)) {
                 if (this.invalidateCache) {
                     ForgeGradle3Adapter.logger.info(`Removing existing cache ${cacheDir}..`)
                     await remove(cacheDir)
+                    shouldExtractInstaller = true;
                 } else {
                     // Use cache.
                     ForgeGradle3Adapter.logger.info(`Using cached results at ${cacheDir}.`)
                 }
             } else {
                 await mkdirs(cacheDir)
+                shouldExtractInstaller = true;
             }
+
+            // Extract the required data from the installer
+            if (shouldExtractInstaller) this.extractInstaller(installerPath, cacheDir)
+            // Read the install_profile file to figure out how to patch Forge
+            const installerManifest = await readFile(join(cacheDir, 'install_profile.json'))
+            const installerJson = JSON.parse(installerManifest.toString()) as InstallerManifestFG3
+            // Then download the dependencies used by the installer to patch the Minecraft JAR
+            if (shouldExtractInstaller) await this.extractInstallerLibraries(installerJson)
+
 
             ForgeGradle3Adapter.logger.debug('Processing Version Manifest')
             const versionManifest = await readFile(join(cacheDir, 'version.json'))
@@ -400,7 +406,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             const patchLocation = join(this.absoluteRoot, 'repo', 'lib', MavenUtil.mavenComponentsAsPath("net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"));
 
             // Inject the client.lzma patch
-            await move(join(this.repoStructure.getForgeCacheDirectory(this.artifactVersion), "data", "client.lzma"), patchLocation, { overwrite: true });
+            if (shouldExtractInstaller) await move(join(this.repoStructure.getForgeCacheDirectory(this.artifactVersion), "data", "client.lzma"), patchLocation, { overwrite: true });
             forgeModule.clientPatch = {
                 id: MavenUtil.mavenComponentsToIdentifier("net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"),
                 type: Type.ForgeHosted,
