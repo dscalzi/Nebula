@@ -414,7 +414,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 artifact: this.generateArtifact(await readFile(patchLocation), await lstat(patchLocation), libRepo.getArtifactUrlByComponents(this.baseUrl, "net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"))
             }
 
-            for (const lib of versionJson.libraries) {
+            for (const lib of versionJson.libraries.filter(lib => lib.downloads.artifact.url !== "")) { // Some forge versions embed their metadata into their version.json file
                 ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
 
                 const localPath = libRepo.getArtifactById(lib.name)
@@ -445,6 +445,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     ),
                     name: lib.name
                 } satisfies Module);
+
             }
 
             return forgeModule
