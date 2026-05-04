@@ -399,6 +399,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     ),
                     name: lib.name
                 } satisfies Module);
+
             }
 
             // Processors are the steps used by the forge installer to actually patch the Minecraft JAR
@@ -451,6 +452,13 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 } satisfies Module);
 
             }
+
+            // Finally, inject the installer-required values
+            const variablesStore: Record<string, string> = {};
+            for (const [key, value] of Object.entries(installerJson.data)) {
+                variablesStore[key] = value.client
+            }
+            forgeModule.installerVariables = variablesStore
 
             return forgeModule
         } else {
