@@ -355,7 +355,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             const forgeModule = {
                 type: Type.Forge,
                 name: `Minecraft Forge (${this.forgeVersion})`,
-                id: 'net.minecraftforge',
+                id: `net.minecraftforge.forge:${this.artifactVersion}:client`,
                 subModules: [],
                 artifact: {
                     size: 0,
