@@ -394,7 +394,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                         libRepo.getArtifactUrlByComponents(
                             this.baseUrl,
                             mavenComponents.group, mavenComponents.artifact,
-                            mavenComponents.version, mavenComponents.classifier
+                            mavenComponents.version, mavenComponents.classifier, mavenComponents.extension
                         )
                     ),
                     name: lib.name
