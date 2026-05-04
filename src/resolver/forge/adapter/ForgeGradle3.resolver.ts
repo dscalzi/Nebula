@@ -345,13 +345,15 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             const installerManifest = await readFile(join(cacheDir, 'install_profile.json'))
             const installerJson = JSON.parse(installerManifest.toString()) as InstallerManifestFG3
             // Then download the dependencies used by the installer to patch the Minecraft JAR
-            if (shouldExtractInstaller) await this.extractInstallerLibraries(installerJson)
+            // Also process the version.json file
+            if (shouldExtractInstaller) {
+                await this.extractInstallerLibraries(installerJson)
+            }
+            
+            const [versionJson, versionJsonModule] = await this.processVersionManifest(join(cacheDir, 'version.json'));
 
 
-            ForgeGradle3Adapter.logger.debug('Processing Version Manifest')
-            const versionManifest = await readFile(join(cacheDir, 'version.json'))
-            const versionJson = JSON.parse(versionManifest.toString()) as VersionManifestFG3
-
+            ForgeGradle3Adapter.logger.debug('Processing Forge Module')
             const forgeModule = {
                 type: Type.Forge,
                 name: `Minecraft Forge (${this.forgeVersion})`,
@@ -363,6 +365,8 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 },
                 installerModules: []
             } satisfies Module as Module
+
+            forgeModule.subModules?.unshift(versionJsonModule)
 
             for (const lib of installerJson.libraries) {
                 ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
@@ -524,7 +528,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
     }*/
 
-    private getVersionManifestPath(installerOutputDir: string): string {
+   /* private getVersionManifestPath(installerOutputDir: string): string {
         const versionRepo = this.repoStructure.getVersionRepoStruct()
         const versionName = versionRepo.getFileName(this.minecraftVersion, this.forgeVersion)
         return join(installerOutputDir, 'versions', versionName, `${versionName}.json`)
@@ -537,11 +541,10 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             await remove(installerOutputDir)
             throw new Error(`Forge was either not installed or installed to the wrong location. When the forge installer opens, you MUST set the installation directory to ${installerOutputDir}`)
         }
-    }
+    }*/
 
-    private async processVersionManifest(installerOutputDir: string): Promise<[VersionManifestFG3, Module]> {
+    private async processVersionManifest(versionManifestPath: string): Promise<[VersionManifestFG3, Module]> {
         const versionRepo = this.repoStructure.getVersionRepoStruct()
-        const versionManifestPath = this.getVersionManifestPath(installerOutputDir)
 
         const versionManifestBuf = await readFile(versionManifestPath)
         const versionManifest = JSON.parse(versionManifestBuf.toString()) as VersionManifestFG3
