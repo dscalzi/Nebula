@@ -14,7 +14,7 @@ import { MavenUtil } from '../../../util/MavenUtil.js'
 import { createHash } from 'crypto'
 import AdmZip from 'adm-zip'
 import { InstallerManifestFG3 } from '../../../model/forge/InstallerManifestFG3.js'
-import { copyFileSync } from 'fs'
+import { exists } from 'fs-extra'
 
 interface GeneratedFile {
     name: string
@@ -340,7 +340,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             }
 
             // Extract the required data from the installer
-            if (shouldExtractInstaller) this.extractInstaller(installerPath, cacheDir)
+            if (shouldExtractInstaller) await this.extractInstaller(installerPath, cacheDir)
             // Read the install_profile file to figure out how to patch Forge
             const installerManifest = await readFile(join(cacheDir, 'install_profile.json'))
             const installerJson = JSON.parse(installerManifest.toString()) as InstallerManifestFG3
@@ -349,7 +349,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             if (shouldExtractInstaller) {
                 await this.extractInstallerLibraries(installerJson)
             }
-            
+
             const [versionJson, versionJsonModule] = await this.processVersionManifest(join(cacheDir, 'version.json'));
 
 
@@ -368,6 +368,38 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
             forgeModule.subModules?.unshift(versionJsonModule)
 
+            // Some Forge versions includes a jar only embedded in the installer.
+            const commonLib = join(cacheDir, 'maven', 'net', 'minecraftforge', 'forge', this.artifactVersion, `forge-${this.artifactVersion}.jar`);
+            const commonLibExists = await exists(commonLib);
+
+            if (commonLibExists) {
+                const libBuf = await readFile(commonLib)
+                const stats = await lstat(commonLib)
+                const libName = `net.minecraftforge:forge:${this.artifactVersion}`
+                const mavenComponents = MavenUtil.getMavenComponents(libName)
+                forgeModule.subModules?.push({
+                    id: libName,
+                    type: Type.Library,
+                    artifact: this.generateArtifact(
+                        libBuf,
+                        stats,
+                        libRepo.getArtifactUrlByComponents(
+                            this.baseUrl,
+                            mavenComponents.group, mavenComponents.artifact,
+                            mavenComponents.version, mavenComponents.classifier, mavenComponents.extension
+                        )
+                    ),
+                    name: libName
+                })
+                const destination = this.repoStructure.getLibRepoStruct().getArtifactByComponents(
+                    mavenComponents.group,
+                    mavenComponents.artifact,
+                    mavenComponents.version,
+                    mavenComponents.classifier
+                )
+
+                await copy(commonLib, destination, { overwrite: true })
+            }
             for (const lib of installerJson.libraries) {
                 ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
 
@@ -375,6 +407,10 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
                 if (!await libRepo.artifactExists(localPath)) {
                     ForgeGradle3Adapter.logger.debug('Not found locally, downloading..')
+                    // It looks like older Forge versions aren't supplying a maven url for the universal jar.
+                    // This should fix the issue
+                    const libComponents = MavenUtil.getMavenComponents(lib.name)
+                    if (libComponents.group === "net.minecraftforge" && libComponents.artifact === "forge" && libComponents.classifier === "universal" && lib.downloads.artifact.url === "") lib.downloads.artifact.url = this.REMOTE_REPOSITORY + MavenUtil.mavenIdentifierAsPath(lib.name)
                     await libRepo.downloadArtifactDirect(lib.downloads.artifact.url, lib.downloads.artifact.path)
                 } else {
                     ForgeGradle3Adapter.logger.debug('Using local copy.')
@@ -419,7 +455,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 artifact: this.generateArtifact(await readFile(patchLocation), await lstat(patchLocation), libRepo.getArtifactUrlByComponents(this.baseUrl, "net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"))
             }
 
-            for (const lib of versionJson.libraries.filter(lib => lib.downloads.artifact.url !== "")) { // Some forge versions embed their metadata into their version.json file
+            for (const lib of versionJson.libraries.filter(lib => lib.downloads.artifact.url !== "")) { // Some forge versions embed their metadata into their version.json file for Client
                 ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
 
                 const localPath = libRepo.getArtifactById(lib.name)
@@ -468,12 +504,14 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
     }
 
-    private extractInstaller(installerPath: string, installerOutputDir: string): void {
+    private async extractInstaller(installerPath: string, installerOutputDir: string): Promise<void> {
         const installerFiles = new AdmZip(installerPath)
-        const filesToExtract: (string | ((file: File) => boolean))[] = [
+        const filesToExtract: (string)[] = [
             'data/client.lzma',
             'version.json',
             'install_profile.json',
+            `maven/net/minecraftforge/forge/${this.artifactVersion}/forge-${this.artifactVersion}.jar`,
+            `maven/net/minecraftforge/forge/${this.artifactVersion}/forge-${this.artifactVersion}-universal.jar`
         ]
         const matchedFiles = installerFiles.getEntries().filter(f => filesToExtract.includes(f.entryName))
         for (const file of matchedFiles) {
@@ -536,20 +574,20 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
     }*/
 
-   /* private getVersionManifestPath(installerOutputDir: string): string {
-        const versionRepo = this.repoStructure.getVersionRepoStruct()
-        const versionName = versionRepo.getFileName(this.minecraftVersion, this.forgeVersion)
-        return join(installerOutputDir, 'versions', versionName, `${versionName}.json`)
-    }
-
-    private async verifyInstallerRan(installerOutputDir: string): Promise<void> {
-        const versionManifestPath = this.getVersionManifestPath(installerOutputDir)
-
-        if (!await pathExists(versionManifestPath)) {
-            await remove(installerOutputDir)
-            throw new Error(`Forge was either not installed or installed to the wrong location. When the forge installer opens, you MUST set the installation directory to ${installerOutputDir}`)
-        }
-    }*/
+    /* private getVersionManifestPath(installerOutputDir: string): string {
+         const versionRepo = this.repoStructure.getVersionRepoStruct()
+         const versionName = versionRepo.getFileName(this.minecraftVersion, this.forgeVersion)
+         return join(installerOutputDir, 'versions', versionName, `${versionName}.json`)
+     }
+ 
+     private async verifyInstallerRan(installerOutputDir: string): Promise<void> {
+         const versionManifestPath = this.getVersionManifestPath(installerOutputDir)
+ 
+         if (!await pathExists(versionManifestPath)) {
+             await remove(installerOutputDir)
+             throw new Error(`Forge was either not installed or installed to the wrong location. When the forge installer opens, you MUST set the installation directory to ${installerOutputDir}`)
+         }
+     }*/
 
     private async processVersionManifest(versionManifestPath: string): Promise<[VersionManifestFG3, Module]> {
         const versionRepo = this.repoStructure.getVersionRepoStruct()
