@@ -451,7 +451,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             forgeModule.clientPatch = {
                 id: MavenUtil.mavenComponentsToIdentifier("net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"),
                 type: Type.ForgeHosted,
-                name: "Minecraf Forge (client patch)",
+                name: "Minecraft Forge (client patch)",
                 artifact: this.generateArtifact(await readFile(patchLocation), await lstat(patchLocation), libRepo.getArtifactUrlByComponents(this.baseUrl, "net.minecraftforge", "forge", this.artifactVersion, "client", "lzma"))
             }
 
