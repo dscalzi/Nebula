@@ -395,7 +395,8 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                     mavenComponents.group,
                     mavenComponents.artifact,
                     mavenComponents.version,
-                    mavenComponents.classifier
+                    mavenComponents.classifier,
+                    mavenComponents.extension
                 )
 
                 await copy(commonLib, destination, { overwrite: true })
