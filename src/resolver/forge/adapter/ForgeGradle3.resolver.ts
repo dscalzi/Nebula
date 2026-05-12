@@ -394,6 +394,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
 
                 await copy(commonLib, destination, { overwrite: true })
             }
+            // Then download the dependencies used by the installer to patch the Minecraft JAR
             for (const lib of installerJson.libraries) {
                 ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
 
@@ -415,6 +416,8 @@ export class ForgeGradle3Adapter extends ForgeResolver {
                 }
 
                 if (queueDownload) {
+                    // It looks like older Forge versions aren't supplying a maven URL for the universal jar.
+                    // This should fix the issue by deriving the artifact URL from its Maven coordinates.
                     this.ensureUniversalForgeUrl(lib)
                     if (!lib.downloads.artifact.url) {
                         throw new Error(`Missing download URL for ${lib.name}`)
@@ -529,6 +532,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
     }
 
     private ensureUniversalForgeUrl(lib: { name: string, downloads: { artifact: { url: string } } }): void {
+        // Fix missing URL for Forge universal jar artifacts by constructing the URL from the Maven identifier.
         const libComponents = MavenUtil.getMavenComponents(lib.name)
         if (libComponents.group === LibRepoStructure.FORGE_GROUP && libComponents.artifact === LibRepoStructure.FORGE_ARTIFACT && libComponents.classifier === 'universal' && !lib.downloads.artifact.url) {
             ForgeGradle3Adapter.logger.debug('Forge universal jar with missing URL detected, constructing URL from maven coordinates..')
