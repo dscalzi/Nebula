@@ -342,12 +342,7 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             // Read the install_profile file to figure out how to patch Forge
             const installerManifest = await readFile(join(cacheDir, 'install_profile.json'))
             const installerJson = JSON.parse(installerManifest.toString()) as InstallerManifestFG3
-            // Then download the dependencies used by the installer to patch the Minecraft JAR
-            // Also process the version.json file
-            if (shouldExtractInstaller) {
-                await this.extractInstallerLibraries(installerJson)
-            }
-
+            // Then process the version.json file and resolve installer libraries later.
             const [versionJson, versionJsonModule] = await this.processVersionManifest(join(cacheDir, 'version.json'));
 
 
@@ -402,20 +397,34 @@ export class ForgeGradle3Adapter extends ForgeResolver {
             for (const lib of installerJson.libraries) {
                 ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
 
-                const localPath = libRepo.getArtifactById(lib.name)
+                const extension = 'jar'
+                const localPath = libRepo.getArtifactById(lib.name, extension)
 
-                if (!await libRepo.artifactExists(localPath)) {
+                let queueDownload = !await libRepo.artifactExists(localPath)
+                let libBuf!: Buffer
+
+                if (!queueDownload) {
+                    libBuf = await readFile(localPath)
+                    const sha1 = createHash('sha1').update(libBuf).digest('hex')
+                    if (sha1 !== lib.downloads.artifact.sha1) {
+                        ForgeGradle3Adapter.logger.debug('Hashes do not match, redownloading..')
+                        queueDownload = true
+                    }
+                } else {
                     ForgeGradle3Adapter.logger.debug('Not found locally, downloading..')
-                    // It looks like older Forge versions aren't supplying a maven url for the universal jar.
-                    // This should fix the issue
-                    const libComponents = MavenUtil.getMavenComponents(lib.name)
-                    if (libComponents.group === "net.minecraftforge" && libComponents.artifact === "forge" && libComponents.classifier === "universal" && lib.downloads.artifact.url === "") lib.downloads.artifact.url = this.REMOTE_REPOSITORY + MavenUtil.mavenIdentifierAsPath(lib.name)
+                }
+
+                if (queueDownload) {
+                    this.ensureUniversalForgeUrl(lib)
+                    if (!lib.downloads.artifact.url) {
+                        throw new Error(`Missing download URL for ${lib.name}`)
+                    }
                     await libRepo.downloadArtifactDirect(lib.downloads.artifact.url, lib.downloads.artifact.path)
+                    libBuf = await readFile(localPath)
                 } else {
                     ForgeGradle3Adapter.logger.debug('Using local copy.')
                 }
 
-                const libBuf = await readFile(localPath)
                 const stats = await lstat(localPath)
 
                 const mavenComponents = MavenUtil.getMavenComponents(lib.name)
@@ -519,34 +528,11 @@ export class ForgeGradle3Adapter extends ForgeResolver {
         }
     }
 
-    private async extractInstallerLibraries(installerManifest: InstallerManifestFG3): Promise<void> {
-        const libRepo = this.repoStructure.getLibRepoStruct()
-        for (const lib of installerManifest.libraries) {
-            ForgeGradle3Adapter.logger.debug(`Processing ${lib.name}..`)
-            const extension = 'jar'
-            const localPath = libRepo.getArtifactById(lib.name, extension)
-
-            let queueDownload = !await libRepo.artifactExists(localPath)
-            let libBuf
-
-            if (!queueDownload) {
-                libBuf = await readFile(localPath)
-                const sha1 = createHash('sha1').update(libBuf).digest('hex')
-                if (sha1 !== lib.downloads.artifact.sha1) {
-                    ForgeGradle3Adapter.logger.debug('Hashes do not match, redownloading..')
-                    queueDownload = true
-                }
-            } else {
-                ForgeGradle3Adapter.logger.debug('Not found locally, downloading..')
-                queueDownload = true
-            }
-
-            if (queueDownload) {
-                await libRepo.downloadArtifactDirect(lib.downloads.artifact.url, lib.downloads.artifact.path)
-                libBuf = await readFile(localPath)
-            } else {
-                ForgeGradle3Adapter.logger.debug('Using local copy.')
-            }
+    private ensureUniversalForgeUrl(lib: { name: string, downloads: { artifact: { url: string } } }): void {
+        const libComponents = MavenUtil.getMavenComponents(lib.name)
+        if (libComponents.group === LibRepoStructure.FORGE_GROUP && libComponents.artifact === LibRepoStructure.FORGE_ARTIFACT && libComponents.classifier === 'universal' && !lib.downloads.artifact.url) {
+            ForgeGradle3Adapter.logger.debug('Forge universal jar with missing URL detected, constructing URL from maven coordinates..')
+            lib.downloads.artifact.url = this.REMOTE_REPOSITORY + MavenUtil.mavenIdentifierAsPath(lib.name)
         }
     }
 
